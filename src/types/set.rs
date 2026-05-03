@@ -1,0 +1,42 @@
+use std::path::Path;
+
+use thiserror::Error;
+
+use super::achievement::Achievement;
+use crate::schema::user::UserFile;
+
+#[derive(Error, Debug)]
+pub enum ExportError {
+    #[error("export failed: {0}")]
+    Io(#[from] std::io::Error),
+}
+
+#[derive(Debug, Clone, PartialEq, Default)]
+pub struct Set {
+    pub game_id: String,
+    pub game_name: String,
+    pub achievements: Vec<Achievement>,
+}
+
+impl Set {
+    pub fn new<S: Into<String>>(game_id: S, game_name: S) -> Self {
+        Self {
+            game_id: game_id.into(),
+            game_name: game_name.into(),
+            achievements: Vec::new(),
+        }
+    }
+
+    pub fn push(&mut self, achievement: Achievement) {
+        self.achievements.push(achievement);
+    }
+
+    pub fn export(&self, dir: impl AsRef<Path>) -> Result<(), ExportError> {
+        let filename = format!("{}-User.txt", self.game_id);
+        let path = dir.as_ref().join(filename);
+        Ok(std::fs::write(
+            path,
+            UserFile::from(self.clone()).to_string(),
+        )?)
+    }
+}
