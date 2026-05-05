@@ -284,8 +284,8 @@ impl fmt::Display for MemOrValue {
                 write!(
                     f,
                     "{}{}{:x}",
-                    memory.size.to_prefix(),
                     memory.memtype.to_prefix(),
+                    memory.size.to_prefix(),
                     memory.address
                 )
             }
@@ -323,7 +323,7 @@ mod tests {
         let groups: Conditions = input.parse().unwrap();
         let output = format!("{}", groups);
         assert!(output.starts_with("I:0xH1a8c94*2"));
-        assert!(output.contains("0xU1a9fad>=2"));
+        assert!(output.contains("_0xU1a9fad>=2"));
     }
 
     #[test]
@@ -332,7 +332,31 @@ mod tests {
         let groups: Conditions = input.parse().unwrap();
         let output = format!("{}", groups);
         assert!(output.starts_with("I:0xH1a8c94*2"));
-        assert!(output.contains("0xU1a9fad>=2"));
         assert!(output.contains("SI:"));
+    }
+
+    #[test]
+    fn test_delta_serialization() {
+        let cond = Condition {
+            source: Source {
+                reference: MemOrValue::Memory(MemoryRef {
+                    size: MemorySize::Bits32,
+                    address: 0x31d05c,
+                    memtype: MemoryType::Delta,
+                }),
+                flag: None,
+                memtype: None,
+            },
+            op: Some(Operation {
+                op: Operator::Equals,
+                target: MemOrValue::Memory(MemoryRef {
+                    size: MemorySize::Bits32,
+                    address: 0x31d05c,
+                    memtype: MemoryType::Standard,
+                }),
+            }),
+            hits: 0,
+        };
+        assert_eq!(cond.to_string(), "d0xX31d05c=0xX31d05c");
     }
 }

@@ -233,14 +233,8 @@ impl FromStr for AchievementEntry {
             .get(10)
             .map(|s| s.to_string())
             .filter(|v| !v.is_empty());
-        let upvotes: Option<u32> = fields
-            .get(11)
-            .and_then(|s| s.parse().ok())
-            .filter(|&v| v > 0);
-        let downvotes: Option<u32> = fields
-            .get(12)
-            .and_then(|s| s.parse().ok())
-            .filter(|&v| v > 0);
+        let upvotes: Option<u32> = fields.get(11).and_then(|s| s.parse().ok());
+        let downvotes: Option<u32> = fields.get(12).and_then(|s| s.parse().ok());
         let badge = fields
             .get(13)
             .map(|s| s.to_string())
@@ -275,11 +269,11 @@ impl Display for AchievementEntry {
             self.tag,
             self.author.as_deref().unwrap_or(DEFAULT_AUTHOR),
             self.points,
-            self.created.as_deref().unwrap_or(""),
-            self.updated.as_deref().unwrap_or(""),
-            self.upvotes.map(|v| v.to_string()).unwrap_or_default(),
-            self.downvotes.map(|v| v.to_string()).unwrap_or_default(),
-            self.badge.as_deref().unwrap_or(""),
+            self.created.as_deref().unwrap_or("0"),
+            self.updated.as_deref().unwrap_or("0"),
+            self.upvotes.map_or("0".to_string(), |v| v.to_string()),
+            self.downvotes.map_or("0".to_string(), |v| v.to_string()),
+            self.badge.as_deref().unwrap_or("00000"),
         )
     }
 }
@@ -459,8 +453,8 @@ mod tests {
         assert_eq!(entry.tag, Tag::Progression);
         assert_eq!(entry.author, Some("Author".to_string()));
         assert_eq!(entry.points, 3);
-        assert_eq!(entry.upvotes, None);
-        assert_eq!(entry.downvotes, None);
+        assert_eq!(entry.upvotes, Some(0));
+        assert_eq!(entry.downvotes, Some(0));
     }
 
     #[test]
@@ -528,6 +522,33 @@ N0:0x0001:\"Note\"";
         assert_eq!(parsed.tag, entry.tag);
         assert_eq!(parsed.author, entry.author);
         assert_eq!(parsed.points, entry.points);
+    }
+
+    #[test]
+    fn test_achievement_entry_serialization_defaults() {
+        let entry = AchievementEntry {
+            id: 123,
+            condition: "0xH0001".into(),
+            title: "Test".into(),
+            description: "Test desc".into(),
+            tag: Tag::Progression,
+            author: None,
+            points: 5,
+            created: None,
+            updated: None,
+            upvotes: None,
+            downvotes: None,
+            badge: None,
+        };
+
+        let serialized = entry.to_string();
+        let parsed: AchievementEntry = serialized.parse().unwrap();
+
+        assert_eq!(parsed.created, Some("0".to_string()));
+        assert_eq!(parsed.updated, Some("0".to_string()));
+        assert_eq!(parsed.upvotes, Some(0));
+        assert_eq!(parsed.downvotes, Some(0));
+        assert_eq!(parsed.badge, Some("00000".to_string()));
     }
 
     #[test]
