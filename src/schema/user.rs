@@ -6,8 +6,11 @@ use crate::types::ParseError as TypesParseError;
 use crate::types::achievement::{Achievement, Tag};
 use crate::types::set::Set;
 
-const DEFAULT_AUTHOR: &str = "Author";
 const PROTOCOL_VERSION: &str = "1.3";
+const DEFAULT_AUTHOR: &str = "Author";
+const DEFAULT_COUNT: u32 = 0;
+const DEFAULT_TIMESTAMP: &str = "0";
+const DEFAULT_BADGE: &str = "00000";
 
 #[derive(thiserror::Error, Debug)]
 pub enum ParseError {
@@ -187,12 +190,20 @@ pub struct AchievementEntry {
 
 impl AchievementEntry {
     fn merge_metadata(&mut self, existing: &Self) {
-        self.author = self.author.clone().or(existing.author.clone());
-        self.created = self.created.clone().or(existing.created.clone());
-        self.updated = self.updated.clone().or(existing.updated.clone());
+        if self.author.is_none() {
+            self.author = existing.author.clone();
+        }
+        if self.created.is_none() {
+            self.created = existing.created.clone();
+        }
+        if self.updated.is_none() {
+            self.updated = existing.updated.clone();
+        }
         self.upvotes = self.upvotes.or(existing.upvotes);
         self.downvotes = self.downvotes.or(existing.downvotes);
-        self.badge = self.badge.clone().or(existing.badge.clone());
+        if self.badge.is_none() {
+            self.badge = existing.badge.clone();
+        }
     }
 }
 
@@ -269,11 +280,11 @@ impl Display for AchievementEntry {
             self.tag,
             self.author.as_deref().unwrap_or(DEFAULT_AUTHOR),
             self.points,
-            self.created.as_deref().unwrap_or("0"),
-            self.updated.as_deref().unwrap_or("0"),
-            self.upvotes.map_or("0".to_string(), |v| v.to_string()),
-            self.downvotes.map_or("0".to_string(), |v| v.to_string()),
-            self.badge.as_deref().unwrap_or("00000"),
+            self.created.as_deref().unwrap_or(DEFAULT_TIMESTAMP),
+            self.updated.as_deref().unwrap_or(DEFAULT_TIMESTAMP),
+            self.upvotes.unwrap_or(DEFAULT_COUNT),
+            self.downvotes.unwrap_or(DEFAULT_COUNT),
+            self.badge.as_deref().unwrap_or(DEFAULT_BADGE),
         )
     }
 }

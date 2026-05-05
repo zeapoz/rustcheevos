@@ -46,7 +46,7 @@ pub enum BitIndex {
     Seven,
 }
 
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Copy, Debug, PartialEq)]
 pub enum MemorySize {
     BitIndex(BitIndex),
     Lower4,
@@ -168,7 +168,7 @@ impl FromStr for MemoryType {
     }
 }
 
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Copy, Debug, PartialEq)]
 pub struct MemoryRef {
     pub size: MemorySize,
     pub address: usize,
@@ -226,7 +226,7 @@ impl MemoryRef {
     memory_size_method!(mbfle, MemorySize::MBF32LE);
 }
 
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Copy, Debug, PartialEq)]
 pub enum MemOrValue {
     Memory(MemoryRef),
     Value { value: u32 },
