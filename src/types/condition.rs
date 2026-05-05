@@ -143,6 +143,10 @@ impl From<Vec<Condition>> for ConditionGroup {
     }
 }
 
+pub fn extend_from_item(vec: &mut Vec<Condition>, item: impl Into<ConditionGroup>) {
+    vec.extend(item.into().0);
+}
+
 #[derive(Clone, Debug, PartialEq)]
 pub struct Condition {
     pub source: Source,

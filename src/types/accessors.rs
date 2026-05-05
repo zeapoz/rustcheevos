@@ -187,3 +187,15 @@ macro_rules! invert {
         $cond.with_memtype($crate::types::memory::MemoryType::Invert)
     };
 }
+
+#[macro_export]
+macro_rules! chain {
+    ($($item:expr),* $(,)?) => {{
+        use $crate::types::condition::ConditionGroup;
+        let mut vec = Vec::new();
+        $(
+            $crate::types::condition::extend_from_item(&mut vec, $item);
+        )*
+        ConditionGroup::new(vec)
+    }};
+}
