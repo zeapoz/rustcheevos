@@ -101,77 +101,6 @@ fn build_memref(
     }
 }
 
-#[derive(Debug, Clone, PartialEq)]
-pub struct ConditionGroup(Vec<Condition>);
-
-impl ConditionGroup {
-    pub fn new(conditions: Vec<Condition>) -> Self {
-        Self(conditions)
-    }
-
-    pub fn iter(&self) -> impl Iterator<Item = &Condition> {
-        self.0.iter()
-    }
-
-    pub fn and(mut self, other: impl Into<ConditionGroup>) -> Self {
-        self.0.extend(other.into().0);
-        self
-    }
-
-    pub fn with_flag(mut self, flag: Flag) -> ConditionGroup {
-        for cond in self.0.iter_mut() {
-            cond.source.flag = Some(flag);
-        }
-        self
-    }
-}
-
-impl From<Condition> for ConditionGroup {
-    fn from(value: Condition) -> Self {
-        ConditionGroup::new(vec![value])
-    }
-}
-
-impl<const N: usize> From<[Condition; N]> for ConditionGroup {
-    fn from(arr: [Condition; N]) -> Self {
-        ConditionGroup::new(arr.into())
-    }
-}
-
-impl From<Vec<Condition>> for ConditionGroup {
-    fn from(value: Vec<Condition>) -> Self {
-        ConditionGroup::new(value)
-    }
-}
-
-impl FromStr for ConditionGroup {
-    type Err = ParseError;
-
-    fn from_str(s: &str) -> Result<Self, Self::Err> {
-        let conditions: Vec<_> = s
-            .split('_')
-            .filter(|s| !s.is_empty())
-            .map(Condition::deserialize)
-            .collect::<Result<_, _>>()?;
-
-        Ok(Self(conditions))
-    }
-}
-
-impl fmt::Display for ConditionGroup {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(
-            f,
-            "{}",
-            self.0
-                .iter()
-                .map(|c| c.to_string())
-                .collect::<Vec<_>>()
-                .join("_")
-        )
-    }
-}
-
 #[derive(Clone, Debug, PartialEq)]
 pub struct Condition {
     pub source: Source,
@@ -312,14 +241,10 @@ impl WithFlagExt for Condition {
     }
 }
 
-pub fn extend_from_item(vec: &mut Vec<Condition>, item: impl Into<ConditionGroup>) {
-    vec.extend(item.into().0);
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::types::achievement::Conditions;
+    use crate::types::achievement::{ConditionGroup, Conditions};
     use std::str::FromStr;
 
     #[test]

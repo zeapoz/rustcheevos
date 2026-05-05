@@ -191,10 +191,10 @@ macro_rules! invert {
 #[macro_export]
 macro_rules! chain {
     ($($item:expr),* $(,)?) => {{
-        use $crate::types::condition::ConditionGroup;
+        use $crate::types::achievement::{ConditionGroup, extend_from_item};
         let mut vec = Vec::new();
         $(
-            $crate::types::condition::extend_from_item(&mut vec, $item);
+            extend_from_item(&mut vec, $item);
         )*
         ConditionGroup::new(vec)
     }};
