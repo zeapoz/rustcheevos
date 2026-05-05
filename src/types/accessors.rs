@@ -62,15 +62,31 @@ macro_rules! reset_next_if {
 
 #[macro_export]
 macro_rules! add_source {
-    ($cond:expr) => {
-        $cond.with_flags($crate::types::flag::Flag::AddSource)
+    ($value:expr) => {
+        $crate::types::condition::Condition {
+            source: $crate::types::source::Source {
+                reference: $value.into(),
+                flag: Some($crate::types::flag::Flag::AddSource),
+                memtype: None,
+            },
+            op: None,
+            hits: 0,
+        }
     };
 }
 
 #[macro_export]
 macro_rules! sub_source {
-    ($cond:expr) => {
-        $cond.with_flags($crate::types::flag::Flag::SubSource)
+    ($value:expr) => {
+        $crate::types::condition::Condition {
+            source: $crate::types::source::Source {
+                reference: $value.into(),
+                flag: Some($crate::types::flag::Flag::SubSource),
+                memtype: None,
+            },
+            op: None,
+            hits: 0,
+        }
     };
 }
 
