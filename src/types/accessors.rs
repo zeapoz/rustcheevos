@@ -42,21 +42,21 @@ define_memory_accessors! {
 #[macro_export]
 macro_rules! pause_if {
     ($cond:expr) => {
-        $cond.with_flags($crate::types::flag::Flag::PauseIf)
+        $cond.with_flag($crate::types::flag::Flag::PauseIf)
     };
 }
 
 #[macro_export]
 macro_rules! reset_if {
     ($cond:expr) => {
-        $cond.with_flags($crate::types::flag::Flag::ResetIf)
+        $cond.with_flag($crate::types::flag::Flag::ResetIf)
     };
 }
 
 #[macro_export]
 macro_rules! reset_next_if {
     ($cond:expr) => {
-        $cond.with_flags($crate::types::flag::Flag::ResetNextIf)
+        $cond.with_flag($crate::types::flag::Flag::ResetNextIf)
     };
 }
 
@@ -93,70 +93,70 @@ macro_rules! sub_source {
 #[macro_export]
 macro_rules! add_hits {
     ($cond:expr) => {
-        $cond.with_flags($crate::types::flag::Flag::AddHits)
+        $cond.with_flag($crate::types::flag::Flag::AddHits)
     };
 }
 
 #[macro_export]
 macro_rules! sub_hits {
     ($cond:expr) => {
-        $cond.with_flags($crate::types::flag::Flag::SubHits)
+        $cond.with_flag($crate::types::flag::Flag::SubHits)
     };
 }
 
 #[macro_export]
 macro_rules! add_address {
     ($cond:expr) => {
-        $cond.with_flags($crate::types::flag::Flag::AddAddress)
+        $cond.with_flag($crate::types::flag::Flag::AddAddress)
     };
 }
 
 #[macro_export]
 macro_rules! and_next {
     ($cond:expr) => {
-        $cond.with_flags($crate::types::flag::Flag::AndNext)
+        $cond.with_flag($crate::types::flag::Flag::AndNext)
     };
 }
 
 #[macro_export]
 macro_rules! or_next {
     ($cond:expr) => {
-        $cond.with_flags($crate::types::flag::Flag::OrNext)
+        $cond.with_flag($crate::types::flag::Flag::OrNext)
     };
 }
 
 #[macro_export]
 macro_rules! measured {
     ($cond:expr) => {
-        $cond.with_flags($crate::types::flag::Flag::Measured)
+        $cond.with_flag($crate::types::flag::Flag::Measured)
     };
 }
 
 #[macro_export]
 macro_rules! measured_pct {
     ($cond:expr) => {
-        $cond.with_flags($crate::types::flag::Flag::MeasuredPercentage)
+        $cond.with_flag($crate::types::flag::Flag::MeasuredPercentage)
     };
 }
 
 #[macro_export]
 macro_rules! measured_if {
     ($cond:expr) => {
-        $cond.with_flags($crate::types::flag::Flag::MeasuredIf)
+        $cond.with_flag($crate::types::flag::Flag::MeasuredIf)
     };
 }
 
 #[macro_export]
 macro_rules! trigger {
     ($cond:expr) => {
-        $cond.with_flags($crate::types::flag::Flag::Trigger)
+        $cond.with_flag($crate::types::flag::Flag::Trigger)
     };
 }
 
 #[macro_export]
 macro_rules! remember {
     ($cond:expr) => {
-        $cond.with_flags($crate::types::flag::Flag::Remember)
+        $cond.with_flag($crate::types::flag::Flag::Remember)
     };
 }
 

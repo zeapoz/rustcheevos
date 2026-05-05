@@ -1,7 +1,7 @@
 #![allow(clippy::should_implement_trait)]
 
 use super::ParseError;
-use std::str::FromStr;
+use std::{fmt, str::FromStr};
 
 macro_rules! memory_size_method {
     ($name:ident, $size:expr) => {
@@ -260,5 +260,22 @@ impl From<(MemorySize, usize)> for MemOrValue {
             address,
             memtype: MemoryType::Standard,
         })
+    }
+}
+
+impl fmt::Display for MemOrValue {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            MemOrValue::Value { value } => write!(f, "{value}"),
+            MemOrValue::Memory(memory) => {
+                write!(
+                    f,
+                    "{}{}{:x}",
+                    memory.memtype.to_prefix(),
+                    memory.size.to_prefix(),
+                    memory.address
+                )
+            }
+        }
     }
 }

@@ -42,6 +42,28 @@ macro_rules! condition_memtype_method {
     };
 }
 
+pub trait WithFlagExt {
+    fn with_flag(self, flag: Flag) -> Self;
+}
+
+impl<const N: usize> WithFlagExt for [Condition; N] {
+    fn with_flag(mut self, flag: Flag) -> Self {
+        for item in self.iter_mut() {
+            item.source.flag = Some(flag);
+        }
+        self
+    }
+}
+
+impl WithFlagExt for Vec<Condition> {
+    fn with_flag(mut self, flag: Flag) -> Self {
+        for cond in self.iter_mut() {
+            cond.source.flag = Some(flag);
+        }
+        self
+    }
+}
+
 static CONDITION_REGEX: LazyLock<Regex> = LazyLock::new(|| {
     Regex::new(
         r"(?x)
@@ -95,6 +117,31 @@ impl ConditionGroup {
         self.0.extend(other.into().0);
         self
     }
+
+    pub fn with_flag(mut self, flag: Flag) -> ConditionGroup {
+        for cond in self.0.iter_mut() {
+            cond.source.flag = Some(flag);
+        }
+        self
+    }
+}
+
+impl From<Condition> for ConditionGroup {
+    fn from(value: Condition) -> Self {
+        ConditionGroup::new(vec![value])
+    }
+}
+
+impl<const N: usize> From<[Condition; N]> for ConditionGroup {
+    fn from(arr: [Condition; N]) -> Self {
+        ConditionGroup::new(arr.into())
+    }
+}
+
+impl From<Vec<Condition>> for ConditionGroup {
+    fn from(value: Vec<Condition>) -> Self {
+        ConditionGroup::new(value)
+    }
 }
 
 impl FromStr for ConditionGroup {
@@ -125,28 +172,6 @@ impl fmt::Display for ConditionGroup {
     }
 }
 
-impl From<Condition> for ConditionGroup {
-    fn from(value: Condition) -> Self {
-        ConditionGroup::new(vec![value])
-    }
-}
-
-impl<const N: usize> From<[Condition; N]> for ConditionGroup {
-    fn from(arr: [Condition; N]) -> Self {
-        ConditionGroup::new(arr.into())
-    }
-}
-
-impl From<Vec<Condition>> for ConditionGroup {
-    fn from(value: Vec<Condition>) -> Self {
-        ConditionGroup::new(value)
-    }
-}
-
-pub fn extend_from_item(vec: &mut Vec<Condition>, item: impl Into<ConditionGroup>) {
-    vec.extend(item.into().0);
-}
-
 #[derive(Clone, Debug, PartialEq)]
 pub struct Condition {
     pub source: Source,
@@ -155,13 +180,13 @@ pub struct Condition {
 }
 
 impl Condition {
-    pub fn with_flags(mut self, flag: Flag) -> Self {
-        self.source.flag = Some(flag);
+    pub fn with_memtype(mut self, memtype: MemoryType) -> Self {
+        self.source.memtype = Some(memtype);
         self
     }
 
-    pub fn with_memtype(mut self, memtype: MemoryType) -> Self {
-        self.source.memtype = Some(memtype);
+    pub fn with_hits(mut self, hits: u32) -> Self {
+        self.hits = hits;
         self
     }
 
@@ -280,21 +305,15 @@ impl fmt::Display for Condition {
     }
 }
 
-impl fmt::Display for MemOrValue {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self {
-            MemOrValue::Value { value } => write!(f, "{value}"),
-            MemOrValue::Memory(memory) => {
-                write!(
-                    f,
-                    "{}{}{:x}",
-                    memory.memtype.to_prefix(),
-                    memory.size.to_prefix(),
-                    memory.address
-                )
-            }
-        }
+impl WithFlagExt for Condition {
+    fn with_flag(mut self, flag: Flag) -> Self {
+        self.source.flag = Some(flag);
+        self
     }
+}
+
+pub fn extend_from_item(vec: &mut Vec<Condition>, item: impl Into<ConditionGroup>) {
+    vec.extend(item.into().0);
 }
 
 #[cfg(test)]
