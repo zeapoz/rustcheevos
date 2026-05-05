@@ -34,9 +34,17 @@ impl Set {
     pub fn export(&self, dir: impl AsRef<Path>) -> Result<(), ExportError> {
         let filename = format!("{}-User.txt", self.game_id);
         let path = dir.as_ref().join(filename);
-        Ok(std::fs::write(
-            path,
-            UserFile::from(self.clone()).to_string(),
-        )?)
+
+        let mut new_user_file = UserFile::from(self.clone());
+
+        if let Ok(existing_content) = std::fs::read_to_string(&path) {
+            if let Ok(existing) = existing_content.parse::<UserFile>() {
+                new_user_file.merge_with_existing(&existing);
+                new_user_file.leaderboards = existing.leaderboards;
+                new_user_file.notes = existing.notes;
+            }
+        }
+
+        Ok(std::fs::write(path, new_user_file.to_string())?)
     }
 }

@@ -1,3 +1,5 @@
+use std::collections::HashMap;
+use std::fmt::{Display, Formatter};
 use std::str::FromStr;
 
 use crate::types::ParseError as TypesParseError;
@@ -49,8 +51,8 @@ impl FromStr for Header {
     }
 }
 
-impl std::fmt::Display for Header {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+impl Display for Header {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         write!(f, "{}\n{}", self.version, self.game_title)
     }
 }
@@ -63,39 +65,26 @@ pub struct UserFile {
     pub notes: Vec<CodeNote>,
 }
 
-#[derive(Debug, Clone)]
-pub struct AchievementEntry {
-    pub id: u32,
-    pub condition: String,
-    pub title: String,
-    pub description: String,
-    pub tag: Tag,
-    pub author: String,
-    pub points: u32,
-    pub created: String,
-    pub updated: String,
-    pub upvotes: u32,
-    pub downvotes: u32,
-    pub badge: String,
-}
+impl UserFile {
+    pub fn merge_with_existing(&mut self, existing: &UserFile) {
+        let existing_by_id: HashMap<_, _> =
+            existing.achievements.iter().map(|a| (a.id, a)).collect();
 
-#[derive(Debug, Clone)]
-pub struct LeaderboardEntry {
-    pub id: u32,
-    pub start: String,
-    pub cancel: String,
-    pub submit: String,
-    pub value: String,
-    pub format: String,
-    pub title: String,
-    pub description: String,
-    pub lower_is_better: bool,
-}
+        for new_achievement in &mut self.achievements {
+            if let Some(existing) = existing_by_id.get(&new_achievement.id) {
+                new_achievement.merge_metadata(existing);
+            }
+        }
 
-#[derive(Debug, Clone)]
-pub struct CodeNote {
-    pub address: u32,
-    pub note: String,
+        let new_ids: std::collections::HashSet<_> =
+            self.achievements.iter().map(|a| a.id).collect();
+
+        for existing_achievement in &existing.achievements {
+            if !new_ids.contains(&existing_achievement.id) {
+                self.achievements.push(existing_achievement.clone());
+            }
+        }
+    }
 }
 
 impl FromStr for UserFile {
@@ -144,8 +133,8 @@ impl FromStr for UserFile {
     }
 }
 
-impl std::fmt::Display for UserFile {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+impl Display for UserFile {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         writeln!(f, "{}", self.header)?;
         for achievement in &self.achievements {
             writeln!(f, "{achievement}")?;
@@ -157,127 +146,6 @@ impl std::fmt::Display for UserFile {
             writeln!(f, "{note}")?;
         }
         Ok(())
-    }
-}
-
-fn split_unquoted(s: &str, delim: char) -> Vec<&str> {
-    let mut result = Vec::new();
-    let mut in_quotes = false;
-    let mut start = 0;
-
-    for (i, c) in s.char_indices() {
-        if c == '"' {
-            in_quotes = !in_quotes;
-        } else if c == delim && !in_quotes {
-            result.push(&s[start..i]);
-            start = i + 1;
-        }
-    }
-    result.push(&s[start..]);
-    result
-}
-
-impl FromStr for AchievementEntry {
-    type Err = ParseError;
-
-    fn from_str(s: &str) -> Result<Self, Self::Err> {
-        let fields: Vec<&str> = split_unquoted(s, ':');
-        if fields.len() < 11 {
-            return Err(ParseError::InvalidEntry(format!(
-                "insufficient fields: {}",
-                fields.len()
-            )));
-        }
-
-        let id = fields[0]
-            .parse()
-            .map_err(|_| ParseError::InvalidEntry("invalid id".into()))?;
-
-        let condition = fields[1].trim_matches('"').to_string();
-        let title = fields[2].trim_matches('"').to_string();
-        let description = fields[3].trim_matches('"').to_string();
-        let tag = fields.get(6).map(|s| s.trim()).unwrap_or("").parse()?;
-        let author = fields.get(7).map(|s| s.to_string()).unwrap_or_default();
-        let points = fields
-            .get(8)
-            .ok_or_else(|| ParseError::InvalidEntry("invalid points".into()))?
-            .parse()
-            .map_err(|_| ParseError::InvalidEntry("invalid points".into()))?;
-        let created = fields.get(9).map(|s| s.to_string()).unwrap_or_default();
-        let updated = fields.get(10).map(|s| s.to_string()).unwrap_or_default();
-        let upvotes = fields
-            .get(11)
-            .ok_or_else(|| ParseError::InvalidEntry("invalid upvotes".into()))?
-            .parse()
-            .map_err(|_| ParseError::InvalidEntry("invalid upvotes".into()))?;
-        let downvotes = fields
-            .get(12)
-            .ok_or_else(|| ParseError::InvalidEntry("invalid downvotes".into()))?
-            .parse()
-            .map_err(|_| ParseError::InvalidEntry("invalid downvotes".into()))?;
-        let badge = fields.get(13).map(|s| s.to_string()).unwrap_or_default();
-
-        Ok(AchievementEntry {
-            id,
-            condition,
-            title,
-            description,
-            tag,
-            author,
-            points,
-            created,
-            updated,
-            upvotes,
-            downvotes,
-            badge,
-        })
-    }
-}
-
-impl std::fmt::Display for AchievementEntry {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(
-            f,
-            "{}:\"{}\":\"{}\":\"{}\": : :{}:{}:{}:{}:{}:{}:{}:{}",
-            self.id,
-            self.condition,
-            self.title,
-            self.description,
-            self.tag,
-            self.author,
-            self.points,
-            self.created,
-            self.updated,
-            self.upvotes,
-            self.downvotes,
-            self.badge,
-        )
-    }
-}
-
-impl From<Achievement> for AchievementEntry {
-    fn from(achievement: Achievement) -> Self {
-        let condition = achievement.conditions.to_string();
-        let tag = achievement.tag;
-        let title = achievement.title;
-        let description = achievement.description;
-        let id = achievement.id.unwrap_or(0);
-        let points = achievement.points;
-
-        AchievementEntry {
-            id,
-            condition,
-            title,
-            description,
-            tag,
-            author: DEFAULT_AUTHOR.to_string(),
-            points,
-            created: "0".to_string(),
-            updated: "0".to_string(),
-            upvotes: 0,
-            downvotes: 0,
-            badge: "00000".to_string(),
-        }
     }
 }
 
@@ -301,11 +169,165 @@ impl From<Set> for UserFile {
     }
 }
 
+#[derive(Debug, Clone)]
+pub struct AchievementEntry {
+    pub id: u32,
+    pub condition: String,
+    pub title: String,
+    pub description: String,
+    pub tag: Tag,
+    pub author: Option<String>,
+    pub points: u32,
+    pub created: Option<String>,
+    pub updated: Option<String>,
+    pub upvotes: Option<u32>,
+    pub downvotes: Option<u32>,
+    pub badge: Option<String>,
+}
+
+impl AchievementEntry {
+    fn merge_metadata(&mut self, existing: &Self) {
+        self.author = self.author.clone().or(existing.author.clone());
+        self.created = self.created.clone().or(existing.created.clone());
+        self.updated = self.updated.clone().or(existing.updated.clone());
+        self.upvotes = self.upvotes.or(existing.upvotes);
+        self.downvotes = self.downvotes.or(existing.downvotes);
+        self.badge = self.badge.clone().or(existing.badge.clone());
+    }
+}
+
+impl FromStr for AchievementEntry {
+    type Err = ParseError;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        let fields = split_unquoted(s, ':');
+        if fields.len() < 11 {
+            return Err(ParseError::InvalidEntry(format!(
+                "insufficient fields: {}",
+                fields.len()
+            )));
+        }
+
+        let id = fields[0]
+            .parse()
+            .map_err(|_| ParseError::InvalidEntry("invalid id".into()))?;
+
+        let condition = fields[1].trim_matches('"').to_string();
+        let title = fields[2].trim_matches('"').to_string();
+        let description = fields[3].trim_matches('"').to_string();
+        let tag = fields.get(6).map(|s| s.trim()).unwrap_or("").parse()?;
+        let author = fields
+            .get(7)
+            .map(|s| s.to_string())
+            .filter(|v| !v.is_empty());
+        let points = fields
+            .get(8)
+            .ok_or_else(|| ParseError::InvalidEntry("invalid points".into()))?
+            .parse()
+            .map_err(|_| ParseError::InvalidEntry("invalid points".into()))?;
+        let created = fields
+            .get(9)
+            .map(|s| s.to_string())
+            .filter(|v| !v.is_empty());
+        let updated = fields
+            .get(10)
+            .map(|s| s.to_string())
+            .filter(|v| !v.is_empty());
+        let upvotes: Option<u32> = fields
+            .get(11)
+            .and_then(|s| s.parse().ok())
+            .filter(|&v| v > 0);
+        let downvotes: Option<u32> = fields
+            .get(12)
+            .and_then(|s| s.parse().ok())
+            .filter(|&v| v > 0);
+        let badge = fields
+            .get(13)
+            .map(|s| s.to_string())
+            .filter(|v| !v.is_empty());
+
+        Ok(AchievementEntry {
+            id,
+            condition,
+            title,
+            description,
+            tag,
+            author,
+            points,
+            created,
+            updated,
+            upvotes,
+            downvotes,
+            badge,
+        })
+    }
+}
+
+impl Display for AchievementEntry {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        write!(
+            f,
+            "{}:\"{}\":\"{}\":\"{}\": : :{}:{}:{}:{}:{}:{}:{}:{}",
+            self.id,
+            self.condition,
+            self.title,
+            self.description,
+            self.tag,
+            self.author.as_deref().unwrap_or(DEFAULT_AUTHOR),
+            self.points,
+            self.created.as_deref().unwrap_or(""),
+            self.updated.as_deref().unwrap_or(""),
+            self.upvotes.map(|v| v.to_string()).unwrap_or_default(),
+            self.downvotes.map(|v| v.to_string()).unwrap_or_default(),
+            self.badge.as_deref().unwrap_or(""),
+        )
+    }
+}
+
+impl From<Achievement> for AchievementEntry {
+    fn from(achievement: Achievement) -> Self {
+        let condition = achievement.conditions.to_string();
+        let tag = achievement.tag;
+        let title = achievement.title;
+        let description = achievement.description;
+        let id = achievement.id.unwrap_or(0);
+        let points = achievement.points;
+
+        AchievementEntry {
+            id,
+            condition,
+            title,
+            description,
+            tag,
+            author: None,
+            points,
+            created: None,
+            updated: None,
+            upvotes: None,
+            downvotes: None,
+            badge: None,
+        }
+    }
+}
+
+#[derive(Debug, Clone)]
+pub struct LeaderboardEntry {
+    pub id: u32,
+    pub start: String,
+    pub cancel: String,
+    pub submit: String,
+    pub value: String,
+    pub format: String,
+    pub title: String,
+    pub description: String,
+    pub lower_is_better: bool,
+}
+
 impl FromStr for LeaderboardEntry {
     type Err = ParseError;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
-        let fields: Vec<&str> = split_unquoted(s, ':');
+        let fields = split_unquoted(s, ':');
         if fields.len() < 9 {
             return Err(ParseError::InvalidLeaderboard("insufficient fields".into()));
         }
@@ -341,8 +363,8 @@ impl FromStr for LeaderboardEntry {
     }
 }
 
-impl std::fmt::Display for LeaderboardEntry {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+impl Display for LeaderboardEntry {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         write!(
             f,
             "L{}:\"{}\":\"{}\":\"{}\":\"{}\":{}:\"{}\":\"{}\":{}",
@@ -359,6 +381,12 @@ impl std::fmt::Display for LeaderboardEntry {
     }
 }
 
+#[derive(Debug, Clone)]
+pub struct CodeNote {
+    pub address: u32,
+    pub note: String,
+}
+
 impl FromStr for CodeNote {
     type Err = ParseError;
 
@@ -366,7 +394,7 @@ impl FromStr for CodeNote {
         let s = s
             .strip_prefix("N0:")
             .ok_or(ParseError::InvalidNote("missing N0: prefix".into()))?;
-        let parts: Vec<&str> = s.splitn(2, ':').collect();
+        let parts: Vec<_> = s.splitn(2, ':').collect();
         if parts.len() != 2 {
             return Err(ParseError::InvalidNote("missing note text".into()));
         }
@@ -381,10 +409,27 @@ impl FromStr for CodeNote {
     }
 }
 
-impl std::fmt::Display for CodeNote {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+impl Display for CodeNote {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         write!(f, "N0:0x{:x}:\"{}\"", self.address, self.note)
     }
+}
+
+fn split_unquoted(s: &str, delim: char) -> Vec<&str> {
+    let mut result = Vec::new();
+    let mut in_quotes = false;
+    let mut start = 0;
+
+    for (i, c) in s.char_indices() {
+        if c == '"' {
+            in_quotes = !in_quotes;
+        } else if c == delim && !in_quotes {
+            result.push(&s[start..i]);
+            start = i + 1;
+        }
+    }
+    result.push(&s[start..]);
+    result
 }
 
 #[cfg(test)]
@@ -412,10 +457,10 @@ mod tests {
             "Earn a Bronze medal or higher on every planet of the Alpha galaxy"
         );
         assert_eq!(entry.tag, Tag::Progression);
-        assert_eq!(entry.author, "Author");
+        assert_eq!(entry.author, Some("Author".to_string()));
         assert_eq!(entry.points, 3);
-        assert_eq!(entry.upvotes, 0);
-        assert_eq!(entry.downvotes, 0);
+        assert_eq!(entry.upvotes, None);
+        assert_eq!(entry.downvotes, None);
     }
 
     #[test]
@@ -545,5 +590,158 @@ N0:0x0001:\"Note\"";
         assert_eq!(parsed.achievements.len(), 1);
         assert_eq!(parsed.achievements[0].title, "Test Achievement");
         assert_eq!(parsed.achievements[0].points, 5);
+    }
+
+    #[test]
+    fn test_merge_with_existing() {
+        let mut new_file = UserFile {
+            header: Header {
+                version: "1.3".into(),
+                game_title: "Test Game".into(),
+            },
+            achievements: vec![AchievementEntry {
+                id: 1,
+                condition: "cond1".into(),
+                title: "Achievement 1".into(),
+                description: "Desc".into(),
+                tag: Tag::Progression,
+                author: None,
+                points: 5,
+                created: None,
+                updated: None,
+                upvotes: None,
+                downvotes: None,
+                badge: None,
+            }],
+            leaderboards: Vec::new(),
+            notes: Vec::new(),
+        };
+
+        let existing = UserFile {
+            header: Header {
+                version: "1.3".into(),
+                game_title: "Test Game".into(),
+            },
+            achievements: vec![AchievementEntry {
+                id: 1,
+                condition: "cond1".into(),
+                title: "Achievement 1".into(),
+                description: "Desc".into(),
+                tag: Tag::Progression,
+                author: Some("ExistingAuthor".into()),
+                points: 5,
+                created: Some("1234567890".into()),
+                updated: Some("1234567891".into()),
+                upvotes: Some(10),
+                downvotes: Some(2),
+                badge: Some("12345".into()),
+            }],
+            leaderboards: vec![LeaderboardEntry {
+                id: 0,
+                start: "start".into(),
+                cancel: "cancel".into(),
+                submit: "submit".into(),
+                value: "value".into(),
+                format: "VALUE".into(),
+                title: "Leaderboard".into(),
+                description: "Desc".into(),
+                lower_is_better: false,
+            }],
+            notes: vec![CodeNote {
+                address: 0x1000,
+                note: "Test note".into(),
+            }],
+        };
+
+        new_file.merge_with_existing(&existing);
+
+        assert_eq!(
+            new_file.achievements[0].author,
+            Some("ExistingAuthor".to_string())
+        );
+        assert_eq!(
+            new_file.achievements[0].created,
+            Some("1234567890".to_string())
+        );
+        assert_eq!(
+            new_file.achievements[0].updated,
+            Some("1234567891".to_string())
+        );
+        assert_eq!(new_file.achievements[0].upvotes, Some(10));
+        assert_eq!(new_file.achievements[0].downvotes, Some(2));
+        assert_eq!(new_file.achievements[0].badge, Some("12345".to_string()));
+    }
+
+    #[test]
+    fn test_merge_preserves_existing_achievements() {
+        let mut new_file = UserFile {
+            header: Header {
+                version: "1.3".into(),
+                game_title: "Test".into(),
+            },
+            achievements: vec![AchievementEntry {
+                id: 1,
+                condition: "cond".into(),
+                title: "Ach1".into(),
+                description: "Desc".into(),
+                tag: Tag::Progression,
+                author: None,
+                points: 5,
+                created: None,
+                updated: None,
+                upvotes: None,
+                downvotes: None,
+                badge: None,
+            }],
+            leaderboards: Vec::new(),
+            notes: Vec::new(),
+        };
+
+        let existing = UserFile {
+            header: Header {
+                version: "1.3".into(),
+                game_title: "Test".into(),
+            },
+            achievements: vec![
+                AchievementEntry {
+                    id: 1,
+                    condition: "cond".into(),
+                    title: "Ach1".into(),
+                    description: "Desc".into(),
+                    tag: Tag::Progression,
+                    author: Some("Author1".into()),
+                    points: 5,
+                    created: Some("1".into()),
+                    updated: Some("1".into()),
+                    upvotes: Some(5),
+                    downvotes: Some(1),
+                    badge: Some("1".into()),
+                },
+                AchievementEntry {
+                    id: 2,
+                    condition: "cond2".into(),
+                    title: "Ach2".into(),
+                    description: "Desc2".into(),
+                    tag: Tag::WinCondition,
+                    author: Some("Author2".into()),
+                    points: 10,
+                    created: Some("2".into()),
+                    updated: Some("2".into()),
+                    upvotes: Some(20),
+                    downvotes: Some(5),
+                    badge: Some("2".into()),
+                },
+            ],
+            leaderboards: Vec::new(),
+            notes: Vec::new(),
+        };
+
+        new_file.merge_with_existing(&existing);
+
+        assert_eq!(new_file.achievements.len(), 2);
+        assert_eq!(new_file.achievements[0].id, 1);
+        assert_eq!(new_file.achievements[0].author, Some("Author1".to_string()));
+        assert_eq!(new_file.achievements[1].id, 2);
+        assert_eq!(new_file.achievements[1].author, Some("Author2".to_string()));
     }
 }

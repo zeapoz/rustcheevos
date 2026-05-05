@@ -101,7 +101,7 @@ impl FromStr for ConditionGroup {
     type Err = ParseError;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
-        let conditions: Vec<Condition> = s
+        let conditions: Vec<_> = s
             .split('_')
             .filter(|s| !s.is_empty())
             .map(Condition::deserialize)

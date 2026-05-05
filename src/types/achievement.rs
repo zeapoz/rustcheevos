@@ -51,7 +51,7 @@ impl std::str::FromStr for Conditions {
         let groups: Vec<_> = s.split('S').filter(|s| !s.is_empty()).collect();
         let core: ConditionGroup = groups.first().ok_or(ParseError::InvalidFormat)?.parse()?;
 
-        let alt_groups: Vec<ConditionGroup> = groups
+        let alt_groups = groups
             .iter()
             .skip(1)
             .map(|s| s.parse())

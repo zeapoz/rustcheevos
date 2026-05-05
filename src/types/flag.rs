@@ -20,6 +20,28 @@ pub enum Flag {
     Remember,
 }
 
+impl Flag {
+    pub fn to_prefix(&self) -> &'static str {
+        match self {
+            Flag::PauseIf => "P:",
+            Flag::ResetIf => "R:",
+            Flag::ResetNextIf => "Z:",
+            Flag::AddSource => "A:",
+            Flag::SubSource => "B:",
+            Flag::AddHits => "C:",
+            Flag::SubHits => "D:",
+            Flag::AddAddress => "I:",
+            Flag::AndNext => "N:",
+            Flag::OrNext => "O:",
+            Flag::Measured => "M:",
+            Flag::MeasuredPercentage => "G:",
+            Flag::MeasuredIf => "Q:",
+            Flag::Trigger => "T:",
+            Flag::Remember => "K:",
+        }
+    }
+}
+
 impl FromStr for Flag {
     type Err = ParseError;
 
@@ -41,28 +63,6 @@ impl FromStr for Flag {
             "T:" => Ok(Flag::Trigger),
             "K:" => Ok(Flag::Remember),
             _ => Err(ParseError::UnknownFlag(s.to_string())),
-        }
-    }
-}
-
-impl Flag {
-    pub fn to_prefix(&self) -> &'static str {
-        match self {
-            Flag::PauseIf => "P:",
-            Flag::ResetIf => "R:",
-            Flag::ResetNextIf => "Z:",
-            Flag::AddSource => "A:",
-            Flag::SubSource => "B:",
-            Flag::AddHits => "C:",
-            Flag::SubHits => "D:",
-            Flag::AddAddress => "I:",
-            Flag::AndNext => "N:",
-            Flag::OrNext => "O:",
-            Flag::Measured => "M:",
-            Flag::MeasuredPercentage => "G:",
-            Flag::MeasuredIf => "Q:",
-            Flag::Trigger => "T:",
-            Flag::Remember => "K:",
         }
     }
 }
