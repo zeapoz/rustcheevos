@@ -1,9 +1,10 @@
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 use std::fmt::{Display, Formatter};
 use std::str::FromStr;
 
 use crate::types::ParseError as TypesParseError;
 use crate::types::achievement::{Achievement, Tag};
+use crate::types::leaderboard::Leaderboard;
 use crate::types::set::Set;
 
 const PROTOCOL_VERSION: &str = "1.3";
@@ -79,13 +80,45 @@ impl UserFile {
             }
         }
 
-        let new_ids: std::collections::HashSet<_> =
-            self.achievements.iter().map(|a| a.id).collect();
+        merge_achievements_with_existing(&mut self.achievements, &existing.achievements);
+        merge_leaderboards_with_existing(&mut self.leaderboards, &existing.leaderboards);
+    }
+}
 
-        for existing_achievement in &existing.achievements {
-            if !new_ids.contains(&existing_achievement.id) {
-                self.achievements.push(existing_achievement.clone());
-            }
+fn merge_achievements_with_existing(
+    new_items: &mut Vec<AchievementEntry>,
+    existing_items: &[AchievementEntry],
+) {
+    let new_ids: HashSet<_> = new_items
+        .iter()
+        .filter(|a| a.id > 0)
+        .map(|a| a.id)
+        .collect();
+    let new_items_zero: HashSet<_> = new_items.iter().filter(|a| a.id == 0).cloned().collect();
+
+    for existing in existing_items {
+        let id = existing.id;
+        if !(new_ids.contains(&id) || id == 0 && new_items_zero.contains(existing)) {
+            new_items.push(existing.clone());
+        }
+    }
+}
+
+fn merge_leaderboards_with_existing(
+    new_items: &mut Vec<LeaderboardEntry>,
+    existing_items: &[LeaderboardEntry],
+) {
+    let new_ids: HashSet<_> = new_items
+        .iter()
+        .filter(|l| l.id > 0)
+        .map(|l| l.id)
+        .collect();
+    let new_items_zero: HashSet<_> = new_items.iter().filter(|l| l.id == 0).cloned().collect();
+
+    for existing in existing_items {
+        let id = existing.id;
+        if !(new_ids.contains(&id) || id == 0 && new_items_zero.contains(existing)) {
+            new_items.push(existing.clone());
         }
     }
 }
@@ -163,16 +196,21 @@ impl From<Set> for UserFile {
             .into_iter()
             .map(AchievementEntry::from)
             .collect();
+        let leaderboards = set
+            .leaderboards
+            .into_iter()
+            .map(LeaderboardEntry::from)
+            .collect();
         UserFile {
             header,
             achievements,
-            leaderboards: Vec::new(),
+            leaderboards,
             notes: Vec::new(),
         }
     }
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct AchievementEntry {
     pub id: u32,
     pub condition: String,
@@ -315,7 +353,33 @@ impl From<Achievement> for AchievementEntry {
     }
 }
 
-#[derive(Debug, Clone)]
+impl From<Leaderboard> for LeaderboardEntry {
+    fn from(leaderboard: Leaderboard) -> Self {
+        let start = leaderboard.conditions.start.to_string();
+        let cancel = leaderboard.conditions.cancel.to_string();
+        let submit = leaderboard.conditions.submit.to_string();
+        let value = leaderboard.conditions.value.to_string();
+        let format = leaderboard.format.to_string();
+        let title = leaderboard.title;
+        let description = leaderboard.description;
+        let id = leaderboard.id.unwrap_or(0);
+        let lower_is_better = leaderboard.lower_is_better;
+
+        LeaderboardEntry {
+            id,
+            start,
+            cancel,
+            submit,
+            value,
+            format,
+            title,
+            description,
+            lower_is_better,
+        }
+    }
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct LeaderboardEntry {
     pub id: u32,
     pub start: String,
@@ -613,7 +677,7 @@ N0:0x0001:\"Note\"";
             5,
         );
         let mut set = Set::new(String::from("1.3"), String::from("Test Game"));
-        set.push(achievement);
+        set.add(achievement);
         let user_file = UserFile::from(set);
         let serialized = format!("{}", user_file);
         let parsed: UserFile = serialized.parse().unwrap();

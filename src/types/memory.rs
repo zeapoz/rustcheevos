@@ -1,6 +1,6 @@
 #![allow(clippy::should_implement_trait)]
 
-use super::ParseError;
+use super::{ParseError, condition::WithFlagExt};
 use std::{fmt, str::FromStr};
 
 macro_rules! memory_size_method {
@@ -224,6 +224,21 @@ impl MemoryRef {
     memory_size_method!(doublebe, MemorySize::Double32BE);
     memory_size_method!(mbf, MemorySize::MBF32);
     memory_size_method!(mbfle, MemorySize::MBF32LE);
+}
+
+impl WithFlagExt for MemoryRef {
+    type Output = super::condition::Condition;
+    fn with_flag(self, flag: super::flag::Flag) -> Self::Output {
+        super::condition::Condition {
+            source: super::source::Source {
+                reference: MemOrValue::Memory(self),
+                flag: Some(flag),
+                memtype: None,
+            },
+            op: None,
+            hits: 0,
+        }
+    }
 }
 
 #[derive(Clone, Copy, Debug, PartialEq)]

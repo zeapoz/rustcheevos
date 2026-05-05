@@ -43,11 +43,13 @@ macro_rules! condition_memtype_method {
 }
 
 pub trait WithFlagExt {
-    fn with_flag(self, flag: Flag) -> Self;
+    type Output;
+    fn with_flag(self, flag: Flag) -> Self::Output;
 }
 
 impl<const N: usize> WithFlagExt for [Condition; N] {
-    fn with_flag(mut self, flag: Flag) -> Self {
+    type Output = [Condition; N];
+    fn with_flag(mut self, flag: Flag) -> Self::Output {
         for item in self.iter_mut() {
             item.source.flag = Some(flag);
         }
@@ -56,7 +58,8 @@ impl<const N: usize> WithFlagExt for [Condition; N] {
 }
 
 impl WithFlagExt for Vec<Condition> {
-    fn with_flag(mut self, flag: Flag) -> Self {
+    type Output = Vec<Condition>;
+    fn with_flag(mut self, flag: Flag) -> Self::Output {
         for cond in self.iter_mut() {
             cond.source.flag = Some(flag);
         }
@@ -117,6 +120,34 @@ impl Condition {
     pub fn with_hits(mut self, hits: u32) -> Self {
         self.hits = hits;
         self
+    }
+
+    pub fn always_false() -> Self {
+        Self::eq_val(0, 1)
+    }
+
+    pub fn always_true() -> Self {
+        Self::eq_val(1, 1)
+    }
+
+    fn eq_val(value1: u32, value2: u32) -> Self {
+        Self::cmp(
+            MemOrValue::Value { value: value1 },
+            Operator::Equals,
+            MemOrValue::Value { value: value2 },
+        )
+    }
+
+    fn cmp(reference: MemOrValue, op: Operator, target: MemOrValue) -> Self {
+        Condition {
+            source: Source {
+                reference,
+                flag: None,
+                memtype: None,
+            },
+            op: Some(Operation { op, target }),
+            hits: 0,
+        }
     }
 
     condition_op_method!(eq, Operator::Equals);
@@ -214,6 +245,14 @@ impl Condition {
     }
 }
 
+impl WithFlagExt for Condition {
+    type Output = Condition;
+    fn with_flag(mut self, flag: Flag) -> Self::Output {
+        self.source.flag = Some(flag);
+        self
+    }
+}
+
 impl fmt::Display for Condition {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         if let Some(flag) = &self.source.flag {
@@ -231,13 +270,6 @@ impl fmt::Display for Condition {
             write!(f, ".{}.", self.hits)?;
         }
         Ok(())
-    }
-}
-
-impl WithFlagExt for Condition {
-    fn with_flag(mut self, flag: Flag) -> Self {
-        self.source.flag = Some(flag);
-        self
     }
 }
 

@@ -4,6 +4,7 @@ pub mod accessors;
 pub mod achievement;
 pub mod condition;
 pub mod flag;
+pub mod leaderboard;
 pub mod memory;
 pub mod operator;
 pub mod set;

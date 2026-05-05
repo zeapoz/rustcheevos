@@ -3,6 +3,7 @@ use std::path::Path;
 use thiserror::Error;
 
 use super::achievement::Achievement;
+use super::leaderboard::Leaderboard;
 use crate::schema::user::UserFile;
 
 #[derive(Error, Debug)]
@@ -11,11 +12,30 @@ pub enum ExportError {
     Io(#[from] std::io::Error),
 }
 
+#[derive(Debug, Clone, PartialEq)]
+pub enum SetItem {
+    Achievement(Achievement),
+    Leaderboard(Leaderboard),
+}
+
+impl From<Achievement> for SetItem {
+    fn from(achievement: Achievement) -> Self {
+        SetItem::Achievement(achievement)
+    }
+}
+
+impl From<Leaderboard> for SetItem {
+    fn from(leaderboard: Leaderboard) -> Self {
+        SetItem::Leaderboard(leaderboard)
+    }
+}
+
 #[derive(Debug, Clone, PartialEq, Default)]
 pub struct Set {
     pub game_id: String,
     pub game_name: String,
     pub achievements: Vec<Achievement>,
+    pub leaderboards: Vec<Leaderboard>,
 }
 
 impl Set {
@@ -24,11 +44,23 @@ impl Set {
             game_id: game_id.into(),
             game_name: game_name.into(),
             achievements: Vec::new(),
+            leaderboards: Vec::new(),
         }
     }
 
-    pub fn push(&mut self, achievement: Achievement) {
-        self.achievements.push(achievement);
+    pub fn add(&mut self, item: impl Into<SetItem>) -> &mut Self {
+        match item.into() {
+            SetItem::Achievement(achievement) => self.achievements.push(achievement),
+            SetItem::Leaderboard(leaderboard) => self.leaderboards.push(leaderboard),
+        }
+        self
+    }
+
+    pub fn add_many(&mut self, items: impl IntoIterator<Item = SetItem>) -> &mut Self {
+        for item in items {
+            self.add(item);
+        }
+        self
     }
 
     pub fn export(&self, dir: impl AsRef<Path>) -> Result<(), ExportError> {
@@ -40,7 +72,6 @@ impl Set {
         if let Ok(existing_content) = std::fs::read_to_string(&path) {
             if let Ok(existing) = existing_content.parse::<UserFile>() {
                 new_user_file.merge_with_existing(&existing);
-                new_user_file.leaderboards = existing.leaderboards;
                 new_user_file.notes = existing.notes;
             }
         }

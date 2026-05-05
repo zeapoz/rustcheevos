@@ -138,7 +138,7 @@ impl fmt::Display for Conditions {
     }
 }
 
-#[derive(Default, Debug, Clone, PartialEq)]
+#[derive(Default, Debug, Clone, PartialEq, Eq, Hash)]
 pub enum Tag {
     #[default]
     Empty,
