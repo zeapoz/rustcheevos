@@ -5,7 +5,7 @@ use std::{fmt, str::FromStr, sync::LazyLock};
 use regex::Regex;
 
 use crate::types::ParseError;
-use crate::types::memory::{MemOrValue, MemorySize, MemoryType, MemoryRef};
+use crate::types::memory::{MemOrValue, MemoryRef, MemorySize, MemoryType};
 
 use super::flag::Flag;
 use super::operator::Operator;

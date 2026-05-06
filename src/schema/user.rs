@@ -1,6 +1,7 @@
 use std::collections::{HashMap, HashSet};
 use std::fmt::{Display, Formatter};
 use std::str::FromStr;
+use thiserror::Error;
 
 use crate::types::ParseError as TypesParseError;
 use crate::types::achievement::{Achievement, Tag};
@@ -13,11 +14,8 @@ const DEFAULT_COUNT: u32 = 0;
 const DEFAULT_TIMESTAMP: &str = "0";
 const DEFAULT_BADGE: &str = "00000";
 
-#[derive(thiserror::Error, Debug)]
+#[derive(Error, Debug)]
 pub enum ParseError {
-    #[error("invalid tag: {0}")]
-    InvalidTag(String),
-
     #[error("types error: {0}")]
     Types(#[from] TypesParseError),
 
