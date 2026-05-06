@@ -1,41 +1,8 @@
-//! Achievement set types and serialization.
+use std::{fs, io, path::Path};
 
-use std::path::Path;
+use crate::schema::user::{USER_FILE_EXTENSION, USER_FILE_SUFFIX, UserFile};
 
-use thiserror::Error;
-
-use super::achievement::Achievement;
-use super::leaderboard::Leaderboard;
-use crate::schema::user::UserFile;
-
-/// Errors that can occur when exporting an achievement set.
-#[derive(Error, Debug)]
-pub enum ExportError {
-    /// I/O error during export.
-    #[error("export failed: {0}")]
-    Io(#[from] std::io::Error),
-}
-
-/// Items that can be part of an achievement set.
-#[derive(Debug, Clone, PartialEq)]
-pub enum SetItem {
-    /// An achievement.
-    Achievement(Achievement),
-    /// A leaderboard.
-    Leaderboard(Leaderboard),
-}
-
-impl From<Achievement> for SetItem {
-    fn from(achievement: Achievement) -> Self {
-        SetItem::Achievement(achievement)
-    }
-}
-
-impl From<Leaderboard> for SetItem {
-    fn from(leaderboard: Leaderboard) -> Self {
-        SetItem::Leaderboard(leaderboard)
-    }
-}
+use super::{achievement::Achievement, leaderboard::Leaderboard};
 
 /// An achievement set containing achievements and leaderboards.
 #[derive(Debug, Clone, PartialEq, Default)]
@@ -57,7 +24,7 @@ impl Set {
     ///
     /// * `game_id` - The game ID.
     /// * `game_name` - The game name.
-    pub fn new<S: Into<String>>(game_id: S, game_name: S) -> Self {
+    pub fn new(game_id: impl Into<String>, game_name: impl Into<String>) -> Self {
         Self {
             game_id: game_id.into(),
             game_name: game_name.into(),
@@ -91,27 +58,48 @@ impl Set {
         self
     }
 
-    /// Exports this set to a file in the given directory.
+    /// Exports this set to to the user file at the given directory.
     ///
     /// # Arguments
     ///
     /// * `dir` - The directory to export to.
-    ///
-    /// # Errors
-    /// Returns [`ExportError`] if writing fails.
-    pub fn export(&self, dir: impl AsRef<Path>) -> Result<(), ExportError> {
-        let filename = format!("{}-User.txt", self.game_id);
+    pub fn export(&self, dir: impl AsRef<Path>) -> io::Result<()> {
+        let filename = format!(
+            "{}{}.{}",
+            self.game_id, USER_FILE_SUFFIX, USER_FILE_EXTENSION
+        );
         let path = dir.as_ref().join(filename);
+        self.export_to_file(path)
+    }
 
-        let mut new_user_file = UserFile::from(self.clone());
+    /// Exports this set to a custom file path.
+    ///
+    /// # Arguments
+    ///
+    /// * `path` - The path to export to.
+    pub fn export_to_file(&self, path: impl AsRef<Path>) -> io::Result<()> {
+        let user_file = UserFile::from(self.clone());
+        fs::write(path, user_file.to_string())
+    }
+}
 
-        if let Ok(existing_content) = std::fs::read_to_string(&path) {
-            if let Ok(existing) = existing_content.parse::<UserFile>() {
-                new_user_file.merge_with_existing(&existing);
-                new_user_file.notes = existing.notes;
-            }
-        }
+/// Items that can be part of an achievement set.
+#[derive(Debug, Clone, PartialEq)]
+pub enum SetItem {
+    /// An achievement.
+    Achievement(Achievement),
+    /// A leaderboard.
+    Leaderboard(Leaderboard),
+}
 
-        Ok(std::fs::write(path, new_user_file.to_string())?)
+impl From<Achievement> for SetItem {
+    fn from(achievement: Achievement) -> Self {
+        SetItem::Achievement(achievement)
+    }
+}
+
+impl From<Leaderboard> for SetItem {
+    fn from(leaderboard: Leaderboard) -> Self {
+        SetItem::Leaderboard(leaderboard)
     }
 }

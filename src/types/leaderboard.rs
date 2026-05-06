@@ -1,14 +1,83 @@
-//! Leaderboard types and parsing.
-
 use std::fmt;
 use std::str::FromStr;
 
-use super::ParseError;
-use super::achievement::ConditionGroup;
+use crate::ParseError;
+
+use super::requirement::group::RequirementGroup;
+
+/// A leaderboard definition.
+#[derive(Debug, Clone, PartialEq)]
+pub struct Leaderboard {
+    /// The leaderboard ID.
+    pub id: u32,
+    /// The leaderboard title.
+    pub title: String,
+    /// The leaderboard description.
+    pub description: String,
+    /// The leaderboard start condition.
+    pub start: RequirementGroup,
+    /// The leaderboard cancel condition.
+    pub cancel: RequirementGroup,
+    /// The leaderboard submit condition.
+    pub submit: RequirementGroup,
+    /// The leaderboard value condition.
+    pub value: RequirementGroup,
+    /// The value format.
+    pub format: LeaderboardFormat,
+    /// Whether lower values are better.
+    pub lower_is_better: bool,
+}
+
+impl Leaderboard {
+    /// Creates a new leaderboard.
+    ///
+    /// # Arguments
+    ///
+    /// * `title` - The leaderboard title.
+    /// * `description` - The leaderboard description.
+    /// * `start` - The leaderboard start condition.
+    /// * `cancel` - The leaderboard cancel condition.
+    /// * `submit` - The leaderboard submit condition.
+    /// * `value` - The leaderboard value condition.
+    /// * `format` - The value format.
+    /// * `lower_is_better` - Whether lower values are better.
+    pub fn new(
+        title: impl Into<String>,
+        description: impl Into<String>,
+        start: impl Into<RequirementGroup>,
+        cancel: impl Into<RequirementGroup>,
+        submit: impl Into<RequirementGroup>,
+        value: impl Into<RequirementGroup>,
+        format: LeaderboardFormat,
+        lower_is_better: bool,
+    ) -> Self {
+        Self {
+            id: 0,
+            title: title.into(),
+            description: description.into(),
+            start: start.into(),
+            cancel: cancel.into(),
+            submit: submit.into(),
+            value: value.into(),
+            format,
+            lower_is_better,
+        }
+    }
+
+    /// Sets the leaderboard ID.
+    ///
+    /// # Arguments
+    ///
+    /// * `id` - The leaderboard ID.
+    pub fn with_id(mut self, id: u32) -> Self {
+        self.id = id;
+        self
+    }
+}
 
 /// The format for a leaderboard value.
 #[derive(Debug, Clone, Copy, PartialEq)]
-pub enum Format {
+pub enum LeaderboardFormat {
     /// Score format.
     Score,
     /// Seconds format.
@@ -43,7 +112,7 @@ pub enum Format {
     Custom,
 }
 
-impl Format {
+impl LeaderboardFormat {
     /// Returns the string representation of this format.
     ///
     /// # Returns
@@ -51,33 +120,33 @@ impl Format {
     /// The string representation.
     pub fn as_str(&self) -> &'static str {
         match self {
-            Format::Score => "SCORE",
-            Format::Seconds => "SECONDS",
-            Format::Frames => "FRAMES",
-            Format::Milliseconds => "MILLISECONDS",
-            Format::Minutes => "MINUTES",
-            Format::SecsAsMins => "SECS_AS_MINS",
-            Format::Value => "VALUE",
-            Format::Unsigned => "UNSIGNED",
-            Format::Tens => "TENS",
-            Format::Hundreds => "HUNDREDS",
-            Format::Thousands => "THOUSANDS",
-            Format::Fixed1 => "FIXED1",
-            Format::Fixed2 => "FIXED2",
-            Format::Fixed3 => "FIXED3",
-            Format::Points => "POINTS",
-            Format::Custom => "CUSTOM",
+            LeaderboardFormat::Score => "SCORE",
+            LeaderboardFormat::Seconds => "SECONDS",
+            LeaderboardFormat::Frames => "FRAMES",
+            LeaderboardFormat::Milliseconds => "MILLISECONDS",
+            LeaderboardFormat::Minutes => "MINUTES",
+            LeaderboardFormat::SecsAsMins => "SECS_AS_MINS",
+            LeaderboardFormat::Value => "VALUE",
+            LeaderboardFormat::Unsigned => "UNSIGNED",
+            LeaderboardFormat::Tens => "TENS",
+            LeaderboardFormat::Hundreds => "HUNDREDS",
+            LeaderboardFormat::Thousands => "THOUSANDS",
+            LeaderboardFormat::Fixed1 => "FIXED1",
+            LeaderboardFormat::Fixed2 => "FIXED2",
+            LeaderboardFormat::Fixed3 => "FIXED3",
+            LeaderboardFormat::Points => "POINTS",
+            LeaderboardFormat::Custom => "CUSTOM",
         }
     }
 }
 
-impl fmt::Display for Format {
+impl fmt::Display for LeaderboardFormat {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "{}", self.as_str())
     }
 }
 
-impl FromStr for Format {
+impl FromStr for LeaderboardFormat {
     type Err = ParseError;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
@@ -98,225 +167,8 @@ impl FromStr for Format {
             "FIXED3" => Self::Fixed3,
             "POINTS" => Self::Points,
             "CUSTOM" => Self::Custom,
-            _s => return Err(ParseError::InvalidFormat),
+            s => return Err(ParseError::InvalidLeaderboardFormat(s.to_string())),
         };
         Ok(format)
-    }
-}
-
-/// The conditions for a leaderboard.
-#[derive(Debug, Clone, PartialEq)]
-pub struct LeaderboardConditions {
-    /// The start conditions.
-    pub start: ConditionGroup,
-    /// The cancel conditions.
-    pub cancel: ConditionGroup,
-    /// The submit conditions.
-    pub submit: ConditionGroup,
-    /// The value conditions.
-    pub value: ConditionGroup,
-}
-
-impl LeaderboardConditions {
-    /// Creates new leaderboard conditions.
-    ///
-    /// # Arguments
-    ///
-    /// * `start` - The start conditions.
-    /// * `cancel` - The cancel conditions.
-    /// * `submit` - The submit conditions.
-    /// * `value` - The value conditions.
-    pub fn new(
-        start: impl Into<ConditionGroup>,
-        cancel: impl Into<ConditionGroup>,
-        submit: impl Into<ConditionGroup>,
-        value: impl Into<ConditionGroup>,
-    ) -> Self {
-        Self {
-            start: start.into(),
-            cancel: cancel.into(),
-            submit: submit.into(),
-            value: value.into(),
-        }
-    }
-}
-
-impl FromStr for LeaderboardConditions {
-    type Err = ParseError;
-
-    fn from_str(s: &str) -> Result<Self, Self::Err> {
-        let fields: Vec<_> = s.split(':').collect();
-        if fields.len() < 4 {
-            return Err(ParseError::InvalidLeaderboard("insufficient fields".into()));
-        }
-
-        let start: ConditionGroup = fields[0].parse()?;
-        let cancel: ConditionGroup = fields[1].parse()?;
-        let submit: ConditionGroup = fields[2].parse()?;
-        let value: ConditionGroup = fields[3].parse()?;
-
-        Ok(Self {
-            start,
-            cancel,
-            submit,
-            value,
-        })
-    }
-}
-
-impl fmt::Display for LeaderboardConditions {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(
-            f,
-            "{}:{}:{}:{}",
-            self.start, self.cancel, self.submit, self.value
-        )
-    }
-}
-
-/// A leaderboard definition.
-#[derive(Debug, Clone, PartialEq)]
-pub struct Leaderboard {
-    /// The leaderboard ID (optional until submitted).
-    pub id: Option<u32>,
-    /// The leaderboard title.
-    pub title: String,
-    /// The leaderboard description.
-    pub description: String,
-    /// The leaderboard conditions.
-    pub conditions: LeaderboardConditions,
-    /// The value format.
-    pub format: Format,
-    /// Whether lower values are better.
-    pub lower_is_better: bool,
-}
-
-impl Leaderboard {
-    /// Creates a new leaderboard.
-    ///
-    /// # Arguments
-    ///
-    /// * `title` - The leaderboard title.
-    /// * `description` - The leaderboard description.
-    /// * `conditions` - The leaderboard conditions.
-    /// * `format` - The value format.
-    /// * `lower_is_better` - Whether lower values are better.
-    pub fn new(
-        title: impl Into<String>,
-        description: impl Into<String>,
-        conditions: LeaderboardConditions,
-        format: Format,
-        lower_is_better: bool,
-    ) -> Self {
-        Self {
-            conditions,
-            id: None,
-            title: title.into(),
-            description: description.into(),
-            format,
-            lower_is_better,
-        }
-    }
-
-    /// Sets the leaderboard ID.
-    ///
-    /// # Arguments
-    ///
-    /// * `id` - The leaderboard ID.
-    pub fn with_id(mut self, id: u32) -> Self {
-        self.id = Some(id);
-        self
-    }
-}
-
-impl fmt::Display for Leaderboard {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(
-            f,
-            "L{}:\"{}\":\"{}\":\"{}\":\"{}\":{}:\"{}\":\"{}\":{}",
-            self.id.unwrap_or(0),
-            self.conditions.start,
-            self.conditions.cancel,
-            self.conditions.submit,
-            self.conditions.value,
-            self.format,
-            self.title,
-            self.description,
-            if self.lower_is_better { 1 } else { 0 }
-        )
-    }
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-    use std::str::FromStr;
-
-    #[test]
-    fn test_format_from_str() {
-        assert_eq!(Format::from_str("SCORE").unwrap(), Format::Score);
-        assert_eq!(Format::from_str("seconds").unwrap(), Format::Seconds);
-        assert!(Format::from_str("INVALID").is_err());
-    }
-
-    #[test]
-    fn test_format_display() {
-        assert_eq!(Format::Score.to_string(), "SCORE");
-        assert_eq!(Format::Milliseconds.to_string(), "MILLISECONDS");
-    }
-
-    #[test]
-    fn test_leaderboard_conditions_from_str() {
-        let input = "0xH001234=1:0xH001235=1:0xH001236=1:0xH001236";
-        let cond: LeaderboardConditions = input.parse().unwrap();
-
-        assert_eq!(cond.start.iter().count(), 1);
-        assert_eq!(cond.cancel.iter().count(), 1);
-        assert_eq!(cond.submit.iter().count(), 1);
-        assert_eq!(cond.value.iter().count(), 1);
-    }
-
-    #[test]
-    fn test_leaderboard_conditions_display() {
-        let start: ConditionGroup = "0xH001234=1".parse().unwrap();
-        let cancel: ConditionGroup = "0xH001235=1".parse().unwrap();
-        let submit: ConditionGroup = "0xH001236=1".parse().unwrap();
-        let value: ConditionGroup = "0xH001236*10".parse().unwrap();
-        let cond = LeaderboardConditions::new(start, cancel, submit, value);
-        let output = cond.to_string();
-        assert!(output.starts_with("0xH4d2=1:0xH4d3=1:0xH4d4=1:0xH4d4*10"));
-    }
-
-    #[test]
-    fn test_leaderboard_display() {
-        let start: ConditionGroup = "0xH001234=1".parse().unwrap();
-        let cancel: ConditionGroup = "0xH001235=1".parse().unwrap();
-        let submit: ConditionGroup = "0xH001236=1".parse().unwrap();
-        let value: ConditionGroup = "0xH001236".parse().unwrap();
-        let cond = LeaderboardConditions::new(start, cancel, submit, value);
-        let lb = Leaderboard::new(
-            "Test Leaderboard",
-            "Test Description",
-            cond,
-            Format::Score,
-            false,
-        );
-        let output = format!("{lb}");
-        assert!(output.starts_with("L0:"));
-        assert!(output.contains("Test Leaderboard"));
-        assert!(output.contains("SCORE"));
-    }
-
-    #[test]
-    fn test_leaderboard_with_id() {
-        let start: ConditionGroup = "0xH001234=1".parse().unwrap();
-        let cancel: ConditionGroup = "0xH001235=1".parse().unwrap();
-        let submit: ConditionGroup = "0xH001236=1".parse().unwrap();
-        let value: ConditionGroup = "0xH001236".parse().unwrap();
-        let cond = LeaderboardConditions::new(start, cancel, submit, value);
-        let lb = Leaderboard::new("Test", "Desc", cond, Format::Seconds, true).with_id(12345);
-
-        let output = lb.to_string();
-        assert!(output.starts_with("L12345:"));
     }
 }

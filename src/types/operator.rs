@@ -1,71 +1,113 @@
-//! Comparison operators for conditions.
+use std::{fmt, str::FromStr};
 
-use crate::types::ParseError;
-use std::str::FromStr;
+use winnow::Parser;
 
-/// Comparison operators for conditions.
+use crate::{
+    ParseError,
+    parsers::{parse_arithmetic_operator, parse_comparison_operator},
+};
+
+/// Operators that can be used in arithmetic.
 #[derive(Clone, Copy, Debug, PartialEq)]
-pub enum Operator {
-    /// Equality comparison.
-    Equals,
-    /// Inequality comparison.
-    NotEquals,
-    /// Less than comparison.
-    LessThan,
-    /// Less than or equal comparison.
-    LessThanOrEquals,
-    /// Greater than comparison.
-    GreaterThan,
-    /// Greater than or equal comparison.
-    GreaterThanOrEquals,
-    /// Addition operation.
+pub enum ArithmeticOperator {
     Add,
-    /// Subtraction operation.
     Subtract,
-    /// Multiplication operation.
     Multiply,
-    /// Division operation.
     Divide,
+    Modulo,
+    BitwiseAnd,
+    BitwiseXor,
 }
 
-impl Operator {
-    /// Returns the string prefix for this operator.
-    ///
-    /// # Returns
-    ///
-    /// The string prefix.
-    pub fn to_prefix(&self) -> &'static str {
-        match self {
-            Operator::Equals => "=",
-            Operator::NotEquals => "!=",
-            Operator::LessThan => "<",
-            Operator::LessThanOrEquals => "<=",
-            Operator::GreaterThan => ">",
-            Operator::GreaterThanOrEquals => ">=",
-            Operator::Add => "+",
-            Operator::Subtract => "-",
-            Operator::Multiply => "*",
-            Operator::Divide => "/",
+impl TryFrom<&str> for ArithmeticOperator {
+    type Error = ParseError;
+
+    fn try_from(s: &str) -> Result<Self, Self::Error> {
+        match s {
+            "+" => Ok(ArithmeticOperator::Add),
+            "-" => Ok(ArithmeticOperator::Subtract),
+            "*" => Ok(ArithmeticOperator::Multiply),
+            "/" => Ok(ArithmeticOperator::Divide),
+            "%" => Ok(ArithmeticOperator::Modulo),
+            "&" => Ok(ArithmeticOperator::BitwiseAnd),
+            "^" => Ok(ArithmeticOperator::BitwiseXor),
+            _ => Err(ParseError::InvalidOperator(s.to_string())),
         }
     }
 }
 
-impl FromStr for Operator {
+impl FromStr for ArithmeticOperator {
     type Err = ParseError;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
+        parse_arithmetic_operator
+            .parse(s)
+            .map_err(|s| ParseError::InvalidOperator(s.to_string()))
+    }
+}
+
+impl fmt::Display for ArithmeticOperator {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        let s = match self {
+            ArithmeticOperator::Add => "+",
+            ArithmeticOperator::Subtract => "-",
+            ArithmeticOperator::Multiply => "*",
+            ArithmeticOperator::Divide => "/",
+            ArithmeticOperator::Modulo => "%",
+            ArithmeticOperator::BitwiseAnd => "&",
+            ArithmeticOperator::BitwiseXor => "^",
+        };
+        write!(f, "{s}")
+    }
+}
+
+/// Operators that can be used in comparisons.
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub enum ComparisonOperator {
+    LessThan,
+    LessThanOrEquals,
+    GreaterThan,
+    GreaterThanOrEquals,
+    Equals,
+    NotEquals,
+}
+
+impl TryFrom<&str> for ComparisonOperator {
+    type Error = ParseError;
+
+    fn try_from(s: &str) -> Result<Self, Self::Error> {
         match s {
-            "*" => Ok(Operator::Multiply),
-            "/" => Ok(Operator::Divide),
-            "+" => Ok(Operator::Add),
-            "-" => Ok(Operator::Subtract),
-            "=" => Ok(Operator::Equals),
-            ">=" => Ok(Operator::GreaterThanOrEquals),
-            "<=" => Ok(Operator::LessThanOrEquals),
-            ">" => Ok(Operator::GreaterThan),
-            "<" => Ok(Operator::LessThan),
-            "!=" => Ok(Operator::NotEquals),
-            _ => Err(ParseError::UnknownOperator(s.to_string())),
+            "<" => Ok(ComparisonOperator::LessThan),
+            "<=" => Ok(ComparisonOperator::LessThanOrEquals),
+            ">" => Ok(ComparisonOperator::GreaterThan),
+            ">=" => Ok(ComparisonOperator::GreaterThanOrEquals),
+            "=" => Ok(ComparisonOperator::Equals),
+            "!=" => Ok(ComparisonOperator::NotEquals),
+            _ => Err(ParseError::InvalidOperator(s.to_string())),
         }
+    }
+}
+
+impl FromStr for ComparisonOperator {
+    type Err = ParseError;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        parse_comparison_operator
+            .parse(s)
+            .map_err(|s| ParseError::InvalidOperator(s.to_string()))
+    }
+}
+
+impl fmt::Display for ComparisonOperator {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        let s = match self {
+            ComparisonOperator::LessThan => "<",
+            ComparisonOperator::LessThanOrEquals => "<=",
+            ComparisonOperator::GreaterThan => ">",
+            ComparisonOperator::GreaterThanOrEquals => ">=",
+            ComparisonOperator::Equals => "=",
+            ComparisonOperator::NotEquals => "!=",
+        };
+        write!(f, "{s}")
     }
 }

@@ -1,148 +1,197 @@
-//! Memory types, sizes, and references.
-
-#![expect(clippy::should_implement_trait)]
-
-use super::{ParseError, flag::WithFlagExt};
 use std::{fmt, str::FromStr};
+use winnow::Parser;
 
-macro_rules! memory_size_method {
-    // Generate a memory size accessor method
-    ($name:ident, $size:expr) => {
-        /// Creates a memory reference with the specified size at the given address.
-        pub const fn $name(address: usize) -> MemoryRef {
-            MemoryRef {
-                size: $size,
-                address,
-                memtype: MemoryType::Standard,
-            }
-        }
-    };
+use crate::{
+    ParseError,
+    parsers::{parse_memory_ref, parse_memory_size},
+    prelude::Measured,
+};
+
+use super::{
+    flag::ArithmeticFlag,
+    requirement::{arithmetic::ArithmeticRequirement, comparison::ComparisonRequirement},
+    value::TypedValue,
+};
+
+/// A reference to a memory location.
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub struct MemoryRef {
+    pub size: MemorySize,
+    pub address: usize,
 }
 
-macro_rules! condition_method {
-    // Generate a comparison method for MemoryRef
-    ($name:ident, $op:expr) => {
-        /// Creates a condition comparing this memory reference to a value using the specified operator.
-        pub fn $name<T: Into<MemOrValue>>(self, other: T) -> super::condition::Condition {
-            super::condition::Condition {
-                source: super::source::Source {
-                    reference: self.into(),
-                    flag: None,
-                    memtype: None,
-                },
-                op: Some(super::source::Operation {
-                    op: $op,
-                    target: other.into(),
-                }),
-                hits: 0,
-            }
-        }
-    };
+impl MemoryRef {
+    /// Creates a new memory reference.
+    ///
+    /// # Arguments
+    ///
+    /// * `size` - The size of the memory reference.
+    /// * `address` - The address of the memory reference.
+    pub fn new(size: MemorySize, address: usize) -> Self {
+        Self { size, address }
+    }
+
+    /// Converts the memory reference into a [`TypedValue::Memory`].
+    pub fn memory(self) -> TypedValue {
+        TypedValue::Memory(self)
+    }
+
+    /// Converts the memory reference into a [`TypedValue::Delta`].
+    pub fn delta(self) -> TypedValue {
+        TypedValue::Delta(self)
+    }
+
+    /// Converts the memory reference into a [`TypedValue::Prior`].
+    pub fn prior(self) -> TypedValue {
+        TypedValue::Prior(self)
+    }
+
+    /// Converts the memory reference into a [`TypedValue::BCD`].
+    pub fn bcd(self) -> TypedValue {
+        TypedValue::BCD(self)
+    }
+
+    /// Converts the memory reference into a [`TypedValue::Invert`].
+    pub fn invert(self) -> TypedValue {
+        TypedValue::Invert(self)
+    }
+
+    /// Creates a new equals [`ComparisonRequirement`].
+    pub fn eq(self, rhs: impl Into<TypedValue>) -> ComparisonRequirement {
+        ComparisonRequirement::eq(self, rhs)
+    }
+
+    /// Creates a new not equals [`ComparisonRequirement`].
+    pub fn ne(self, rhs: impl Into<TypedValue>) -> ComparisonRequirement {
+        ComparisonRequirement::ne(self, rhs)
+    }
+
+    /// Creates a new less than [`ComparisonRequirement`].
+    pub fn lt(self, rhs: impl Into<TypedValue>) -> ComparisonRequirement {
+        ComparisonRequirement::lt(self, rhs)
+    }
+
+    /// Creates a new less than or equals [`ComparisonRequirement`].
+    pub fn le(self, rhs: impl Into<TypedValue>) -> ComparisonRequirement {
+        ComparisonRequirement::le(self, rhs)
+    }
+
+    /// Creates a new greater than [`ComparisonRequirement`].
+    pub fn gt(self, rhs: impl Into<TypedValue>) -> ComparisonRequirement {
+        ComparisonRequirement::gt(self, rhs)
+    }
+
+    /// Creates a new greater than or equals [`ComparisonRequirement`].
+    pub fn ge(self, rhs: impl Into<TypedValue>) -> ComparisonRequirement {
+        ComparisonRequirement::ge(self, rhs)
+    }
 }
 
-/// Bit index for bit-level memory access.
-#[derive(Clone, Copy, Debug, PartialEq)]
+impl Measured for MemoryRef {
+    type Output = ArithmeticRequirement;
+
+    fn measured(self) -> Self::Output {
+        ArithmeticRequirement::new(ArithmeticFlag::Measured, self)
+    }
+}
+
+impl FromStr for MemoryRef {
+    type Err = ParseError;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        parse_memory_ref
+            .parse(s)
+            .map_err(|s| ParseError::InvalidMemoryRef(s.to_string()))
+    }
+}
+
+impl fmt::Display for MemoryRef {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        let hex_addr = format!("{:x}", self.address);
+        write!(f, "{}{hex_addr}", self.size)
+    }
+}
+
+/// A bit index.
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub enum BitIndex {
-    /// Bit 0.
     Zero,
-    /// Bit 1.
     One,
-    /// Bit 2.
     Two,
-    /// Bit 3.
     Three,
-    /// Bit 4.
     Four,
-    /// Bit 5.
     Five,
-    /// Bit 6.
     Six,
-    /// Bit 7.
     Seven,
 }
 
-/// Memory size prefixes for different data types.
-#[derive(Clone, Copy, Debug, PartialEq)]
+/// A memory size.
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub enum MemorySize {
-    /// A specific bit of a byte.
     BitIndex(BitIndex),
-    /// Lower 4 bits of a byte.
     Lower4,
-    /// Upper 4 bits of a byte.
     Upper4,
-    /// 8-bit integer.
     Bits8,
-    /// 16-bit integer.
     Bits16,
-    /// 24-bit integer.
     Bits24,
-    /// 32-bit integer.
     Bits32,
-    /// 16-bit big-endian integer.
     Bits16BE,
-    /// 24-bit big-endian integer.
     Bits24BE,
-    /// 32-bit big-endian integer.
     Bits32BE,
-    /// Bit count (number of set bits).
     BitCount,
-    /// 32-bit float.
     Float,
-    /// 32-bit big-endian float.
     FloatBE,
-    /// 32-bit double (floating point).
     Double32,
-    /// 32-bit big-endian double.
     Double32BE,
-    /// MBF32 float.
     MBF32,
-    /// MBF32 little-endian float.
     MBF32LE,
 }
 
 impl MemorySize {
-    /// Returns the string prefix for this memory size.
-    ///
-    /// # Returns
-    ///
-    /// The string prefix.
-    pub fn to_prefix(&self) -> &'static str {
-        match self {
-            MemorySize::Bits8 => "0xH",
-            MemorySize::Bits16 => "0x ",
-            MemorySize::Bits32 => "0xX",
-            MemorySize::Bits24 => "0xW",
-            MemorySize::Bits16BE => "0xI",
-            MemorySize::Bits24BE => "0xJ",
-            MemorySize::Bits32BE => "0xG",
-            MemorySize::BitCount => "0xK",
-            MemorySize::Lower4 => "0xL",
-            MemorySize::Upper4 => "0xU",
-            MemorySize::BitIndex(BitIndex::Zero) => "0xM",
-            MemorySize::BitIndex(BitIndex::One) => "0xN",
-            MemorySize::BitIndex(BitIndex::Two) => "0xO",
-            MemorySize::BitIndex(BitIndex::Three) => "0xP",
-            MemorySize::BitIndex(BitIndex::Four) => "0xQ",
-            MemorySize::BitIndex(BitIndex::Five) => "0xR",
-            MemorySize::BitIndex(BitIndex::Six) => "0xS",
-            MemorySize::BitIndex(BitIndex::Seven) => "0xT",
-            MemorySize::Float => "fF",
-            MemorySize::FloatBE => "fB",
-            MemorySize::Double32 => "fH",
-            MemorySize::Double32BE => "fI",
-            MemorySize::MBF32 => "fM",
-            MemorySize::MBF32LE => "fL",
+    pub fn parse_bit_size(c: char) -> Result<MemorySize, ParseError> {
+        match c {
+            'H' => Ok(MemorySize::Bits8),
+            ' ' => Ok(MemorySize::Bits16),
+            'X' => Ok(MemorySize::Bits32),
+            'W' => Ok(MemorySize::Bits24),
+            'I' => Ok(MemorySize::Bits16BE),
+            'J' => Ok(MemorySize::Bits24BE),
+            'G' => Ok(MemorySize::Bits32BE),
+            'K' => Ok(MemorySize::BitCount),
+            'L' => Ok(MemorySize::Lower4),
+            'U' => Ok(MemorySize::Upper4),
+            'M' => Ok(MemorySize::BitIndex(BitIndex::Zero)),
+            'N' => Ok(MemorySize::BitIndex(BitIndex::One)),
+            'O' => Ok(MemorySize::BitIndex(BitIndex::Two)),
+            'P' => Ok(MemorySize::BitIndex(BitIndex::Three)),
+            'Q' => Ok(MemorySize::BitIndex(BitIndex::Four)),
+            'R' => Ok(MemorySize::BitIndex(BitIndex::Five)),
+            'S' => Ok(MemorySize::BitIndex(BitIndex::Six)),
+            'T' => Ok(MemorySize::BitIndex(BitIndex::Seven)),
+            _ => Err(ParseError::InvalidMemorySize(c.to_string())),
+        }
+    }
+
+    pub fn parse_float_size(c: char) -> Result<MemorySize, ParseError> {
+        match c {
+            'F' => Ok(MemorySize::Float),
+            'B' => Ok(MemorySize::FloatBE),
+            'H' => Ok(MemorySize::Double32),
+            'I' => Ok(MemorySize::Double32BE),
+            'M' => Ok(MemorySize::MBF32),
+            'L' => Ok(MemorySize::MBF32LE),
+            _ => Err(ParseError::InvalidMemorySize(c.to_string())),
         }
     }
 }
 
-impl FromStr for MemorySize {
-    type Err = ParseError;
+impl TryFrom<&str> for MemorySize {
+    type Error = ParseError;
 
-    fn from_str(s: &str) -> Result<Self, Self::Err> {
+    fn try_from(s: &str) -> Result<Self, Self::Error> {
         match s {
-            "0x " => Ok(MemorySize::Bits16),
             "0xH" => Ok(MemorySize::Bits8),
+            "0x " => Ok(MemorySize::Bits16),
             "0xX" => Ok(MemorySize::Bits32),
             "0xW" => Ok(MemorySize::Bits24),
             "0xI" => Ok(MemorySize::Bits16BE),
@@ -165,201 +214,108 @@ impl FromStr for MemorySize {
             "fI" => Ok(MemorySize::Double32BE),
             "fM" => Ok(MemorySize::MBF32),
             "fL" => Ok(MemorySize::MBF32LE),
-            _ => Err(ParseError::UnknownMemorySize(s.to_string())),
+            _ => Err(ParseError::InvalidMemorySize(s.to_string())),
         }
     }
 }
 
-/// Memory type modifiers for special memory handling.
-#[derive(Clone, Copy, Debug, PartialEq, Default)]
-pub enum MemoryType {
-    /// Standard memory (default).
-    #[default]
-    Standard,
-    /// Delta memory (compare to previous frame).
-    Delta,
-    /// Prior memory (compare to previous value).
-    Prior,
-    /// BCD (binary-coded decimal).
-    BCD,
-    /// Invert the memory value.
-    Invert,
-}
-
-impl MemoryType {
-    /// Returns the string prefix for this memory type.
-    ///
-    /// # Returns
-    ///
-    /// The string prefix.
-    pub fn to_prefix(&self) -> &'static str {
-        match self {
-            MemoryType::Standard => "",
-            MemoryType::Delta => "d",
-            MemoryType::Prior => "p",
-            MemoryType::BCD => "b",
-            MemoryType::Invert => "~",
-        }
-    }
-}
-
-impl FromStr for MemoryType {
+impl FromStr for MemorySize {
     type Err = ParseError;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
-        match s {
-            "d" => Ok(MemoryType::Delta),
-            "p" => Ok(MemoryType::Prior),
-            "b" => Ok(MemoryType::BCD),
-            "~" => Ok(MemoryType::Invert),
-            _ => Err(ParseError::UnknownMemoryType(s.to_string())),
-        }
+        parse_memory_size
+            .parse(s)
+            .map_err(|s| ParseError::InvalidMemorySize(s.to_string()))
     }
 }
 
-/// A reference to a memory location with size and type information.
-#[derive(Clone, Copy, Debug, PartialEq)]
-pub struct MemoryRef {
-    /// The memory size.
-    pub size: MemorySize,
-    /// The memory address.
-    pub address: usize,
-    /// The memory type modifier.
-    pub memtype: MemoryType,
-}
-
-impl MemoryRef {
-    /// Creates a condition with the specified memory type.
-    ///
-    /// # Arguments
-    ///
-    /// * `memtype` - The memory type to apply.
-    pub fn with_memtype(mut self, memtype: MemoryType) -> super::condition::Condition {
-        self.memtype = memtype;
-        super::condition::Condition {
-            source: super::source::Source {
-                reference: MemOrValue::Memory(self),
-                flag: None,
-                memtype: None,
-            },
-            op: None,
-            hits: 0,
-        }
-    }
-
-    condition_method!(eq, super::operator::Operator::Equals);
-    condition_method!(neq, super::operator::Operator::NotEquals);
-    condition_method!(gt, super::operator::Operator::GreaterThan);
-    condition_method!(gte, super::operator::Operator::GreaterThanOrEquals);
-    condition_method!(lt, super::operator::Operator::LessThan);
-    condition_method!(lte, super::operator::Operator::LessThanOrEquals);
-    condition_method!(add, super::operator::Operator::Add);
-    condition_method!(sub, super::operator::Operator::Subtract);
-    condition_method!(mul, super::operator::Operator::Multiply);
-    condition_method!(div, super::operator::Operator::Divide);
-
-    memory_size_method!(bit0, MemorySize::BitIndex(BitIndex::Zero));
-    memory_size_method!(bit1, MemorySize::BitIndex(BitIndex::One));
-    memory_size_method!(bit2, MemorySize::BitIndex(BitIndex::Two));
-    memory_size_method!(bit3, MemorySize::BitIndex(BitIndex::Three));
-    memory_size_method!(bit4, MemorySize::BitIndex(BitIndex::Four));
-    memory_size_method!(bit5, MemorySize::BitIndex(BitIndex::Five));
-    memory_size_method!(bit6, MemorySize::BitIndex(BitIndex::Six));
-    memory_size_method!(bit7, MemorySize::BitIndex(BitIndex::Seven));
-    memory_size_method!(lower4, MemorySize::Lower4);
-    memory_size_method!(upper4, MemorySize::Upper4);
-    memory_size_method!(bits8, MemorySize::Bits8);
-    memory_size_method!(bits16, MemorySize::Bits16);
-    memory_size_method!(bits24, MemorySize::Bits24);
-    memory_size_method!(bits32, MemorySize::Bits32);
-    memory_size_method!(bits16be, MemorySize::Bits16BE);
-    memory_size_method!(bits24be, MemorySize::Bits24BE);
-    memory_size_method!(bits32be, MemorySize::Bits32BE);
-    memory_size_method!(bitcount, MemorySize::BitCount);
-    memory_size_method!(float, MemorySize::Float);
-    memory_size_method!(floatbe, MemorySize::FloatBE);
-    memory_size_method!(double, MemorySize::Double32);
-    memory_size_method!(doublebe, MemorySize::Double32BE);
-    memory_size_method!(mbf, MemorySize::MBF32);
-    memory_size_method!(mbfle, MemorySize::MBF32LE);
-}
-
-impl WithFlagExt for MemoryRef {
-    type Output = super::condition::Condition;
-    fn with_flag(self, flag: super::flag::Flag) -> Self::Output {
-        super::condition::Condition {
-            source: super::source::Source {
-                reference: MemOrValue::Memory(self),
-                flag: Some(flag),
-                memtype: None,
-            },
-            op: None,
-            hits: 0,
-        }
-    }
-}
-
-/// Either a memory reference or a literal value.
-#[derive(Clone, Copy, Debug, PartialEq)]
-pub enum MemOrValue {
-    /// A memory reference.
-    Memory(MemoryRef),
-    /// A literal value.
-    Value {
-        /// The literal value.
-        value: u32,
-    },
-}
-
-impl MemOrValue {
-    /// Returns the value if this is a Value variant, otherwise None.
-    ///
-    /// # Returns
-    ///
-    /// The value if [`MemOrValue`] is a Value, otherwise None.
-    pub fn value(self) -> Option<u32> {
-        match self {
-            MemOrValue::Value { value } => Some(value),
-            MemOrValue::Memory(_) => None,
-        }
-    }
-}
-
-impl From<u32> for MemOrValue {
-    fn from(value: u32) -> Self {
-        MemOrValue::Value { value }
-    }
-}
-
-impl From<MemoryRef> for MemOrValue {
-    fn from(memory: MemoryRef) -> Self {
-        MemOrValue::Memory(memory)
-    }
-}
-
-impl From<(MemorySize, usize)> for MemOrValue {
-    fn from((size, address): (MemorySize, usize)) -> Self {
-        MemOrValue::Memory(MemoryRef {
-            size,
-            address,
-            memtype: MemoryType::Standard,
-        })
-    }
-}
-
-impl fmt::Display for MemOrValue {
+impl fmt::Display for MemorySize {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self {
-            MemOrValue::Value { value } => write!(f, "{value}"),
-            MemOrValue::Memory(memory) => {
-                write!(
-                    f,
-                    "{}{}{:x}",
-                    memory.memtype.to_prefix(),
-                    memory.size.to_prefix(),
-                    memory.address
-                )
-            }
-        }
+        let s = match self {
+            MemorySize::Bits8 => "0xH",
+            MemorySize::Bits16 => "0x ",
+            MemorySize::Bits32 => "0xX",
+            MemorySize::Bits24 => "0xW",
+            MemorySize::Bits16BE => "0xI",
+            MemorySize::Bits24BE => "0xJ",
+            MemorySize::Bits32BE => "0xG",
+            MemorySize::BitCount => "0xK",
+            MemorySize::Lower4 => "0xL",
+            MemorySize::Upper4 => "0xU",
+            MemorySize::BitIndex(index) => match index {
+                BitIndex::Zero => "0xM",
+                BitIndex::One => "0xN",
+                BitIndex::Two => "0xO",
+                BitIndex::Three => "0xP",
+                BitIndex::Four => "0xQ",
+                BitIndex::Five => "0xR",
+                BitIndex::Six => "0xS",
+                BitIndex::Seven => "0xT",
+            },
+            MemorySize::Float => "fF",
+            MemorySize::FloatBE => "fB",
+            MemorySize::Double32 => "fH",
+            MemorySize::Double32BE => "fI",
+            MemorySize::MBF32 => "fM",
+            MemorySize::MBF32LE => "fL",
+        };
+        write!(f, "{s}")
     }
+}
+
+macro_rules! memory_ref_constructors {
+    ($($variant:ident($inner:ident::$inner_variant:ident) => $method:ident),*$(,)?) => {
+        $(
+            impl MemoryRef {
+                pub const fn $method(address: usize) -> Self {
+                    Self {
+                        size: MemorySize::$variant($inner::$inner_variant),
+                        address,
+                    }
+                }
+            }
+        )*
+    };
+    ($($variant:ident => $method:ident),*$(,)?) => {
+        $(
+            impl MemoryRef {
+                pub const fn $method(address: usize) -> Self {
+                    Self {
+                        size: MemorySize::$variant,
+                        address,
+                    }
+                }
+            }
+        )*
+    };
+}
+
+memory_ref_constructors! {
+    BitIndex(BitIndex::Zero) => bit0,
+    BitIndex(BitIndex::One) => bit1,
+    BitIndex(BitIndex::Two) => bit2,
+    BitIndex(BitIndex::Three) => bit3,
+    BitIndex(BitIndex::Four) => bit4,
+    BitIndex(BitIndex::Five) => bit5,
+    BitIndex(BitIndex::Six) => bit6,
+    BitIndex(BitIndex::Seven) => bit7,
+}
+
+memory_ref_constructors! {
+    Lower4 => lower4,
+    Upper4 => upper4,
+    Bits8 => bits8,
+    Bits16 => bits16,
+    Bits24 => bits24,
+    Bits32 => bits32,
+    Bits16BE => bits16be,
+    Bits24BE => bits24be,
+    Bits32BE => bits32be,
+    BitCount => bitcount,
+    Float => float,
+    FloatBE => floatbe,
+    Double32 => double32,
+    Double32BE => double32be,
+    MBF32 => mbf32,
+    MBF32LE => mbf32le,
 }

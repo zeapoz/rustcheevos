@@ -1,243 +1,21 @@
-//! Achievement types and parsing.
+use std::{fmt, str::FromStr};
 
-use std::fmt;
-use std::str::FromStr;
+use crate::ParseError;
 
-use super::ParseError;
-use super::condition::Condition;
-
-/// A group of conditions that must all be true.
-#[derive(Debug, Clone, PartialEq)]
-pub struct ConditionGroup(Vec<Condition>);
-
-impl ConditionGroup {
-    /// Creates a new condition group from a vector of conditions.
-    ///
-    /// # Arguments
-    ///
-    /// * `conditions` - The conditions to include.
-    pub fn new(conditions: Vec<Condition>) -> Self {
-        Self(conditions)
-    }
-
-    /// Returns an iterator over the conditions in this group.
-    ///
-    /// # Returns
-    ///
-    /// An iterator over references to the conditions.
-    pub fn iter(&self) -> impl Iterator<Item = &Condition> {
-        self.0.iter()
-    }
-
-    /// Consumes this group and returns the inner conditions.
-    ///
-    /// # Returns
-    ///
-    /// The inner conditions.
-    pub fn into_inner(self) -> Vec<Condition> {
-        self.0
-    }
-}
-
-impl From<Condition> for ConditionGroup {
-    fn from(value: Condition) -> Self {
-        ConditionGroup::new(vec![value])
-    }
-}
-
-impl<const N: usize> From<[Condition; N]> for ConditionGroup {
-    fn from(arr: [Condition; N]) -> Self {
-        ConditionGroup::new(arr.into())
-    }
-}
-
-impl From<Vec<Condition>> for ConditionGroup {
-    fn from(value: Vec<Condition>) -> Self {
-        ConditionGroup::new(value)
-    }
-}
-
-impl FromStr for ConditionGroup {
-    type Err = ParseError;
-
-    fn from_str(s: &str) -> Result<Self, Self::Err> {
-        let conditions: Vec<_> = s
-            .split('_')
-            .filter(|s| !s.is_empty())
-            .map(Condition::deserialize)
-            .collect::<Result<_, _>>()?;
-
-        Ok(Self(conditions))
-    }
-}
-
-impl fmt::Display for ConditionGroup {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(
-            f,
-            "{}",
-            self.0
-                .iter()
-                .map(|c| c.to_string())
-                .collect::<Vec<_>>()
-                .join("_")
-        )
-    }
-}
-
-/// Extends a vector of conditions from a condition group item.
-///
-/// # Arguments
-///
-/// * `vec` - The vector to extend.
-/// * `item` - The item to convert to conditions and extend with.
-pub fn extend_from_item(vec: &mut Vec<Condition>, item: impl Into<ConditionGroup>) {
-    vec.extend(item.into().0);
-}
-
-/// Alternative condition groups for achievements.
-pub struct AltGroups(pub Vec<ConditionGroup>);
-
-impl From<Vec<ConditionGroup>> for AltGroups {
-    fn from(v: Vec<ConditionGroup>) -> Self {
-        AltGroups(v)
-    }
-}
-
-impl From<Vec<Condition>> for AltGroups {
-    fn from(v: Vec<Condition>) -> Self {
-        AltGroups(v.into_iter().map(ConditionGroup::from).collect())
-    }
-}
-
-impl<const N: usize> From<[Condition; N]> for AltGroups {
-    fn from(arr: [Condition; N]) -> Self {
-        AltGroups(arr.into_iter().map(ConditionGroup::from).collect())
-    }
-}
-
-/// Conditions for an achievement, including core and alternative groups.
-#[derive(Debug, Clone, PartialEq)]
-pub struct Conditions {
-    /// The core conditions that must be true.
-    pub core: ConditionGroup,
-    /// Alternative condition groups (any of which can be true).
-    pub alt_groups: Vec<ConditionGroup>,
-}
-
-impl Conditions {
-    /// Creates new conditions with the given core group.
-    ///
-    /// # Arguments
-    ///
-    /// * `core` - The core conditions.
-    pub fn new<C: Into<ConditionGroup>>(core: C) -> Self {
-        Self {
-            core: core.into(),
-            alt_groups: Vec::new(),
-        }
-    }
-
-    /// Adds alternative condition groups.
-    ///
-    /// # Arguments
-    ///
-    /// * `alts` - The alternative condition groups.
-    pub fn with_alts<I: IntoIterator<Item = ConditionGroup>>(mut self, alts: I) -> Self {
-        self.alt_groups = alts.into_iter().collect();
-        self
-    }
-}
-
-impl std::str::FromStr for Conditions {
-    type Err = ParseError;
-
-    fn from_str(s: &str) -> Result<Self, Self::Err> {
-        let groups: Vec<_> = s.split('S').filter(|s| !s.is_empty()).collect();
-        let core: ConditionGroup = groups.first().ok_or(ParseError::InvalidFormat)?.parse()?;
-
-        let alt_groups = groups
-            .iter()
-            .skip(1)
-            .map(|s| s.parse())
-            .collect::<Result<_, _>>()?;
-
-        Ok(Self { core, alt_groups })
-    }
-}
-
-impl fmt::Display for Conditions {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{}", self.core)?;
-        for alt in &self.alt_groups {
-            write!(f, "S{alt}")?;
-        }
-        Ok(())
-    }
-}
-
-/// Tags for achievements.
-#[derive(Default, Debug, Clone, PartialEq, Eq, Hash)]
-pub enum Tag {
-    /// No special tag.
-    #[default]
-    Empty,
-    /// Progression achievement.
-    Progression,
-    /// Win condition.
-    WinCondition,
-    /// Missable achievement.
-    Missable,
-}
-
-impl Tag {
-    /// Returns the string representation of this tag.
-    ///
-    /// # Returns
-    ///
-    /// The string representation.
-    pub fn as_str(&self) -> &'static str {
-        match self {
-            Tag::Empty => "",
-            Tag::Progression => "progression",
-            Tag::WinCondition => "win_condition",
-            Tag::Missable => "missable",
-        }
-    }
-}
-
-impl std::fmt::Display for Tag {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{}", self.as_str())
-    }
-}
-
-impl std::str::FromStr for Tag {
-    type Err = ParseError;
-
-    fn from_str(s: &str) -> Result<Self, Self::Err> {
-        let tag = match s {
-            "" | "empty" => Self::Empty,
-            "progression" => Self::Progression,
-            "win_condition" => Self::WinCondition,
-            "missable" => Self::Missable,
-            s => return Err(ParseError::InvalidTag(s.to_string())),
-        };
-        Ok(tag)
-    }
-}
+use super::requirement::group::RequirementGroup;
 
 /// An achievement definition.
 #[derive(Debug, Clone, PartialEq)]
 pub struct Achievement {
-    /// The achievement ID (optional until submitted).
-    pub id: Option<u32>,
+    pub id: u32,
     /// The achievement title.
     pub title: String,
     /// The achievement description.
     pub description: String,
     /// The conditions that must be met.
-    pub conditions: Conditions,
+    pub core: RequirementGroup,
+    /// The alternative conditions.
+    pub alt_groups: Vec<RequirementGroup>,
     /// The achievement tag.
     pub tag: Tag,
     /// The point value.
@@ -251,19 +29,20 @@ impl Achievement {
     ///
     /// * `title` - The achievement title.
     /// * `description` - The achievement description.
-    /// * `conditions` - The achievement conditions.
+    /// * `core` - The achievement conditions that must be met.
     /// * `points` - The point value.
-    pub fn new<S: Into<String>>(
-        title: S,
-        description: S,
-        conditions: Conditions,
+    pub fn new(
+        title: impl Into<String>,
+        description: impl Into<String>,
+        core: impl Into<RequirementGroup>,
         points: u32,
     ) -> Self {
         Self {
-            conditions,
-            id: None,
+            id: 0,
             title: title.into(),
             description: description.into(),
+            core: core.into(),
+            alt_groups: Vec::new(),
             tag: Tag::default(),
             points,
         }
@@ -275,7 +54,7 @@ impl Achievement {
     ///
     /// * `id` - The achievement ID.
     pub fn with_id(mut self, id: u32) -> Self {
-        self.id = Some(id);
+        self.id = id;
         self
     }
 
@@ -288,63 +67,78 @@ impl Achievement {
         self.tag = tag;
         self
     }
-}
 
-impl fmt::Display for Achievement {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{}", self.conditions)
-    }
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-    use std::str::FromStr;
-
-    #[test]
-    fn test_deserialize_condition_groups_no_alts() {
-        let input =
-            "I:0xH1a8c94*184_0x 1aaee4=5_A:1_I:0xH1a8c94*184_d0x 1aaee4=0x 1aaee4_0xH1a54c0=3";
-
-        let groups = Conditions::from_str(input).expect("Failed to parse condition groups");
-
-        assert_eq!(groups.core.iter().count(), 6);
-        assert!(groups.alt_groups.is_empty());
+    ///  Sets the alternative groups of conditions.
+    ///
+    /// # Arguments
+    ///
+    /// * `alt_groups` - The alternative groups of conditions.
+    pub fn with_alt_groups(mut self, alt_groups: &[RequirementGroup]) -> Self {
+        self.alt_groups = alt_groups.to_vec();
+        self
     }
 
-    #[test]
-    fn test_deserialize_condition_groups_alt_groups() {
-        let input = "I:0xH1a8c94*2_0xU1a9c4d>=1_I:0xH1a8c94*2_0xU1a9c4d!=4_I:0xH1a8c94*2_0xU1a9c7d>=1_I:0xH1a8c94*2_0xU1a9c7d!=4_I:0xH1a8c94*2_0xU1a9cad>=1_I:0xH1a8c94*2_0xU1a9cad!=4_d0xH1a6990=1_0xH1a6990=1SI:0xH1a8c94*2_d0xU1a9c4d<1SI:0xH1a8c94*2_d0xU1a9c7d<1SI:0xH1a8c94*2_d0xU1a9cad<1";
+    /// Adds an alternative group of conditions.
+    ///
+    /// # Arguments
+    ///
+    /// * `alt_group` - The alternative group of conditions.
+    pub fn push_alt_group(&mut self, group: RequirementGroup) {
+        self.alt_groups.push(group);
+    }
 
-        let groups = Conditions::from_str(input).expect("Failed to parse condition groups");
-
-        assert_eq!(groups.core.iter().count(), 14);
-        assert_eq!(groups.alt_groups.len(), 3);
-
-        for alt in &groups.alt_groups {
-            assert_eq!(alt.iter().count(), 2);
+    /// Serializes the requirements into a string.
+    ///
+    /// # Returns
+    ///
+    /// The serialized requirements.
+    pub fn serialize_requirements(&self) -> String {
+        let mut s = String::new();
+        s.push_str(&self.core.to_string());
+        for alt in &self.alt_groups {
+            s.push_str(&format!("S{}", alt));
         }
+        s
     }
+}
 
-    #[test]
-    fn test_condition_groups_display() {
-        let input = "I:0xH1a8c94*2_0xU1a9fad>=2";
-        let groups: Conditions = input.parse().unwrap();
-        let output = format!("{groups}");
-        assert!(output.starts_with("I:0xH1a8c94*2"));
+/// Tags for achievements.
+#[derive(Default, Debug, Clone, PartialEq, Eq, Hash)]
+pub enum Tag {
+    /// No special tag.
+    #[default]
+    None,
+    /// Progression achievement.
+    Progression,
+    /// Win condition.
+    WinCondition,
+    /// Missable achievement.
+    Missable,
+}
+
+impl fmt::Display for Tag {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        let s = match self {
+            Tag::None => "",
+            Tag::Progression => "progression",
+            Tag::WinCondition => "win_condition",
+            Tag::Missable => "missable",
+        };
+        write!(f, "{s}")
     }
+}
 
-    #[test]
-    fn test_achievement_display() {
-        let input = "I:0xH1a8c94*2_0xU1a9fad>=2";
-        let groups: Conditions = input.parse().unwrap();
-        let achievement = Achievement::new(
-            String::from("Test Title"),
-            String::from("Test Description"),
-            groups,
-            5,
-        );
-        let output = format!("{achievement}");
-        assert!(output.starts_with("I:0xH1a8c94*2"));
+impl FromStr for Tag {
+    type Err = ParseError;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        let tag = match s {
+            "" => Self::None,
+            "progression" => Self::Progression,
+            "win_condition" => Self::WinCondition,
+            "missable" => Self::Missable,
+            s => return Err(ParseError::InvalidTag(s.to_string())),
+        };
+        Ok(tag)
     }
 }

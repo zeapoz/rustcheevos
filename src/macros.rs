@@ -190,183 +190,166 @@ macro_rules! mbfle {
     };
 }
 
-/// Sets the pause flag on a condition.
+/// Sets the pause flag on a requirement.
 #[macro_export]
 macro_rules! pause_if {
-    ($cond:expr) => {
-        $cond.with_flag($crate::types::flag::Flag::PauseIf)
+    ($req:expr) => {
+        $req.pause_if()
     };
 }
 
-/// Sets the reset flag on a condition.
+/// Sets the reset flag on a requirement.
 #[macro_export]
 macro_rules! reset_if {
-    ($cond:expr) => {
-        $cond.with_flag($crate::types::flag::Flag::ResetIf)
+    ($req:expr) => {
+        $req.reset_if()
     };
 }
 
-/// Sets the reset next flag on a condition.
+/// Sets the reset next flag on a requirement.
 #[macro_export]
 macro_rules! reset_next_if {
-    ($cond:expr) => {
-        $cond.with_flag($crate::types::flag::Flag::ResetNextIf)
+    ($req:expr) => {
+        $req.reset_next_if()
     };
 }
 
-/// Sets the add source flag on a condition.
+/// Sets the add source flag on a requirement.
 #[macro_export]
 macro_rules! add_source {
-    ($value:expr) => {
-        $crate::types::condition::Condition {
-            source: $crate::types::source::Source {
-                reference: $value.into(),
-                flag: Some($crate::types::flag::Flag::AddSource),
-                memtype: None,
-            },
-            op: None,
-            hits: 0,
-        }
+    ($req:expr) => {
+        $req.add_source()
     };
 }
 
-/// Sets the sub source flag on a condition.
+/// Sets the sub source flag on a requirement.
 #[macro_export]
 macro_rules! sub_source {
-    ($value:expr) => {
-        $crate::types::condition::Condition {
-            source: $crate::types::source::Source {
-                reference: $value.into(),
-                flag: Some($crate::types::flag::Flag::SubSource),
-                memtype: None,
-            },
-            op: None,
-            hits: 0,
-        }
+    ($req:expr) => {
+        $req.sub_source()
     };
 }
 
-/// Sets the add hits flag on a condition.
+/// Sets the add hits flag on a requirement.
 #[macro_export]
 macro_rules! add_hits {
-    ($cond:expr) => {
-        $cond.with_flag($crate::types::flag::Flag::AddHits)
+    ($req:expr) => {
+        $req.add_hits()
     };
 }
 
-/// Sets the sub hits flag on a condition.
+/// Sets the sub hits flag on a requirement.
 #[macro_export]
 macro_rules! sub_hits {
-    ($cond:expr) => {
-        $cond.with_flag($crate::types::flag::Flag::SubHits)
+    ($req:expr) => {
+        $req.sub_hits()
     };
 }
 
-/// Sets the add address flag on a condition.
+/// Sets the add address flag on a requirement.
 #[macro_export]
 macro_rules! add_address {
-    ($cond:expr) => {
-        $cond.with_flag($crate::types::flag::Flag::AddAddress)
+    ($req:expr) => {
+        $req.add_address()
     };
 }
 
-/// Sets the and next flag on a condition.
+/// Sets the and next flag on a requirement.
 #[macro_export]
 macro_rules! and_next {
-    ($cond:expr) => {
-        $cond.with_flag($crate::types::flag::Flag::AndNext)
+    ($req:expr) => {
+        $req.and_next()
     };
 }
 
-/// Sets the or next flag on a condition.
+/// Sets the or next flag on a requirement.
 #[macro_export]
 macro_rules! or_next {
-    ($cond:expr) => {
-        $cond.with_flag($crate::types::flag::Flag::OrNext)
+    ($req:expr) => {
+        $req.or_next()
     };
 }
 
-/// Sets the measured flag on a condition.
+/// Sets the measured flag on a requirement.
 #[macro_export]
 macro_rules! measured {
-    ($cond:expr) => {
-        $cond.with_flag($crate::types::flag::Flag::Measured)
+    ($req:expr) => {
+        $req.measured()
     };
 }
 
-/// Sets the measured percentage flag on a condition.
+/// Sets the measured percentage flag on a requirement.
 #[macro_export]
 macro_rules! measured_pct {
-    ($cond:expr) => {
-        $cond.with_flag($crate::types::flag::Flag::MeasuredPercentage)
+    ($req:expr) => {
+        $req.measured_pct()
     };
 }
 
-/// Sets the measured if flag on a condition.
+/// Sets the measured if flag on a requirement.
 #[macro_export]
 macro_rules! measured_if {
-    ($cond:expr) => {
-        $cond.with_flag($crate::types::flag::Flag::MeasuredIf)
+    ($req:expr) => {
+        $req.measured_if()
     };
 }
 
-/// Sets the trigger flag on a condition.
+/// Sets the trigger flag on a requirement.
 #[macro_export]
 macro_rules! trigger {
-    ($cond:expr) => {
-        $cond.with_flag($crate::types::flag::Flag::Trigger)
+    ($req:expr) => {
+        $req.trigger()
     };
 }
 
-/// Sets the remember flag on a condition.
+/// Sets the remember flag on a requirement.
 #[macro_export]
 macro_rules! remember {
-    ($cond:expr) => {
-        $cond.with_flag($crate::types::flag::Flag::Remember)
+    ($req:expr) => {
+        $req.remember()
     };
 }
 
-/// Applies the delta memory type to a condition.
+/// Applies the delta memory type to a requirement.
 #[macro_export]
 macro_rules! delta {
-    ($cond:expr) => {
-        $cond.with_memtype($crate::types::memory::MemoryType::Delta)
+    ($req:expr) => {
+        $req.delta()
     };
 }
 
-/// Applies the prior memory type to a condition.
+/// Applies the prior memory type to a requirement.
 #[macro_export]
 macro_rules! prior {
-    ($cond:expr) => {
-        $cond.with_memtype($crate::types::memory::MemoryType::Prior)
+    ($req:expr) => {
+        $req.prior()
     };
 }
 
-/// Applies the BCD memory type to a condition.
+/// Applies the BCD memory type to a requirement.
 #[macro_export]
 macro_rules! bcd {
-    ($cond:expr) => {
-        $cond.with_memtype($crate::types::memory::MemoryType::BCD)
+    ($req:expr) => {
+        $req.bcd()
     };
 }
 
-/// Applies the invert memory type to a condition.
+/// Applies the invert memory type to a requirement.
 #[macro_export]
 macro_rules! invert {
-    ($cond:expr) => {
-        $cond.with_memtype($crate::types::memory::MemoryType::Invert)
+    ($req:expr) => {
+        $req.invert()
     };
 }
 
-/// Chains multiple conditions together into a group.
+/// Chains multiple requirements together into a group.
 #[macro_export]
 macro_rules! chain {
     ($($item:expr),* $(,)?) => {{
-        use $crate::types::achievement::{ConditionGroup, extend_from_item};
-        let mut vec = Vec::new();
+        let mut group = $crate::types::requirement::group::RequirementGroup::new();
         $(
-            extend_from_item(&mut vec, $item);
+            group.extend($item);
         )*
-        ConditionGroup::new(vec)
+        group
     }};
 }
