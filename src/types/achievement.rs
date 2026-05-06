@@ -1,21 +1,39 @@
+//! Achievement types and parsing.
+
 use std::fmt;
 use std::str::FromStr;
 
 use super::ParseError;
 use super::condition::Condition;
 
+/// A group of conditions that must all be true.
 #[derive(Debug, Clone, PartialEq)]
 pub struct ConditionGroup(Vec<Condition>);
 
 impl ConditionGroup {
+    /// Creates a new condition group from a vector of conditions.
+    ///
+    /// # Arguments
+    ///
+    /// * `conditions` - The conditions to include.
     pub fn new(conditions: Vec<Condition>) -> Self {
         Self(conditions)
     }
 
+    /// Returns an iterator over the conditions in this group.
+    ///
+    /// # Returns
+    ///
+    /// An iterator over references to the conditions.
     pub fn iter(&self) -> impl Iterator<Item = &Condition> {
         self.0.iter()
     }
 
+    /// Consumes this group and returns the inner conditions.
+    ///
+    /// # Returns
+    ///
+    /// The inner conditions.
     pub fn into_inner(self) -> Vec<Condition> {
         self.0
     }
@@ -67,10 +85,17 @@ impl fmt::Display for ConditionGroup {
     }
 }
 
+/// Extends a vector of conditions from a condition group item.
+///
+/// # Arguments
+///
+/// * `vec` - The vector to extend.
+/// * `item` - The item to convert to conditions and extend with.
 pub fn extend_from_item(vec: &mut Vec<Condition>, item: impl Into<ConditionGroup>) {
     vec.extend(item.into().0);
 }
 
+/// Alternative condition groups for achievements.
 pub struct AltGroups(pub Vec<ConditionGroup>);
 
 impl From<Vec<ConditionGroup>> for AltGroups {
@@ -91,13 +116,21 @@ impl<const N: usize> From<[Condition; N]> for AltGroups {
     }
 }
 
+/// Conditions for an achievement, including core and alternative groups.
 #[derive(Debug, Clone, PartialEq)]
 pub struct Conditions {
+    /// The core conditions that must be true.
     pub core: ConditionGroup,
+    /// Alternative condition groups (any of which can be true).
     pub alt_groups: Vec<ConditionGroup>,
 }
 
 impl Conditions {
+    /// Creates new conditions with the given core group.
+    ///
+    /// # Arguments
+    ///
+    /// * `core` - The core conditions.
     pub fn new<C: Into<ConditionGroup>>(core: C) -> Self {
         Self {
             core: core.into(),
@@ -105,6 +138,11 @@ impl Conditions {
         }
     }
 
+    /// Adds alternative condition groups.
+    ///
+    /// # Arguments
+    ///
+    /// * `alts` - The alternative condition groups.
     pub fn with_alts<I: IntoIterator<Item = ConditionGroup>>(mut self, alts: I) -> Self {
         self.alt_groups = alts.into_iter().collect();
         self
@@ -138,16 +176,26 @@ impl fmt::Display for Conditions {
     }
 }
 
+/// Tags for achievements.
 #[derive(Default, Debug, Clone, PartialEq, Eq, Hash)]
 pub enum Tag {
+    /// No special tag.
     #[default]
     Empty,
+    /// Progression achievement.
     Progression,
+    /// Win condition.
     WinCondition,
+    /// Missable achievement.
     Missable,
 }
 
 impl Tag {
+    /// Returns the string representation of this tag.
+    ///
+    /// # Returns
+    ///
+    /// The string representation.
     pub fn as_str(&self) -> &'static str {
         match self {
             Tag::Empty => "",
@@ -179,17 +227,32 @@ impl std::str::FromStr for Tag {
     }
 }
 
+/// An achievement definition.
 #[derive(Debug, Clone, PartialEq)]
 pub struct Achievement {
+    /// The achievement ID (optional until submitted).
     pub id: Option<u32>,
+    /// The achievement title.
     pub title: String,
+    /// The achievement description.
     pub description: String,
+    /// The conditions that must be met.
     pub conditions: Conditions,
+    /// The achievement tag.
     pub tag: Tag,
+    /// The point value.
     pub points: u32,
 }
 
 impl Achievement {
+    /// Creates a new achievement with the given title, description, conditions, and points.
+    ///
+    /// # Arguments
+    ///
+    /// * `title` - The achievement title.
+    /// * `description` - The achievement description.
+    /// * `conditions` - The achievement conditions.
+    /// * `points` - The point value.
     pub fn new<S: Into<String>>(
         title: S,
         description: S,
@@ -206,11 +269,21 @@ impl Achievement {
         }
     }
 
+    /// Sets the achievement ID.
+    ///
+    /// # Arguments
+    ///
+    /// * `id` - The achievement ID.
     pub fn with_id(mut self, id: u32) -> Self {
         self.id = Some(id);
         self
     }
 
+    /// Sets the achievement tag.
+    ///
+    /// # Arguments
+    ///
+    /// * `tag` - The achievement tag.
     pub fn with_tag(mut self, tag: Tag) -> Self {
         self.tag = tag;
         self

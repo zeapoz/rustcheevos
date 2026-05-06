@@ -1,30 +1,54 @@
+//! Leaderboard types and parsing.
+
 use std::fmt;
 use std::str::FromStr;
 
 use super::ParseError;
 use super::achievement::ConditionGroup;
 
+/// The format for a leaderboard value.
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub enum Format {
+    /// Score format.
     Score,
+    /// Seconds format.
     Seconds,
+    /// Frames format.
     Frames,
+    /// Milliseconds format.
     Milliseconds,
+    /// Minutes format.
     Minutes,
+    /// Seconds as minutes format.
     SecsAsMins,
+    /// Raw value format.
     Value,
+    /// Unsigned integer format.
     Unsigned,
+    /// Tens format.
     Tens,
+    /// Hundreds format.
     Hundreds,
+    /// Thousands format.
     Thousands,
+    /// Fixed 1 decimal place.
     Fixed1,
+    /// Fixed 2 decimal places.
     Fixed2,
+    /// Fixed 3 decimal places.
     Fixed3,
+    /// Points format.
     Points,
+    /// Custom format.
     Custom,
 }
 
 impl Format {
+    /// Returns the string representation of this format.
+    ///
+    /// # Returns
+    ///
+    /// The string representation.
     pub fn as_str(&self) -> &'static str {
         match self {
             Format::Score => "SCORE",
@@ -80,15 +104,28 @@ impl FromStr for Format {
     }
 }
 
+/// The conditions for a leaderboard.
 #[derive(Debug, Clone, PartialEq)]
 pub struct LeaderboardConditions {
+    /// The start conditions.
     pub start: ConditionGroup,
+    /// The cancel conditions.
     pub cancel: ConditionGroup,
+    /// The submit conditions.
     pub submit: ConditionGroup,
+    /// The value conditions.
     pub value: ConditionGroup,
 }
 
 impl LeaderboardConditions {
+    /// Creates new leaderboard conditions.
+    ///
+    /// # Arguments
+    ///
+    /// * `start` - The start conditions.
+    /// * `cancel` - The cancel conditions.
+    /// * `submit` - The submit conditions.
+    /// * `value` - The value conditions.
     pub fn new(
         start: impl Into<ConditionGroup>,
         cancel: impl Into<ConditionGroup>,
@@ -137,17 +174,33 @@ impl fmt::Display for LeaderboardConditions {
     }
 }
 
+/// A leaderboard definition.
 #[derive(Debug, Clone, PartialEq)]
 pub struct Leaderboard {
+    /// The leaderboard ID (optional until submitted).
     pub id: Option<u32>,
+    /// The leaderboard title.
     pub title: String,
+    /// The leaderboard description.
     pub description: String,
+    /// The leaderboard conditions.
     pub conditions: LeaderboardConditions,
+    /// The value format.
     pub format: Format,
+    /// Whether lower values are better.
     pub lower_is_better: bool,
 }
 
 impl Leaderboard {
+    /// Creates a new leaderboard.
+    ///
+    /// # Arguments
+    ///
+    /// * `title` - The leaderboard title.
+    /// * `description` - The leaderboard description.
+    /// * `conditions` - The leaderboard conditions.
+    /// * `format` - The value format.
+    /// * `lower_is_better` - Whether lower values are better.
     pub fn new(
         title: impl Into<String>,
         description: impl Into<String>,
@@ -165,6 +218,11 @@ impl Leaderboard {
         }
     }
 
+    /// Sets the leaderboard ID.
+    ///
+    /// # Arguments
+    ///
+    /// * `id` - The leaderboard ID.
     pub fn with_id(mut self, id: u32) -> Self {
         self.id = Some(id);
         self

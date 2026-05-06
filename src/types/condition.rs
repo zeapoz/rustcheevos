@@ -1,4 +1,6 @@
-#![allow(clippy::should_implement_trait)]
+//! Condition types and builders for achievement conditions.
+
+#![expect(clippy::should_implement_trait)]
 
 use std::{fmt, str::FromStr, sync::LazyLock};
 
@@ -7,12 +9,14 @@ use regex::Regex;
 use crate::types::ParseError;
 use crate::types::memory::{MemOrValue, MemoryRef, MemorySize, MemoryType};
 
-use super::flag::Flag;
+use super::flag::{Flag, WithFlagExt};
 use super::operator::Operator;
 use super::source::{Operation, Source};
 
 macro_rules! condition_op_method {
+    // Generate an operator comparison method
     ($name:ident, $op:expr) => {
+        /// Compares the current memory value to another using the specified operator.
         pub fn $name<T: Into<MemOrValue>>(mut self, other: T) -> Self {
             self.op = Some(Operation {
                 op: $op,
@@ -24,7 +28,9 @@ macro_rules! condition_op_method {
 }
 
 macro_rules! condition_flag_method {
+    // Generate a flag setter method
     ($name:ident, $flag:expr) => {
+        /// Sets the condition flag.
         pub fn $name(mut self) -> Self {
             self.source.flag = Some($flag);
             self
@@ -33,37 +39,14 @@ macro_rules! condition_flag_method {
 }
 
 macro_rules! condition_memtype_method {
+    // Generate a memory type setter method
     ($name:ident, $memtype:expr) => {
+        /// Sets the memory type.
         pub fn $name(mut self) -> Self {
             self.source.memtype = Some($memtype);
             self
         }
     };
-}
-
-pub trait WithFlagExt {
-    type Output;
-    fn with_flag(self, flag: Flag) -> Self::Output;
-}
-
-impl<const N: usize> WithFlagExt for [Condition; N] {
-    type Output = [Condition; N];
-    fn with_flag(mut self, flag: Flag) -> Self::Output {
-        for item in self.iter_mut() {
-            item.source.flag = Some(flag);
-        }
-        self
-    }
-}
-
-impl WithFlagExt for Vec<Condition> {
-    type Output = Vec<Condition>;
-    fn with_flag(mut self, flag: Flag) -> Self::Output {
-        for cond in self.iter_mut() {
-            cond.source.flag = Some(flag);
-        }
-        self
-    }
 }
 
 static CONDITION_REGEX: LazyLock<Regex> = LazyLock::new(|| {
@@ -103,28 +86,44 @@ fn build_memref(
     }
 }
 
+/// A condition for an achievement or leaderboard.
 #[derive(Clone, Debug, PartialEq)]
 pub struct Condition {
+    /// The source memory or value.
     pub source: Source,
+    /// The comparison operation (if any).
     pub op: Option<Operation>,
+    /// The number of hits required.
     pub hits: u32,
 }
 
 impl Condition {
+    /// Sets the memory type for this condition.
+    ///
+    /// # Arguments
+    ///
+    /// * `memtype` - The memory type to apply.
     pub fn with_memtype(mut self, memtype: MemoryType) -> Self {
         self.source.memtype = Some(memtype);
         self
     }
 
+    /// Sets the hits count for this condition.
+    ///
+    /// # Arguments
+    ///
+    /// * `hits` - The number of hits required.
     pub fn with_hits(mut self, hits: u32) -> Self {
         self.hits = hits;
         self
     }
 
+    /// Returns a condition that is always false.
     pub fn always_false() -> Self {
         Self::eq_val(0, 1)
     }
 
+    /// Returns a condition that is always true.
     pub fn always_true() -> Self {
         Self::eq_val(1, 1)
     }
@@ -181,6 +180,14 @@ impl Condition {
     condition_memtype_method!(bcd, MemoryType::BCD);
     condition_memtype_method!(invert, MemoryType::Invert);
 
+    /// Deserializes a condition from its string representation.
+    ///
+    /// # Arguments
+    ///
+    /// * `s` - The string to deserialize.
+    ///
+    /// # Errors
+    /// Returns [`ParseError`] if `s` is invalid.
     pub fn deserialize(s: &str) -> Result<Self, ParseError> {
         let Some(caps) = CONDITION_REGEX.captures(s) else {
             return Err(ParseError::InvalidFormat);

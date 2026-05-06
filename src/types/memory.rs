@@ -1,10 +1,14 @@
-#![allow(clippy::should_implement_trait)]
+//! Memory types, sizes, and references.
 
-use super::{ParseError, condition::WithFlagExt};
+#![expect(clippy::should_implement_trait)]
+
+use super::{ParseError, flag::WithFlagExt};
 use std::{fmt, str::FromStr};
 
 macro_rules! memory_size_method {
+    // Generate a memory size accessor method
     ($name:ident, $size:expr) => {
+        /// Creates a memory reference with the specified size at the given address.
         pub const fn $name(address: usize) -> MemoryRef {
             MemoryRef {
                 size: $size,
@@ -16,7 +20,9 @@ macro_rules! memory_size_method {
 }
 
 macro_rules! condition_method {
+    // Generate a comparison method for MemoryRef
     ($name:ident, $op:expr) => {
+        /// Creates a condition comparing this memory reference to a value using the specified operator.
         pub fn $name<T: Into<MemOrValue>>(self, other: T) -> super::condition::Condition {
             super::condition::Condition {
                 source: super::source::Source {
@@ -34,40 +40,72 @@ macro_rules! condition_method {
     };
 }
 
+/// Bit index for bit-level memory access.
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub enum BitIndex {
+    /// Bit 0.
     Zero,
+    /// Bit 1.
     One,
+    /// Bit 2.
     Two,
+    /// Bit 3.
     Three,
+    /// Bit 4.
     Four,
+    /// Bit 5.
     Five,
+    /// Bit 6.
     Six,
+    /// Bit 7.
     Seven,
 }
 
+/// Memory size prefixes for different data types.
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub enum MemorySize {
+    /// A specific bit of a byte.
     BitIndex(BitIndex),
+    /// Lower 4 bits of a byte.
     Lower4,
+    /// Upper 4 bits of a byte.
     Upper4,
+    /// 8-bit integer.
     Bits8,
+    /// 16-bit integer.
     Bits16,
+    /// 24-bit integer.
     Bits24,
+    /// 32-bit integer.
     Bits32,
+    /// 16-bit big-endian integer.
     Bits16BE,
+    /// 24-bit big-endian integer.
     Bits24BE,
+    /// 32-bit big-endian integer.
     Bits32BE,
+    /// Bit count (number of set bits).
     BitCount,
+    /// 32-bit float.
     Float,
+    /// 32-bit big-endian float.
     FloatBE,
+    /// 32-bit double (floating point).
     Double32,
+    /// 32-bit big-endian double.
     Double32BE,
+    /// MBF32 float.
     MBF32,
+    /// MBF32 little-endian float.
     MBF32LE,
 }
 
 impl MemorySize {
+    /// Returns the string prefix for this memory size.
+    ///
+    /// # Returns
+    ///
+    /// The string prefix.
     pub fn to_prefix(&self) -> &'static str {
         match self {
             MemorySize::Bits8 => "0xH",
@@ -132,17 +170,28 @@ impl FromStr for MemorySize {
     }
 }
 
+/// Memory type modifiers for special memory handling.
 #[derive(Clone, Copy, Debug, PartialEq, Default)]
 pub enum MemoryType {
+    /// Standard memory (default).
     #[default]
     Standard,
+    /// Delta memory (compare to previous frame).
     Delta,
+    /// Prior memory (compare to previous value).
     Prior,
+    /// BCD (binary-coded decimal).
     BCD,
+    /// Invert the memory value.
     Invert,
 }
 
 impl MemoryType {
+    /// Returns the string prefix for this memory type.
+    ///
+    /// # Returns
+    ///
+    /// The string prefix.
     pub fn to_prefix(&self) -> &'static str {
         match self {
             MemoryType::Standard => "",
@@ -168,14 +217,23 @@ impl FromStr for MemoryType {
     }
 }
 
+/// A reference to a memory location with size and type information.
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub struct MemoryRef {
+    /// The memory size.
     pub size: MemorySize,
+    /// The memory address.
     pub address: usize,
+    /// The memory type modifier.
     pub memtype: MemoryType,
 }
 
 impl MemoryRef {
+    /// Creates a condition with the specified memory type.
+    ///
+    /// # Arguments
+    ///
+    /// * `memtype` - The memory type to apply.
     pub fn with_memtype(mut self, memtype: MemoryType) -> super::condition::Condition {
         self.memtype = memtype;
         super::condition::Condition {
@@ -241,13 +299,24 @@ impl WithFlagExt for MemoryRef {
     }
 }
 
+/// Either a memory reference or a literal value.
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub enum MemOrValue {
+    /// A memory reference.
     Memory(MemoryRef),
-    Value { value: u32 },
+    /// A literal value.
+    Value {
+        /// The literal value.
+        value: u32,
+    },
 }
 
 impl MemOrValue {
+    /// Returns the value if this is a Value variant, otherwise None.
+    ///
+    /// # Returns
+    ///
+    /// The value if [`MemOrValue`] is a Value, otherwise None.
     pub fn value(self) -> Option<u32> {
         match self {
             MemOrValue::Value { value } => Some(value),
