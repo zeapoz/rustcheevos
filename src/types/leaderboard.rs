@@ -4,7 +4,7 @@ use std::str::FromStr;
 use super::ParseError;
 use super::achievement::ConditionGroup;
 
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub enum Format {
     Score,
     Seconds,
@@ -243,7 +243,7 @@ mod tests {
             Format::Score,
             false,
         );
-        let output = format!("{}", lb);
+        let output = format!("{lb}");
         assert!(output.starts_with("L0:"));
         assert!(output.contains("Test Leaderboard"));
         assert!(output.contains("SCORE"));

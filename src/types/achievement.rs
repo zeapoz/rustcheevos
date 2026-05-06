@@ -257,7 +257,7 @@ mod tests {
     fn test_condition_groups_display() {
         let input = "I:0xH1a8c94*2_0xU1a9fad>=2";
         let groups: Conditions = input.parse().unwrap();
-        let output = format!("{}", groups);
+        let output = format!("{groups}");
         assert!(output.starts_with("I:0xH1a8c94*2"));
     }
 
@@ -271,7 +271,7 @@ mod tests {
             groups,
             5,
         );
-        let output = format!("{}", achievement);
+        let output = format!("{achievement}");
         assert!(output.starts_with("I:0xH1a8c94*2"));
     }
 }

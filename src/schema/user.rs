@@ -578,7 +578,7 @@ N0:0x0001:\"Note\"";
             version: "1.3".into(),
             game_title: "Geometry Wars: Galaxies".into(),
         };
-        let serialized = format!("{}", header);
+        let serialized = format!("{header}");
         let parsed: Header = serialized.parse().unwrap();
         assert_eq!(parsed.version, header.version);
         assert_eq!(parsed.game_title, header.game_title);
@@ -588,7 +588,7 @@ N0:0x0001:\"Note\"";
     fn test_achievement_entry_roundtrip() {
         let input = "600707:\"I:0xH1a8c94*2_0xU1a9fad>=2\":\"Alpha Amateur \":\"Description\": : :progression:Author:3:0:0:0:0:00000";
         let entry: AchievementEntry = input.parse().unwrap();
-        let serialized = format!("{}", entry);
+        let serialized = format!("{entry}");
         let parsed: AchievementEntry = serialized.parse().unwrap();
         assert_eq!(parsed.id, entry.id);
         assert_eq!(parsed.condition, entry.condition);
@@ -630,7 +630,7 @@ N0:0x0001:\"Note\"";
     fn test_leaderboard_entry_roundtrip() {
         let input = "L0:\"start\":\"cancel\":\"submit\":\"M:0xX31d048\":VALUE:\"Title\":\"Desc\":0";
         let entry: LeaderboardEntry = input.parse().unwrap();
-        let serialized = format!("{}", entry);
+        let serialized = format!("{entry}");
         let parsed: LeaderboardEntry = serialized.parse().unwrap();
         assert_eq!(parsed.id, entry.id);
         assert_eq!(parsed.start, entry.start);
@@ -647,7 +647,7 @@ N0:0x0001:\"Note\"";
     fn test_code_note_roundtrip() {
         let input = "N0:0x0001C5:\"Note text\"";
         let note: CodeNote = input.parse().unwrap();
-        let serialized = format!("{}", note);
+        let serialized = format!("{note}");
         let parsed: CodeNote = serialized.parse().unwrap();
         assert_eq!(parsed.address, note.address);
         assert_eq!(parsed.note, note.note);
@@ -657,7 +657,7 @@ N0:0x0001:\"Note\"";
     fn test_user_file_roundtrip() {
         let input = "1.3\nGame Title\n600707:\"cond\":\"Title\":\"Desc\": : :progression:Author:3:0:0:0:0:00000\nL0:\"s\":\"c\":\"sub\":\"v\":VALUE:\"T\":\"D\":0\nN0:0x123:\"Note\"";
         let file: UserFile = input.parse().unwrap();
-        let serialized = format!("{}", file);
+        let serialized = format!("{file}");
         let parsed: UserFile = serialized.parse().unwrap();
         assert_eq!(parsed.header.version, file.header.version);
         assert_eq!(parsed.header.game_title, file.header.game_title);
@@ -679,7 +679,7 @@ N0:0x0001:\"Note\"";
         let mut set = Set::new(String::from("1.3"), String::from("Test Game"));
         set.add(achievement);
         let user_file = UserFile::from(set);
-        let serialized = format!("{}", user_file);
+        let serialized = format!("{user_file}");
         let parsed: UserFile = serialized.parse().unwrap();
         assert_eq!(parsed.header.version, "1.3");
         assert_eq!(parsed.header.game_title, "Test Game");

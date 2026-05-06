@@ -1,12 +1,11 @@
 #![allow(clippy::should_implement_trait)]
 
-use crate::types::ParseError;
-use crate::types::memory::MemoryRef;
-use crate::types::memory::{MemOrValue, MemorySize, MemoryType};
+use std::{fmt, str::FromStr, sync::LazyLock};
+
 use regex::Regex;
-use std::fmt;
-use std::str::FromStr;
-use std::sync::LazyLock;
+
+use crate::types::ParseError;
+use crate::types::memory::{MemOrValue, MemorySize, MemoryType, MemoryRef};
 
 use super::flag::Flag;
 use super::operator::Operator;
@@ -292,7 +291,7 @@ mod tests {
     fn test_condition_group_display() {
         let input = "M:0xX31d05c=1_A:1";
         let group: ConditionGroup = input.parse().unwrap();
-        let output = format!("{}", group);
+        let output = format!("{group}");
         assert!(output.starts_with("M:0xX31d05c=1_"));
         assert!(output.contains("_A:1"));
     }
@@ -301,7 +300,7 @@ mod tests {
     fn test_condition_groups_display_no_alts() {
         let input = "I:0xH1a8c94*2_0xU1a9fad>=2";
         let groups: Conditions = input.parse().unwrap();
-        let output = format!("{}", groups);
+        let output = format!("{groups}");
         assert!(output.starts_with("I:0xH1a8c94*2"));
         assert!(output.contains("_0xU1a9fad>=2"));
     }
@@ -310,7 +309,7 @@ mod tests {
     fn test_condition_groups_display_with_alts() {
         let input = "I:0xH1a8c94*2_0xU1a9fad>=2SI:0xH1a8c94*2_d0xU1a9fad<2";
         let groups: Conditions = input.parse().unwrap();
-        let output = format!("{}", groups);
+        let output = format!("{groups}");
         assert!(output.starts_with("I:0xH1a8c94*2"));
         assert!(output.contains("SI:"));
     }
