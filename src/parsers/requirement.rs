@@ -87,7 +87,7 @@ mod tests {
                     comparator: ComparisonOperator::Equals,
                     rhs: TypedValue::Memory(MemoryRef::new(MemorySize::Bits16, 0x5678))
                 },
-                hit_count: 0
+                hit_count: HitCount::new(0)
             })
         );
     }
@@ -113,14 +113,14 @@ mod tests {
     fn test_parse_valid_hit_count() {
         let mut input = ".10.";
         let hit_count = parse_hit_count(&mut input).unwrap();
-        assert_eq!(hit_count, 10);
+        assert_eq!(hit_count, HitCount::new(10));
     }
 
     #[test]
     fn test_parse_no_hit_count() {
-        let mut input = ".0.";
-        let hit_count = parse_hit_count(&mut input).unwrap();
-        assert_eq!(hit_count, 0);
+        let mut input = "";
+        let hit_count = parse_hit_count(&mut input);
+        assert!(hit_count.is_err());
     }
 
     #[test]
@@ -144,7 +144,7 @@ mod tests {
             requirement.operation.rhs,
             TypedValue::Memory(MemoryRef::new(MemorySize::Bits16, 0x5678))
         );
-        assert_eq!(requirement.hit_count, 0);
+        assert_eq!(requirement.hit_count, HitCount::new(0));
     }
 
     #[test]

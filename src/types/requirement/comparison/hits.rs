@@ -8,6 +8,11 @@ use crate::{ParseError, parsers::parse_hit_count};
 pub struct HitCount(u32);
 
 impl HitCount {
+    /// Creates a new hit count with the given hits.
+    pub fn new(hits: u32) -> Self {
+        Self(hits)
+    }
+
     /// Sets the hits on this hit count.
     pub fn set_hits(&mut self, hits: u32) {
         self.0 = hits;
