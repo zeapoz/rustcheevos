@@ -10,37 +10,37 @@ pub mod builtin;
 
 /// A rich presence macro call.
 #[derive(Debug, Clone, PartialEq)]
-pub struct MacroRef {
-    pub macro_type: MacroTypeRef,
+pub struct MacroCall {
+    pub macro_type: MacroRef,
     pub value: MacroValue,
 }
 
-impl MacroRef {
-    /// Returns a new [`MacroHandle`] with the given format and value.
-    pub fn new(macro_type: MacroTypeRef, value: impl Into<MacroValue>) -> Self {
+impl MacroCall {
+    /// Returns a new [`MacroCall`] with the given format and value.
+    pub fn new(macro_type: MacroRef, value: impl Into<MacroValue>) -> Self {
         Self {
             macro_type,
             value: value.into(),
         }
     }
 
-    /// Returns a new [`MacroHandle`] for a builtin macro.
-    pub fn builtin(builtin: BuiltInMacro, value: impl Into<MacroValue>) -> MacroRef {
-        Self::new(MacroTypeRef::Builtin(builtin), value)
+    /// Returns a new [`MacroCall`] for a builtin macro.
+    pub fn builtin(builtin: BuiltInMacro, value: impl Into<MacroValue>) -> MacroCall {
+        Self::new(MacroRef::Builtin(builtin), value)
     }
 
-    /// Returns a new [`MacroHandle`] for a format.
-    pub fn format(format: Rc<Format>, value: impl Into<MacroValue>) -> MacroRef {
-        Self::new(MacroTypeRef::Format(format), value)
+    /// Returns a new [`MacroCall`] for a format.
+    pub fn format(format: Rc<Format>, value: impl Into<MacroValue>) -> MacroCall {
+        Self::new(MacroRef::Format(format), value)
     }
 
-    /// Returns a new [`MacroHandle`] for a lookup table.
-    pub fn lookup(lookup: Rc<LookupTable>, value: impl Into<MacroValue>) -> MacroRef {
-        Self::new(MacroTypeRef::Lookup(lookup), value)
+    /// Returns a new [`MacroCall`] for a lookup table.
+    pub fn lookup(lookup: Rc<LookupTable>, value: impl Into<MacroValue>) -> MacroCall {
+        Self::new(MacroRef::Lookup(lookup), value)
     }
 }
 
-impl fmt::Display for MacroRef {
+impl fmt::Display for MacroCall {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "@{}({})", self.macro_type, self.value)
     }
@@ -48,13 +48,39 @@ impl fmt::Display for MacroRef {
 
 /// References to available macro types.
 #[derive(Debug, Clone, PartialEq)]
-pub enum MacroTypeRef {
+pub enum MacroRef {
     Builtin(BuiltInMacro),
     Format(Rc<Format>),
     Lookup(Rc<LookupTable>),
 }
 
-impl fmt::Display for MacroTypeRef {
+impl MacroRef {
+    /// Returns a builtin macro reference.
+    pub fn builtin(builtin: BuiltInMacro) -> Self {
+        Self::Builtin(builtin)
+    }
+
+    /// Returns a format reference.
+    pub fn format(format: Rc<Format>) -> Self {
+        Self::Format(format)
+    }
+
+    /// Returns a lookup table reference.
+    pub fn lookup(lookup: Rc<LookupTable>) -> Self {
+        Self::Lookup(lookup)
+    }
+
+    /// Calls the referenced macro with the given value to generate a [`MacroCall`]. Calls can be
+    /// used directly within a format string.
+    ///
+    /// # Arguments
+    /// * `value` - The value to pass to the macro.
+    pub fn call(&self, value: impl Into<MacroValue>) -> MacroCall {
+        MacroCall::new(self.clone(), value)
+    }
+}
+
+impl fmt::Display for MacroRef {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let s = match self {
             Self::Builtin(builtin) => builtin.to_string(),

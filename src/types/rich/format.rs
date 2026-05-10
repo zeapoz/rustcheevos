@@ -19,7 +19,8 @@ impl Format {
 
 impl fmt::Display for Format {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "Format:{}\nFormatType={}", self.name, self.format_type)
+        writeln!(f, "Format:{}", self.name)?;
+        writeln!(f, "FormatType={}", self.format_type)
     }
 }
 

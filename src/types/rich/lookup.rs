@@ -1,6 +1,4 @@
-use std::{collections::HashMap, fmt, ops::RangeInclusive, rc::Rc};
-
-use super::macros::{MacroRef, MacroValue};
+use std::{fmt, ops::RangeInclusive};
 
 /// A lookup table for rich presence data.
 #[derive(Debug, Clone, PartialEq)]
@@ -12,10 +10,22 @@ pub struct LookupTable {
 
 impl LookupTable {
     /// Creates a new lookup table with the given name.
-    pub fn new(name: String) -> Self {
+    pub fn new(name: impl Into<String>) -> Self {
         Self {
-            name,
+            name: name.into(),
             entries: Vec::new(),
+            fallback: None,
+        }
+    }
+
+    /// Creates a new lookup table with the given name and entries.
+    pub fn from_iter(
+        name: impl Into<String>,
+        entries: impl IntoIterator<Item = impl Into<Entry>>,
+    ) -> Self {
+        Self {
+            name: name.into(),
+            entries: entries.into_iter().map(|e| e.into()).collect(),
             fallback: None,
         }
     }
@@ -24,15 +34,15 @@ impl LookupTable {
     ///
     /// # Arguments
     /// * `entry` - The entry to add.
-    pub fn add_entry(&mut self, entry: Entry) {
-        self.entries.push(entry);
+    pub fn add_entry(&mut self, entry: impl Into<Entry>) {
+        self.entries.push(entry.into());
     }
 
     /// Adds multiple entries to the lookup table.
     ///
     /// # Arguments
     /// * `entries` - The entries to add.
-    pub fn add_entries(&mut self, entries: Vec<Entry>) {
+    pub fn add_entries(&mut self, entries: impl IntoIterator<Item = Entry>) {
         self.entries.extend(entries);
     }
 
@@ -40,44 +50,8 @@ impl LookupTable {
     ///     
     /// # Arguments
     /// * `fallback` - The fallback value.
-    pub fn set_fallback(&mut self, fallback: String) {
-        self.fallback = Some(fallback);
-    }
-}
-
-impl<T, S> From<Vec<(T, S)>> for LookupTable
-where
-    T: Into<EntryKey>,
-    S: Into<String>,
-{
-    fn from(value: Vec<(T, S)>) -> Self {
-        let mut entries = Vec::new();
-        for (key, value) in value {
-            entries.push(Entry::new(key, value.into()));
-        }
-        Self {
-            name: String::new(),
-            entries,
-            fallback: None,
-        }
-    }
-}
-
-impl<T, S> From<HashMap<T, S>> for LookupTable
-where
-    T: Into<EntryKey>,
-    S: Into<String>,
-{
-    fn from(value: HashMap<T, S>) -> Self {
-        let mut entries = Vec::new();
-        for (key, value) in value {
-            entries.push(Entry::new(key, value.into()));
-        }
-        Self {
-            name: String::new(),
-            entries,
-            fallback: None,
-        }
+    pub fn set_fallback(&mut self, fallback: impl Into<String>) {
+        self.fallback = Some(fallback.into());
     }
 }
 
@@ -94,25 +68,6 @@ impl fmt::Display for LookupTable {
     }
 }
 
-/// A lookup table handle.
-#[derive(Debug, Clone, PartialEq)]
-pub struct LookupTableHandle(Rc<LookupTable>);
-
-impl LookupTableHandle {
-    /// Returns a new [`LookupTableHandle`] for this lookup table.
-    pub fn new(table: impl Into<LookupTable>) -> Self {
-        Self(Rc::new(table.into()))
-    }
-
-    /// Returns a macro reference for the given key.
-    ///
-    /// # Arguments
-    /// * `key` - The key.
-    pub fn lookup(&self, key: impl Into<MacroValue>) -> MacroRef {
-        MacroRef::lookup(self.0.clone(), key.into())
-    }
-}
-
 /// An entry in a lookup table.
 #[derive(Debug, Clone, PartialEq)]
 pub struct Entry {
@@ -126,10 +81,10 @@ impl Entry {
     /// # Arguments
     /// * `key` - The key.
     /// * `value` - The value.
-    pub fn new(key: impl Into<EntryKey>, value: String) -> Self {
+    pub fn new(key: impl Into<EntryKey>, value: impl Into<String>) -> Self {
         Self {
             keys: vec![key.into()],
-            value,
+            value: value.into(),
         }
     }
 
@@ -139,6 +94,16 @@ impl Entry {
     /// * `key` - The key.
     pub fn add_key(&mut self, key: impl Into<EntryKey>) {
         self.keys.push(key.into());
+    }
+}
+
+impl<K, V> From<(K, V)> for Entry
+where
+    K: Into<EntryKey>,
+    V: Into<String>,
+{
+    fn from(value: (K, V)) -> Self {
+        Self::new(value.0, value.1)
     }
 }
 
