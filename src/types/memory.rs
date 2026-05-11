@@ -85,6 +85,41 @@ impl MemoryRef {
     pub fn ge(self, rhs: impl Into<TypedValue>) -> ComparisonRequirement {
         ComparisonRequirement::ge(self, rhs)
     }
+
+    /// Creates a new add [`ArithmeticRequirement`].
+    pub fn add(self, rhs: impl Into<TypedValue>) -> ArithmeticRequirement {
+        ArithmeticRequirement::new(ArithmeticFlag::default(), self).add(rhs)
+    }
+
+    /// Creates a new subtract [`ArithmeticRequirement`].
+    pub fn sub(self, rhs: impl Into<TypedValue>) -> ArithmeticRequirement {
+        ArithmeticRequirement::new(ArithmeticFlag::default(), self).sub(rhs)
+    }
+
+    /// Creates a new multiply [`ArithmeticRequirement`].
+    pub fn mul(self, rhs: impl Into<TypedValue>) -> ArithmeticRequirement {
+        ArithmeticRequirement::new(ArithmeticFlag::default(), self).mul(rhs)
+    }
+
+    /// Creates a new divide [`ArithmeticRequirement`].
+    pub fn div(self, rhs: impl Into<TypedValue>) -> ArithmeticRequirement {
+        ArithmeticRequirement::new(ArithmeticFlag::default(), self).div(rhs)
+    }
+
+    /// Creates a new modulo [`ArithmeticRequirement`].
+    pub fn modulo(self, rhs: impl Into<TypedValue>) -> ArithmeticRequirement {
+        ArithmeticRequirement::new(ArithmeticFlag::default(), self).modulo(rhs)
+    }
+
+    /// Creates a new bitwise and [`ArithmeticRequirement`].
+    pub fn bitwise_and(self, rhs: impl Into<TypedValue>) -> ArithmeticRequirement {
+        ArithmeticRequirement::new(ArithmeticFlag::default(), self).bitwise_and(rhs)
+    }
+
+    /// Creates a new bitwise xor [`ArithmeticRequirement`].
+    pub fn bitwise_xor(self, rhs: impl Into<TypedValue>) -> ArithmeticRequirement {
+        ArithmeticRequirement::new(ArithmeticFlag::default(), self).bitwise_xor(rhs)
+    }
 }
 
 impl Measured for MemoryRef {

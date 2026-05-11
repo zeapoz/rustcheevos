@@ -25,7 +25,7 @@ impl fmt::Display for Format {
 }
 
 /// Rich presence format types.
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Default, Debug, Clone, Copy, PartialEq)]
 pub enum FormatType {
     Score,
     Frames,
@@ -33,6 +33,7 @@ pub enum FormatType {
     Seconds,
     Minutes,
     SecsAsMins,
+    #[default]
     Value,
     Unsigned,
     Tens,

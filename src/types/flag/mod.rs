@@ -103,8 +103,9 @@ impl fmt::Display for ComparisonFlag {
 }
 
 /// A flag in an arithmetic expression.
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Default, Debug, Clone, Copy, PartialEq)]
 pub enum ArithmeticFlag {
+    #[default]
     AddSource,
     SubSource,
     AddAddress,

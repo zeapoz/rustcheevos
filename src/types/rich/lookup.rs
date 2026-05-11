@@ -107,6 +107,15 @@ where
     }
 }
 
+impl<K, V> From<&(K, V)> for Entry
+where
+    K: Into<EntryKey> + Clone,
+    V: Into<String> + Clone,
+{
+    fn from(value: &(K, V)) -> Self {
+        Self::new(value.0.clone(), value.1.clone())
+    }
+}
 impl fmt::Display for Entry {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let keys = self
