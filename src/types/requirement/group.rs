@@ -7,6 +7,62 @@ use crate::{
 
 use super::Requirement;
 
+/// A holding struct for many groups of requirements.
+#[derive(Debug, Clone, PartialEq)]
+pub struct RequirementGroups {
+    core: RequirementGroup,
+    alt_groups: Vec<RequirementGroup>,
+}
+
+impl RequirementGroups {
+    /// Creates a new requirement group with the given core group.
+    ///
+    /// # Arguments
+    ///
+    /// * `core` - The core group.
+    pub fn new(core: impl Into<RequirementGroup>) -> Self {
+        Self {
+            core: core.into(),
+            alt_groups: Vec::new(),
+        }
+    }
+
+    /// Adds an alternative group of requirements.
+    ///
+    /// # Arguments
+    ///
+    /// * `alt_group` - The alternative group of requirements.
+    pub fn push_alt_group(&mut self, group: RequirementGroup) {
+        self.alt_groups.push(group);
+    }
+
+    /// Adds multiple alternative groups of requirements.
+    ///
+    /// # Arguments
+    ///
+    /// * `alt_groups` - The alternative groups of requirements.
+    pub fn with_alt_groups(
+        mut self,
+        alt_groups: impl IntoIterator<Item = impl Into<RequirementGroup>>,
+    ) -> Self {
+        self.alt_groups = alt_groups.into_iter().map(Into::into).collect();
+        self
+    }
+}
+
+impl<T: Into<RequirementGroup>> From<T> for RequirementGroups {
+    fn from(value: T) -> Self {
+        RequirementGroups::new(value.into())
+    }
+}
+
+impl fmt::Display for RequirementGroups {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        let alts: String = self.alt_groups.iter().map(|g| format!("S{g}")).collect();
+        write!(f, "{}{}", self.core, alts)
+    }
+}
+
 /// A group of requirements that must all be true.
 #[derive(Debug, Clone, PartialEq)]
 pub struct RequirementGroup(Vec<Requirement>);

@@ -117,7 +117,7 @@ impl From<Achievement> for AchievementEntry {
     fn from(value: Achievement) -> Self {
         Self {
             id: value.id,
-            requirements: value.serialize_requirements(),
+            requirements: value.requirements.to_string(),
             title: value.title,
             description: value.description,
             tag: value.tag.to_string(),

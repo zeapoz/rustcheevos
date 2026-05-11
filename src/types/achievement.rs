@@ -2,7 +2,7 @@ use std::{fmt, str::FromStr};
 
 use crate::ParseError;
 
-use super::requirement::group::RequirementGroup;
+use super::requirement::group::{RequirementGroup, RequirementGroups};
 
 /// An achievement definition.
 #[derive(Debug, Clone, PartialEq)]
@@ -12,10 +12,8 @@ pub struct Achievement {
     pub title: String,
     /// The achievement description.
     pub description: String,
-    /// The conditions that must be met.
-    pub core: RequirementGroup,
-    /// The alternative conditions.
-    pub alt_groups: Vec<RequirementGroup>,
+    /// The conditions that must be met for the achievement.
+    pub requirements: RequirementGroups,
     /// The achievement tag.
     pub tag: Tag,
     /// The point value.
@@ -41,8 +39,7 @@ impl Achievement {
             id: 0,
             title: title.into(),
             description: description.into(),
-            core: core.into(),
-            alt_groups: Vec::new(),
+            requirements: RequirementGroups::new(core),
             tag: Tag::default(),
             points,
         }
@@ -66,39 +63,6 @@ impl Achievement {
     pub fn with_tag(mut self, tag: Tag) -> Self {
         self.tag = tag;
         self
-    }
-
-    ///  Sets the alternative groups of conditions.
-    ///
-    /// # Arguments
-    ///
-    /// * `alt_groups` - The alternative groups of conditions.
-    pub fn with_alt_groups(mut self, alt_groups: &[RequirementGroup]) -> Self {
-        self.alt_groups = alt_groups.to_vec();
-        self
-    }
-
-    /// Adds an alternative group of conditions.
-    ///
-    /// # Arguments
-    ///
-    /// * `alt_group` - The alternative group of conditions.
-    pub fn push_alt_group(&mut self, group: RequirementGroup) {
-        self.alt_groups.push(group);
-    }
-
-    /// Serializes the requirements into a string.
-    ///
-    /// # Returns
-    ///
-    /// The serialized requirements.
-    pub fn serialize_requirements(&self) -> String {
-        let mut s = String::new();
-        s.push_str(&self.core.to_string());
-        for alt in &self.alt_groups {
-            s.push_str(&format!("S{}", alt));
-        }
-        s
     }
 }
 

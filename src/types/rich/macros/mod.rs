@@ -104,9 +104,9 @@ impl From<MemoryRef> for MacroValue {
     }
 }
 
-impl From<RequirementGroup> for MacroValue {
-    fn from(value: RequirementGroup) -> Self {
-        Self::Arithmetic(value)
+impl<T: Into<RequirementGroup>> From<T> for MacroValue {
+    fn from(value: T) -> Self {
+        Self::Arithmetic(value.into())
     }
 }
 

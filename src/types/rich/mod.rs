@@ -4,10 +4,9 @@ use format::{Format, FormatType};
 use lookup::LookupTable;
 use macros::{MacroRef, builtin::BuiltInMacro};
 
-use crate::{
-    prelude::RequirementGroup,
-    schema::rich::{RICH_PESENCE_FILE_EXTENSION, RICH_PESENCE_FILE_SUFFIX},
-};
+use crate::schema::rich::{RICH_PESENCE_FILE_EXTENSION, RICH_PESENCE_FILE_SUFFIX};
+
+use super::requirement::group::RequirementGroups;
 
 pub mod format;
 pub mod lookup;
@@ -67,10 +66,10 @@ impl RichPresence {
     /// * `display` - The conditional display.
     pub fn add_conditional_display(
         &mut self,
-        condition: impl Into<RequirementGroup>,
+        conditions: impl Into<RequirementGroups>,
         display: impl Into<String>,
     ) {
-        let display = ConditionalDisplay::new(condition, display);
+        let display = ConditionalDisplay::new(conditions, display);
         self.conditional_displays.push(display);
     }
 
@@ -139,13 +138,13 @@ impl fmt::Display for RichPresence {
 /// A conditional rich presence display definition.
 #[derive(Debug, Clone, PartialEq)]
 pub struct ConditionalDisplay {
-    pub condition: RequirementGroup,
+    pub condition: RequirementGroups,
     pub display: String,
 }
 
 impl ConditionalDisplay {
     /// Creates a new conditional display.
-    pub fn new(condition: impl Into<RequirementGroup>, display: impl Into<String>) -> Self {
+    pub fn new(condition: impl Into<RequirementGroups>, display: impl Into<String>) -> Self {
         Self {
             condition: condition.into(),
             display: display.into(),
