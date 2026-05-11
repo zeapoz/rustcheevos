@@ -1,4 +1,5 @@
 pub mod achievement;
+pub mod chain;
 pub mod flag;
 pub mod leaderboard;
 pub mod memory;

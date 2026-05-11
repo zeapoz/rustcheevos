@@ -341,15 +341,3 @@ macro_rules! invert {
         $req.invert()
     };
 }
-
-/// Chains multiple requirements together into a group.
-#[macro_export]
-macro_rules! chain {
-    ($($item:expr),* $(,)?) => {{
-        let mut group = $crate::types::requirement::group::RequirementGroup::new();
-        $(
-            group.extend($item);
-        )*
-        group
-    }};
-}

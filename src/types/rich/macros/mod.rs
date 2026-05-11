@@ -2,7 +2,7 @@ use std::{fmt, rc::Rc};
 
 use builtin::BuiltInMacro;
 
-use crate::prelude::{MemoryRef, RequirementGroup};
+use crate::prelude::{Chain, MemoryRef};
 
 use super::{format::Format, lookup::LookupTable};
 
@@ -95,7 +95,7 @@ impl fmt::Display for MacroRef {
 #[derive(Debug, Clone, PartialEq)]
 pub enum MacroValue {
     Memory(MemoryRef),
-    Arithmetic(RequirementGroup),
+    Arithmetic(Chain),
 }
 
 impl From<MemoryRef> for MacroValue {
@@ -104,7 +104,7 @@ impl From<MemoryRef> for MacroValue {
     }
 }
 
-impl<T: Into<RequirementGroup>> From<T> for MacroValue {
+impl<T: Into<Chain>> From<T> for MacroValue {
     fn from(value: T) -> Self {
         Self::Arithmetic(value.into())
     }

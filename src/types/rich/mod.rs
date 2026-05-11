@@ -6,7 +6,7 @@ use macros::{MacroRef, builtin::BuiltInMacro};
 
 use crate::schema::rich::{RICH_PESENCE_FILE_EXTENSION, RICH_PESENCE_FILE_SUFFIX};
 
-use super::requirement::group::RequirementGroups;
+use super::chain::ChainGroup;
 
 pub mod format;
 pub mod lookup;
@@ -66,7 +66,7 @@ impl RichPresence {
     /// * `display` - The conditional display.
     pub fn add_conditional_display(
         &mut self,
-        conditions: impl Into<RequirementGroups>,
+        conditions: impl Into<ChainGroup>,
         display: impl Into<String>,
     ) {
         let display = ConditionalDisplay::new(conditions, display);
@@ -138,13 +138,13 @@ impl fmt::Display for RichPresence {
 /// A conditional rich presence display definition.
 #[derive(Debug, Clone, PartialEq)]
 pub struct ConditionalDisplay {
-    pub condition: RequirementGroups,
+    pub condition: ChainGroup,
     pub display: String,
 }
 
 impl ConditionalDisplay {
     /// Creates a new conditional display.
-    pub fn new(condition: impl Into<RequirementGroups>, display: impl Into<String>) -> Self {
+    pub fn new(condition: impl Into<ChainGroup>, display: impl Into<String>) -> Self {
         Self {
             condition: condition.into(),
             display: display.into(),

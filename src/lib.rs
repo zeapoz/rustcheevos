@@ -1,5 +1,7 @@
 use thiserror::Error;
 
+pub use rustcheevos_proc::chain;
+
 mod macros;
 pub(crate) mod parsers;
 pub mod prelude;

@@ -3,7 +3,7 @@ use std::str::FromStr;
 
 use crate::ParseError;
 
-use super::requirement::group::RequirementGroup;
+use super::chain::ChainGroup;
 
 /// A leaderboard definition.
 #[derive(Debug, Clone, PartialEq)]
@@ -15,13 +15,13 @@ pub struct Leaderboard {
     /// The leaderboard description.
     pub description: String,
     /// The leaderboard start condition.
-    pub start: RequirementGroup,
+    pub start: ChainGroup,
     /// The leaderboard cancel condition.
-    pub cancel: RequirementGroup,
+    pub cancel: ChainGroup,
     /// The leaderboard submit condition.
-    pub submit: RequirementGroup,
+    pub submit: ChainGroup,
     /// The leaderboard value condition.
-    pub value: RequirementGroup,
+    pub value: ChainGroup,
     /// The value format.
     pub format: LeaderboardFormat,
     /// Whether lower values are better.
@@ -44,10 +44,10 @@ impl Leaderboard {
     pub fn new(
         title: impl Into<String>,
         description: impl Into<String>,
-        start: impl Into<RequirementGroup>,
-        cancel: impl Into<RequirementGroup>,
-        submit: impl Into<RequirementGroup>,
-        value: impl Into<RequirementGroup>,
+        start: impl Into<ChainGroup>,
+        cancel: impl Into<ChainGroup>,
+        submit: impl Into<ChainGroup>,
+        value: impl Into<ChainGroup>,
         format: LeaderboardFormat,
         lower_is_better: bool,
     ) -> Self {

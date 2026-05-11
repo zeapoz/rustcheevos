@@ -2,25 +2,26 @@ use std::{fmt, str::FromStr};
 
 use crate::{
     ParseError, impl_arithmetic_flag_traits, impl_comparison_flag_traits,
+    prelude::Requirement,
     types::flag::{ArithmeticFlag, ComparisonFlag},
 };
 
-use super::Requirement;
+pub mod pending;
 
 /// A holding struct for many groups of requirements.
 #[derive(Debug, Clone, PartialEq)]
-pub struct RequirementGroups {
-    core: RequirementGroup,
-    alt_groups: Vec<RequirementGroup>,
+pub struct ChainGroup {
+    core: Chain,
+    alt_groups: Vec<Chain>,
 }
 
-impl RequirementGroups {
-    /// Creates a new requirement group with the given core group.
+impl ChainGroup {
+    /// Creates a new chain with the given core chain.
     ///
     /// # Arguments
     ///
-    /// * `core` - The core group.
-    pub fn new(core: impl Into<RequirementGroup>) -> Self {
+    /// * `core` - The core chain.
+    pub fn new(core: impl Into<Chain>) -> Self {
         Self {
             core: core.into(),
             alt_groups: Vec::new(),
@@ -32,7 +33,7 @@ impl RequirementGroups {
     /// # Arguments
     ///
     /// * `alt_group` - The alternative group of requirements.
-    pub fn push_alt_group(&mut self, group: RequirementGroup) {
+    pub fn push_alt_group(&mut self, group: Chain) {
         self.alt_groups.push(group);
     }
 
@@ -43,32 +44,32 @@ impl RequirementGroups {
     /// * `alt_groups` - The alternative groups of requirements.
     pub fn with_alt_groups(
         mut self,
-        alt_groups: impl IntoIterator<Item = impl Into<RequirementGroup>>,
+        alt_groups: impl IntoIterator<Item = impl Into<Chain>>,
     ) -> Self {
         self.alt_groups = alt_groups.into_iter().map(Into::into).collect();
         self
     }
 }
 
-impl<T: Into<RequirementGroup>> From<T> for RequirementGroups {
+impl<T: Into<Chain>> From<T> for ChainGroup {
     fn from(value: T) -> Self {
-        RequirementGroups::new(value.into())
+        ChainGroup::new(value.into())
     }
 }
 
-impl fmt::Display for RequirementGroups {
+impl fmt::Display for ChainGroup {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let alts: String = self.alt_groups.iter().map(|g| format!("S{g}")).collect();
         write!(f, "{}{}", self.core, alts)
     }
 }
 
-/// A group of requirements that must all be true.
+/// A chain of requirements that must all be true.
 #[derive(Debug, Clone, PartialEq)]
-pub struct RequirementGroup(Vec<Requirement>);
+pub struct Chain(Vec<Requirement>);
 
-impl RequirementGroup {
-    /// Creates a new condition group
+impl Chain {
+    /// Creates a new chain
     pub fn new() -> Self {
         Self(Vec::new())
     }
@@ -78,33 +79,33 @@ impl RequirementGroup {
     /// # Arguments
     ///
     /// * `requirement` - The requirement to push.
-    pub fn push(&mut self, requirement: Requirement) {
-        self.0.push(requirement);
+    pub fn push(&mut self, requirement: impl Into<Requirement>) {
+        self.0.push(requirement.into());
     }
 
     /// Extends the group with the given requirements.
     ///
     /// # Arguments
     ///
-    /// * `iter` - The requirements to extend the group with.
-    pub fn extend(&mut self, item: impl Into<RequirementGroup>) {
+    /// * `item` - The requirements to extend the group with.
+    pub fn extend(&mut self, item: impl Into<Chain>) {
         self.0.extend_from_slice(&item.into().into_inner());
     }
 
-    /// Returns an iterator over the conditions in this group.
+    /// Returns an iterator over the requirements in this group.
     ///
     /// # Returns
     ///
-    /// An iterator over references to the conditions.
+    /// An iterator over references to the requirements.
     pub fn iter(&self) -> impl Iterator<Item = &Requirement> {
         self.0.iter()
     }
 
-    /// Consumes this group and returns the inner conditions.
+    /// Consumes this group and returns the inner requirements.
     ///
     /// # Returns
     ///
-    /// The inner conditions.
+    /// The inner requirements.
     pub fn into_inner(self) -> Vec<Requirement> {
         self.0
     }
@@ -138,32 +139,32 @@ impl RequirementGroup {
     }
 }
 
-impl<T: Into<Requirement>> From<T> for RequirementGroup {
+impl<T: Into<Requirement>> From<T> for Chain {
     fn from(value: T) -> Self {
-        RequirementGroup(vec![value.into()])
+        Chain(vec![value.into()])
     }
 }
 
-impl<const N: usize, T: Into<Requirement>> From<[T; N]> for RequirementGroup {
+impl<const N: usize, T: Into<Requirement>> From<[T; N]> for Chain {
     fn from(arr: [T; N]) -> Self {
         let arr = arr.into_iter().map(T::into).collect::<Vec<_>>();
-        RequirementGroup(arr.into())
+        Chain(arr.into())
     }
 }
 
-impl From<Vec<Requirement>> for RequirementGroup {
+impl From<Vec<Requirement>> for Chain {
     fn from(value: Vec<Requirement>) -> Self {
-        RequirementGroup(value)
+        Chain(value)
     }
 }
 
-impl FromIterator<Requirement> for RequirementGroup {
+impl FromIterator<Requirement> for Chain {
     fn from_iter<T: IntoIterator<Item = Requirement>>(iter: T) -> Self {
-        RequirementGroup(iter.into_iter().collect())
+        Chain(iter.into_iter().collect())
     }
 }
 
-impl FromStr for RequirementGroup {
+impl FromStr for Chain {
     type Err = ParseError;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
@@ -177,7 +178,7 @@ impl FromStr for RequirementGroup {
     }
 }
 
-impl fmt::Display for RequirementGroup {
+impl fmt::Display for Chain {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(
             f,
@@ -191,5 +192,5 @@ impl fmt::Display for RequirementGroup {
     }
 }
 
-impl_comparison_flag_traits!(RequirementGroup, with_comparison_flag);
-impl_arithmetic_flag_traits!(RequirementGroup, with_arithmetic_flag);
+impl_comparison_flag_traits!(Chain, with_comparison_flag);
+impl_arithmetic_flag_traits!(Chain, with_arithmetic_flag);

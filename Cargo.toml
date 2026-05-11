@@ -6,3 +6,4 @@ edition = "2024"
 [dependencies]
 winnow = "1.0.2"
 thiserror = "1.0"
+rustcheevos-proc = { path = "rustcheevos-proc" }

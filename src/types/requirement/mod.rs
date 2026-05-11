@@ -9,7 +9,6 @@ use comparison::ComparisonRequirement;
 
 pub mod arithmetic;
 pub mod comparison;
-pub mod group;
 
 /// A single requirement clause.
 #[derive(Debug, Clone, Copy, PartialEq)]
