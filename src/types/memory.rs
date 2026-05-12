@@ -2,7 +2,7 @@ use std::{fmt, str::FromStr};
 use winnow::Parser;
 
 use crate::{
-    ParseError,
+    ParseError, impl_arithmetic_flag_traits,
     parsers::{parse_memory_ref, parse_memory_size},
     prelude::Measured,
 };
@@ -120,7 +120,13 @@ impl MemoryRef {
     pub fn bitwise_xor(self, rhs: impl Into<TypedValue>) -> ArithmeticRequirement {
         ArithmeticRequirement::new(ArithmeticFlag::default(), self).bitwise_xor(rhs)
     }
+
+    pub fn with_flag(self, flag: ArithmeticFlag) -> ArithmeticRequirement {
+        ArithmeticRequirement::new(flag, self)
+    }
 }
+
+impl_arithmetic_flag_traits!(MemoryRef, with_flag, ArithmeticRequirement);
 
 impl Measured for MemoryRef {
     type Output = ArithmeticRequirement;

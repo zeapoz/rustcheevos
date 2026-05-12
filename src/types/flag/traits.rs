@@ -1,4 +1,4 @@
-use crate::types::{memory::MemoryRef, requirement::arithmetic::ArithmeticRequirement};
+use crate::types::requirement::arithmetic::ArithmeticRequirement;
 
 use super::ArithmeticFlag;
 
@@ -31,14 +31,6 @@ pub trait AddSource {
 }
 
 impl AddSource for u32 {
-    type Output = ArithmeticRequirement;
-
-    fn add_source(self) -> Self::Output {
-        ArithmeticRequirement::new(ArithmeticFlag::AddSource, self)
-    }
-}
-
-impl AddSource for MemoryRef {
     type Output = ArithmeticRequirement;
 
     fn add_source(self) -> Self::Output {
@@ -236,6 +228,7 @@ macro_rules! impl_comparison_flag_traits {
 /// # Args
 /// - `$struct`: The struct to implement traits for.
 /// - `$method`: The method to call on self with the flag (e.g., `with_flag`).
+/// - `$output`: (optional) The output type. Defaults to `Self`.
 ///
 /// # Generated Traits
 /// - `AddSource`
@@ -245,29 +238,32 @@ macro_rules! impl_comparison_flag_traits {
 #[macro_export]
 macro_rules! impl_arithmetic_flag_traits {
     ($struct:ident, $method:ident) => {
+        impl_arithmetic_flag_traits!($struct, $method, Self);
+    };
+    ($struct:ident, $method:ident, $output:ty) => {
         impl $crate::types::flag::traits::AddSource for $struct {
-            type Output = Self;
+            type Output = $output;
             fn add_source(self) -> Self::Output {
                 self.$method($crate::types::flag::ArithmeticFlag::AddSource)
             }
         }
 
         impl $crate::types::flag::traits::SubSource for $struct {
-            type Output = Self;
+            type Output = $output;
             fn sub_source(self) -> Self::Output {
                 self.$method($crate::types::flag::ArithmeticFlag::SubSource)
             }
         }
 
         impl $crate::types::flag::traits::AddAddress for $struct {
-            type Output = Self;
+            type Output = $output;
             fn add_address(self) -> Self::Output {
                 self.$method($crate::types::flag::ArithmeticFlag::AddAddress)
             }
         }
 
         impl $crate::types::flag::traits::Remember for $struct {
-            type Output = Self;
+            type Output = $output;
             fn remember(self) -> Self::Output {
                 self.$method($crate::types::flag::ArithmeticFlag::Remember)
             }
