@@ -2,7 +2,7 @@ use std::{fmt, str::FromStr};
 
 use crate::ParseError;
 
-use super::chain::{Chain, ChainGroup};
+use super::chain::ChainGroup;
 
 /// An achievement definition.
 #[derive(Debug, Clone, PartialEq)]
@@ -27,19 +27,19 @@ impl Achievement {
     ///
     /// * `title` - The achievement title.
     /// * `description` - The achievement description.
-    /// * `core` - The achievement conditions that must be met.
+    /// * `requirements` - The achievement conditions that must be met.
     /// * `points` - The point value.
     pub fn new(
         title: impl Into<String>,
         description: impl Into<String>,
-        core: impl Into<Chain>,
+        requirements: impl Into<ChainGroup>,
         points: u32,
     ) -> Self {
         Self {
             id: 0,
             title: title.into(),
             description: description.into(),
-            requirements: ChainGroup::new(core),
+            requirements: requirements.into(),
             tag: Tag::default(),
             points,
         }

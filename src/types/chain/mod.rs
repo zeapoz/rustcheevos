@@ -4,6 +4,7 @@ use crate::{
     ParseError, impl_arithmetic_flag_traits, impl_comparison_flag_traits,
     prelude::Requirement,
     types::flag::{ArithmeticFlag, ComparisonFlag},
+    types::value::TypedValue,
 };
 
 pub mod pending;
@@ -137,6 +138,44 @@ impl Chain {
             })
             .collect()
     }
+
+    /// Applies delta to the left-hand side of the last requirement.
+    pub fn delta(self) -> Self {
+        self.transform_last(TypedValue::delta)
+    }
+
+    /// Applies prior to the left-hand side of the last requirement.
+    pub fn prior(self) -> Self {
+        self.transform_last(TypedValue::prior)
+    }
+
+    /// Applies BCD to the left-hand side of the last requirement.
+    pub fn bcd(self) -> Self {
+        self.transform_last(TypedValue::bcd)
+    }
+
+    /// Applies invert to the left-hand side of the last requirement.
+    pub fn invert(self) -> Self {
+        self.transform_last(TypedValue::invert)
+    }
+
+    fn transform_last(self, f: impl FnOnce(TypedValue) -> TypedValue) -> Self {
+        let mut reqs = self.0;
+        if let Some(last) = reqs.pop() {
+            let new_last = match last {
+                Requirement::Comparison(mut c) => {
+                    c.lhs = f(c.lhs);
+                    Requirement::Comparison(c)
+                }
+                Requirement::Arithmetic(mut a) => {
+                    a.lhs = f(a.lhs);
+                    Requirement::Arithmetic(a)
+                }
+            };
+            reqs.push(new_last);
+        }
+        Self(reqs)
+    }
 }
 
 impl<T: Into<Requirement>> From<T> for Chain {
@@ -158,9 +197,10 @@ impl From<Vec<Requirement>> for Chain {
     }
 }
 
-impl FromIterator<Requirement> for Chain {
-    fn from_iter<T: IntoIterator<Item = Requirement>>(iter: T) -> Self {
-        Chain(iter.into_iter().collect())
+impl<T: Into<Chain>> FromIterator<T> for Chain {
+    fn from_iter<I: IntoIterator<Item = T>>(iter: I) -> Self {
+        let chains: Vec<_> = iter.into_iter().map(T::into).collect();
+        Chain(chains.into_iter().flat_map(Chain::into_inner).collect())
     }
 }
 

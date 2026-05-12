@@ -1,5 +1,6 @@
 use crate::{
     prelude::{MemoryRef, Requirement},
+    types::requirement::{arithmetic::ArithmeticRequirement, comparison::ComparisonRequirement},
     types::value::TypedValue,
 };
 
@@ -11,25 +12,60 @@ pub trait Chainable {
     fn chain(self, chain: Chain) -> Self::Output;
 }
 
-impl<T: Into<Chain>> Chainable for T {
+impl Chainable for Requirement {
     type Output = Chain;
 
     fn chain(self, mut chain: Chain) -> Self::Output {
-        chain.extend(self.into());
+        chain.extend(self);
         chain
     }
 }
 
-impl Chainable for MemoryRef {
-    type Output = PendingChain<MemoryRef>;
+impl Chainable for Chain {
+    type Output = Chain;
+
+    fn chain(self, mut chain: Chain) -> Self::Output {
+        chain.extend(self);
+        chain
+    }
+}
+
+impl Chainable for ComparisonRequirement {
+    type Output = Chain;
+
+    fn chain(self, mut chain: Chain) -> Self::Output {
+        chain.extend(self);
+        chain
+    }
+}
+
+impl Chainable for ArithmeticRequirement {
+    type Output = Chain;
+
+    fn chain(self, mut chain: Chain) -> Self::Output {
+        chain.extend(self);
+        chain
+    }
+}
+
+impl Chainable for TypedValue {
+    type Output = PendingChain<TypedValue>;
 
     fn chain(self, chain: Chain) -> Self::Output {
         PendingChain::new(self, chain)
     }
 }
 
-impl Chainable for PendingChain<MemoryRef> {
-    type Output = PendingChain<MemoryRef>;
+impl Chainable for MemoryRef {
+    type Output = PendingChain<TypedValue>;
+
+    fn chain(self, chain: Chain) -> Self::Output {
+        PendingChain::new(self.memory(), chain)
+    }
+}
+
+impl Chainable for PendingChain<TypedValue> {
+    type Output = PendingChain<TypedValue>;
 
     fn chain(self, chain: Chain) -> Self::Output {
         PendingChain::new(self.head, self.pending.chain(chain))
@@ -51,7 +87,7 @@ impl<T> PendingChain<T> {
     }
 }
 
-impl PendingChain<MemoryRef> {
+impl PendingChain<TypedValue> {
     fn extend_req(self, req: impl Into<Requirement>) -> Chain {
         let mut chain = self.pending;
         chain.extend(req);
@@ -121,5 +157,33 @@ impl PendingChain<MemoryRef> {
     pub fn bitwise_xor(self, rhs: impl Into<TypedValue>) -> Chain {
         let head = self.head;
         self.extend_req(head.bitwise_xor(rhs))
+    }
+
+    pub fn delta(self) -> Self {
+        Self {
+            head: self.head.delta(),
+            pending: self.pending,
+        }
+    }
+
+    pub fn prior(self) -> Self {
+        Self {
+            head: self.head.prior(),
+            pending: self.pending,
+        }
+    }
+
+    pub fn bcd(self) -> Self {
+        Self {
+            head: self.head.bcd(),
+            pending: self.pending,
+        }
+    }
+
+    pub fn invert(self) -> Self {
+        Self {
+            head: self.head.invert(),
+            pending: self.pending,
+        }
     }
 }

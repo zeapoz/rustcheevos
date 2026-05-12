@@ -1,4 +1,4 @@
-use crate::types::requirement::arithmetic::ArithmeticRequirement;
+use crate::types::{memory::MemoryRef, requirement::arithmetic::ArithmeticRequirement};
 
 use super::ArithmeticFlag;
 
@@ -31,6 +31,14 @@ pub trait AddSource {
 }
 
 impl AddSource for u32 {
+    type Output = ArithmeticRequirement;
+
+    fn add_source(self) -> Self::Output {
+        ArithmeticRequirement::new(ArithmeticFlag::AddSource, self)
+    }
+}
+
+impl AddSource for MemoryRef {
     type Output = ArithmeticRequirement;
 
     fn add_source(self) -> Self::Output {

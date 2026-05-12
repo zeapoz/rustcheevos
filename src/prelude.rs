@@ -1,5 +1,5 @@
 pub use crate::types::{
-    achievement::Achievement,
+    achievement::{Achievement, Tag},
     chain::{
         pending::{Chainable, PendingChain},
         {Chain, ChainGroup},
@@ -12,4 +12,5 @@ pub use crate::types::{
     },
     rich::{RichPresence, format::FormatType, lookup::LookupTable},
     set::Set,
+    value::TypedValue,
 };
