@@ -2,6 +2,7 @@ use std::fmt;
 use std::str::FromStr;
 
 use crate::parsers::ParseError;
+use crate::prelude::Requirement;
 
 use super::chain::ChainGroup;
 
@@ -63,6 +64,36 @@ impl Leaderboard {
             format,
             lower_is_better,
         }
+    }
+
+    /// Creates a new leaderboard with an instant submission.
+    ///
+    /// # Arguments
+    ///
+    /// * `title` - The leaderboard title.
+    /// * `description` - The leaderboard description.
+    /// * `start` - The leaderboard start condition.
+    /// * `value` - The leaderboard value condition.
+    /// * `format` - The value format.
+    /// * `lower_is_better` - Whether lower values are better.
+    pub fn new_instant_submission(
+        title: impl Into<String>,
+        description: impl Into<String>,
+        start: impl Into<ChainGroup>,
+        value: impl Into<ChainGroup>,
+        format: LeaderboardFormat,
+        lower_is_better: bool,
+    ) -> Self {
+        Self::new(
+            title,
+            description,
+            start,
+            Requirement::always_false(),
+            Requirement::always_true(),
+            value,
+            format,
+            lower_is_better,
+        )
     }
 
     /// Sets the leaderboard ID.
