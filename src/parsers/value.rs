@@ -1,13 +1,17 @@
+//! Parser functions for values.
+
 use winnow::{Parser, Result, ascii::digit1, stream::Stream, token::take_while};
 
 use crate::types::value::*;
 
 use super::parse_memory_ref;
 
+/// Parse an integer value.
 pub fn parse_int_value(input: &mut &str) -> Result<u32> {
     digit1.parse_to().parse_next(input)
 }
 
+/// Parse a float value.
 fn parse_float_value(input: &mut &str) -> Result<f32> {
     let _prefix = 'f'.parse_next(input)?;
     take_while(1.., (('0'..='9'), ('.')))
@@ -15,6 +19,7 @@ fn parse_float_value(input: &mut &str) -> Result<f32> {
         .parse_next(input)
 }
 
+/// Parse a typed value.
 pub fn parse_typed_value(input: &mut &str) -> Result<TypedValue> {
     let start = input.checkpoint();
     if let Ok(memory_ref) = parse_memory_ref.parse_next(input) {

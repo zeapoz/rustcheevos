@@ -1,31 +1,59 @@
+//! Builtin rich presence macros.
+
 use std::fmt;
 
 use crate::types::rich::format::FormatType;
 
-/// Built in macros.
+/// Builtin macros for rich presence display formatting.
 #[derive(Debug, Clone, PartialEq)]
 pub enum BuiltInMacro {
+    /// Integer format.
     Number,
+    /// Unsigned integer format.
     Unsigned,
+    /// Score format.
     Score,
+    /// Centiseconds format (displays as milliseconds / 10).
     Centiseconds,
+    /// Seconds format.
     Seconds,
+    /// Minutes format.
     Minutes,
+    /// Fixed-point with 1 decimal place.
     Fixed1,
+    /// Fixed-point with 2 decimal places.
     Fixed2,
+    /// Fixed-point with 3 decimal places.
     Fixed3,
+    /// Float with 1 decimal place.
     Float1,
+    /// Float with 2 decimal places.
     Float2,
+    /// Float with 3 decimal places.
     Float3,
+    /// Float with 4 decimal places.
     Float4,
+    /// Float with 5 decimal places.
     Float5,
+    /// Float with 6 decimal places.
     Float6,
+    /// ASCII character format.
     ASCIIChar,
+    /// Unicode character format.
     UnicodeChar,
 }
 
 impl BuiltInMacro {
     /// Returns the corresponding [`FormatType`] for this macro, if it exists.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use rustcheevos::types::rich::macros::builtin::BuiltInMacro;
+    ///
+    /// let format = BuiltInMacro::Score.format_type();
+    /// assert!(format.is_some());
+    /// ```
     pub fn format_type(&self) -> Option<FormatType> {
         match self {
             Self::Number => Some(FormatType::Unsigned),

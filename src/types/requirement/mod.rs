@@ -1,3 +1,5 @@
+//! Type definitions for requirements.
+
 use std::{fmt, str::FromStr};
 
 use winnow::Parser;
@@ -21,11 +23,31 @@ pub enum Requirement {
 
 impl Requirement {
     /// Returns a requirement that always evaluates to true.
+    ///
+    /// This is a shorthand for a `1 = 1` comparison.
+    ///
+    /// # Examples
+    /// ```
+    /// use rustcheevos::prelude::*;
+    ///
+    /// let requirement = Requirement::always_true();
+    /// assert_eq!(requirement, ComparisonRequirement::eq(1, 1).into());
+    /// ```
     pub fn always_true() -> Self {
-        Requirement::Comparison(ComparisonRequirement::eq(0, 0))
+        Requirement::Comparison(ComparisonRequirement::eq(1, 1))
     }
 
     /// Returns a requirement that always evaluates to false.
+    ///
+    /// This is a shorthand for a `0 = 1` comparison.
+    ///
+    /// # Examples
+    /// ```
+    /// use rustcheevos::prelude::*;
+    ///
+    /// let requirement = Requirement::always_false();
+    /// assert_eq!(requirement, ComparisonRequirement::eq(0, 1).into());
+    /// ```
     pub fn always_false() -> Self {
         Requirement::Comparison(ComparisonRequirement::eq(0, 1))
     }

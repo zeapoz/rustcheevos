@@ -1,3 +1,5 @@
+//! Type definitions for memory references.
+
 use std::{fmt, str::FromStr};
 use winnow::Parser;
 
@@ -15,20 +17,54 @@ use super::{
 };
 
 /// A reference to a memory location.
+///
+/// This is the core type used for referencing memory locations when building
+/// [`Requirement`][`crate::types::requirement::Requirement`]s.
+///
+/// # Examples
+///
+/// ```
+/// use rustcheevos::prelude::*;
+///
+/// let memory_ref = MemoryRef::new(MemorySize::Bits8, 0x1234).delta();
+/// assert_eq!(memory_ref.size(), MemorySize::Bits8);
+/// assert_eq!(memory_ref.address(), 0x1234);
+/// assert_eq!(memory_ref.access_mode(), AccessMode::Delta);
+/// ```
+///
+/// The default syntax for constructing a [`MemoryRef`] can be very verbose, so as an alternative,
+/// convenience macros are provided for all [`MemorySize`]s. In addition, macros are available for
+/// setting [`AccessMode`]s too.
+///
+/// ```
+/// use rustcheevos::{prelude::*, bits8, delta};
+///
+/// let memory_a = MemoryRef::new(MemorySize::Bits8, 0x1234).delta();
+/// let memory_b = delta!(bits8!(0x1234));
+/// assert_eq!(memory_a, memory_b);
+/// ```
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub struct MemoryRef {
+    /// The size of the memory reference.
     size: MemorySize,
+    /// The address of the memory reference.
     address: usize,
+    /// The access mode of the memory reference.
     access_mode: AccessMode,
 }
 
 impl MemoryRef {
-    /// Creates a new memory reference.
+    /// Creates a new memory reference at the given size and address.
     ///
-    /// # Arguments
+    /// # Examples
+    /// ```
+    /// use rustcheevos::prelude::*;
     ///
-    /// * `size` - The size of the memory reference.
-    /// * `address` - The address of the memory reference.
+    /// let memory_ref = MemoryRef::new(MemorySize::Bits8, 0x1234);
+    /// assert_eq!(memory_ref.size(), MemorySize::Bits8);
+    /// assert_eq!(memory_ref.address(), 0x1234);
+    /// assert_eq!(memory_ref.access_mode(), AccessMode::Memory);
+    /// ```
     pub const fn new(size: MemorySize, address: usize) -> Self {
         Self {
             size,
@@ -38,82 +74,222 @@ impl MemoryRef {
     }
 
     /// Returns the access mode of the memory reference.
+    ///
+    /// # Examples
+    /// ```
+    /// use rustcheevos::prelude::*;
+    ///
+    /// let memory_ref = MemoryRef::new(MemorySize::Bits8, 0x1234);
+    /// assert_eq!(memory_ref.size(), MemorySize::Bits8);
+    /// ```
     pub fn size(&self) -> MemorySize {
         self.size
     }
 
     /// Returns the address of the memory reference.
+    ///
+    /// # Examples
+    /// ```
+    /// use rustcheevos::prelude::*;
+    ///
+    /// let memory_ref = MemoryRef::new(MemorySize::Bits8, 0x1234);
+    /// assert_eq!(memory_ref.address(), 0x1234);
+    /// ```
     pub fn address(&self) -> usize {
         self.address
     }
 
     /// Returns the access mode of the memory reference.
+    /// # Examples
+    /// ```
+    /// use rustcheevos::prelude::*;
+    ///
+    /// let memory_ref = MemoryRef::new(MemorySize::Bits8, 0x1234);
+    /// assert_eq!(memory_ref.access_mode(), AccessMode::Memory);
+    /// ```
     pub fn access_mode(&self) -> AccessMode {
         self.access_mode
     }
 
     /// Sets the access mode of the memory reference.
-    pub fn with_access_mode(mut self, access_mode: AccessMode) -> Self {
+    pub(crate) fn with_access_mode(mut self, access_mode: AccessMode) -> Self {
         self.access_mode = access_mode;
         self
     }
 
     /// Sets the access mode to [`AccessMode::Memory`].
+    ///
+    /// # Examples
+    /// ```
+    /// use rustcheevos::prelude::*;
+    ///
+    /// let memory_ref = MemoryRef::new(MemorySize::Bits8, 0x1234).memory();
+    /// assert_eq!(memory_ref.access_mode(), AccessMode::Memory);
+    /// ```
     pub fn memory(self) -> Self {
         self.with_access_mode(AccessMode::Memory)
     }
 
     /// Sets the access mode to [`AccessMode::Delta`].
+    ///
+    /// # Examples
+    /// ```
+    /// use rustcheevos::prelude::*;
+    ///
+    /// let memory_ref = MemoryRef::new(MemorySize::Bits8, 0x1234).delta();
+    /// assert_eq!(memory_ref.access_mode(), AccessMode::Delta);
+    /// ```
     pub fn delta(self) -> Self {
         self.with_access_mode(AccessMode::Delta)
     }
 
     /// Sets the access mode to [`AccessMode::Prior`].
+    ///
+    /// # Examples
+    /// ```
+    /// use rustcheevos::prelude::*;
+    ///
+    /// let memory_ref = MemoryRef::new(MemorySize::Bits8, 0x1234).prior();
+    /// assert_eq!(memory_ref.access_mode(), AccessMode::Prior);
+    /// ```
     pub fn prior(self) -> Self {
         self.with_access_mode(AccessMode::Prior)
     }
 
     /// Sets the access mode to [`AccessMode::BCD`].
+    ///
+    /// # Examples
+    /// ```
+    /// use rustcheevos::prelude::*;
+    ///
+    /// let memory_ref = MemoryRef::new(MemorySize::Bits8, 0x1234).bcd();
+    /// assert_eq!(memory_ref.access_mode(), AccessMode::BCD);
+    /// ```
     pub fn bcd(self) -> Self {
         self.with_access_mode(AccessMode::BCD)
     }
 
     /// Sets the access mode to [`AccessMode::Invert`].
+    ///
+    /// # Examples
+    /// ```
+    /// use rustcheevos::prelude::*;
+    ///
+    /// let memory_ref = MemoryRef::new(MemorySize::Bits8, 0x1234).invert();
+    /// assert_eq!(memory_ref.access_mode(), AccessMode::Invert);
+    /// ```
     pub fn invert(self) -> Self {
         self.with_access_mode(AccessMode::Invert)
     }
 
     /// Creates a new equals [`ComparisonRequirement`].
+    ///
+    /// # Examples
+    /// ```
+    /// # use rustcheevos::types::operator::ComparisonOperator;
+    /// use rustcheevos::prelude::*;
+    ///
+    /// let memory_ref = MemoryRef::new(MemorySize::Bits8, 0x1234);
+    /// let requirement = memory_ref.eq(50);
+    /// assert_eq!(*requirement.lhs(), TypedValue::Memory(memory_ref));
+    /// assert_eq!(requirement.operator(), ComparisonOperator::Equals);
+    /// ```
     pub fn eq(self, rhs: impl Into<TypedValue>) -> ComparisonRequirement {
         ComparisonRequirement::eq(self, rhs)
     }
 
     /// Creates a new not equals [`ComparisonRequirement`].
+    ///
+    /// # Examples
+    /// ```
+    /// # use rustcheevos::types::operator::ComparisonOperator;
+    /// use rustcheevos::prelude::*;
+    ///
+    /// let memory_ref = MemoryRef::new(MemorySize::Bits8, 0x1234);
+    /// let requirement = memory_ref.ne(50);
+    /// assert_eq!(*requirement.lhs(), TypedValue::Memory(memory_ref));
+    /// assert_eq!(requirement.operator(), ComparisonOperator::NotEquals);
+    /// ```
     pub fn ne(self, rhs: impl Into<TypedValue>) -> ComparisonRequirement {
         ComparisonRequirement::ne(self, rhs)
     }
 
     /// Creates a new less than [`ComparisonRequirement`].
+    ///
+    /// # Examples
+    /// ```
+    /// # use rustcheevos::types::operator::ComparisonOperator;
+    /// use rustcheevos::prelude::*;
+    ///
+    /// let memory_ref = MemoryRef::new(MemorySize::Bits8, 0x1234);
+    /// let requirement = memory_ref.lt(50);
+    /// assert_eq!(*requirement.lhs(), TypedValue::Memory(memory_ref));
+    /// assert_eq!(requirement.operator(), ComparisonOperator::LessThan);
+    /// ```
     pub fn lt(self, rhs: impl Into<TypedValue>) -> ComparisonRequirement {
         ComparisonRequirement::lt(self, rhs)
     }
 
     /// Creates a new less than or equals [`ComparisonRequirement`].
+    ///
+    /// # Examples
+    /// ```
+    /// # use rustcheevos::types::operator::ComparisonOperator;
+    /// use rustcheevos::prelude::*;
+    ///
+    /// let memory_ref = MemoryRef::new(MemorySize::Bits8, 0x1234);
+    /// let requirement = memory_ref.le(50);
+    /// assert_eq!(*requirement.lhs(), TypedValue::Memory(memory_ref));
+    /// assert_eq!(requirement.operator(), ComparisonOperator::LessThanOrEquals);
+    /// ```
     pub fn le(self, rhs: impl Into<TypedValue>) -> ComparisonRequirement {
         ComparisonRequirement::le(self, rhs)
     }
 
     /// Creates a new greater than [`ComparisonRequirement`].
+    ///
+    /// # Examples
+    /// ```
+    /// # use rustcheevos::types::operator::ComparisonOperator;
+    /// use rustcheevos::prelude::*;
+    ///
+    /// let memory_ref = MemoryRef::new(MemorySize::Bits8, 0x1234);
+    /// let requirement = memory_ref.gt(50);
+    /// assert_eq!(*requirement.lhs(), TypedValue::Memory(memory_ref));
+    /// assert_eq!(requirement.operator(), ComparisonOperator::GreaterThan);
+    /// ```
     pub fn gt(self, rhs: impl Into<TypedValue>) -> ComparisonRequirement {
         ComparisonRequirement::gt(self, rhs)
     }
 
     /// Creates a new greater than or equals [`ComparisonRequirement`].
+    ///
+    /// # Examples
+    /// ```
+    /// # use rustcheevos::types::operator::ComparisonOperator;
+    /// use rustcheevos::prelude::*;
+    ///
+    /// let memory_ref = MemoryRef::new(MemorySize::Bits8, 0x1234);
+    /// let requirement = memory_ref.ge(50);
+    /// assert_eq!(*requirement.lhs(), TypedValue::Memory(memory_ref));
+    /// assert_eq!(requirement.operator(), ComparisonOperator::GreaterThanOrEquals);
+    /// ```
     pub fn ge(self, rhs: impl Into<TypedValue>) -> ComparisonRequirement {
         ComparisonRequirement::ge(self, rhs)
     }
 
     /// Creates a new add [`ArithmeticRequirement`].
+    ///
+    /// # Examples
+    /// ```
+    /// # use rustcheevos::types::operator::ArithmeticOperator;
+    /// use rustcheevos::prelude::*;
+    ///
+    /// let memory_ref = MemoryRef::new(MemorySize::Bits8, 0x1234);
+    /// let requirement = memory_ref.add(50);
+    /// assert_eq!(*requirement.lhs(), TypedValue::Memory(memory_ref));
+    /// assert_eq!(requirement.operator(), Some(ArithmeticOperator::Add));
+    /// ```
     #[expect(
         clippy::should_implement_trait,
         reason = "not using arithmetic in the traditional sense"
@@ -123,6 +299,17 @@ impl MemoryRef {
     }
 
     /// Creates a new subtract [`ArithmeticRequirement`].
+    ///
+    /// # Examples
+    /// ```
+    /// # use rustcheevos::types::operator::ArithmeticOperator;
+    /// use rustcheevos::prelude::*;
+    ///
+    /// let memory_ref = MemoryRef::new(MemorySize::Bits8, 0x1234);
+    /// let requirement = memory_ref.sub(50);
+    /// assert_eq!(*requirement.lhs(), TypedValue::Memory(memory_ref));
+    /// assert_eq!(requirement.operator(), Some(ArithmeticOperator::Subtract));
+    /// ```
     #[expect(
         clippy::should_implement_trait,
         reason = "not using arithmetic in the traditional sense"
@@ -132,6 +319,17 @@ impl MemoryRef {
     }
 
     /// Creates a new multiply [`ArithmeticRequirement`].
+    ///
+    /// # Examples
+    /// ```
+    /// # use rustcheevos::types::operator::ArithmeticOperator;
+    /// use rustcheevos::prelude::*;
+    ///
+    /// let memory_ref = MemoryRef::new(MemorySize::Bits8, 0x1234);
+    /// let requirement = memory_ref.mul(50);
+    /// assert_eq!(*requirement.lhs(), TypedValue::Memory(memory_ref));
+    /// assert_eq!(requirement.operator(), Some(ArithmeticOperator::Multiply));
+    /// ```
     #[expect(
         clippy::should_implement_trait,
         reason = "not using arithmetic in the traditional sense"
@@ -141,6 +339,17 @@ impl MemoryRef {
     }
 
     /// Creates a new divide [`ArithmeticRequirement`].
+    ///
+    /// # Examples
+    /// ```
+    /// # use rustcheevos::types::operator::ArithmeticOperator;
+    /// use rustcheevos::prelude::*;
+    ///
+    /// let memory_ref = MemoryRef::new(MemorySize::Bits8, 0x1234);
+    /// let requirement = memory_ref.div(50);
+    /// assert_eq!(*requirement.lhs(), TypedValue::Memory(memory_ref));
+    /// assert_eq!(requirement.operator(), Some(ArithmeticOperator::Divide));
+    /// ```
     #[expect(
         clippy::should_implement_trait,
         reason = "not using arithmetic in the traditional sense"
@@ -150,20 +359,67 @@ impl MemoryRef {
     }
 
     /// Creates a new modulo [`ArithmeticRequirement`].
+    ///
+    /// # Examples
+    /// ```
+    /// # use rustcheevos::types::operator::ArithmeticOperator;
+    /// use rustcheevos::prelude::*;
+    ///
+    /// let memory_ref = MemoryRef::new(MemorySize::Bits8, 0x1234);
+    /// let requirement = memory_ref.modulo(50);
+    /// assert_eq!(*requirement.lhs(), TypedValue::Memory(memory_ref));
+    /// assert_eq!(requirement.operator(), Some(ArithmeticOperator::Modulo));
+    /// ```
     pub fn modulo(self, rhs: impl Into<TypedValue>) -> ArithmeticRequirement {
         ArithmeticRequirement::new(ArithmeticFlag::default(), self).modulo(rhs)
     }
 
     /// Creates a new bitwise and [`ArithmeticRequirement`].
+    ///
+    /// # Examples
+    /// ```
+    /// # use rustcheevos::types::operator::ArithmeticOperator;
+    /// use rustcheevos::prelude::*;
+    ///
+    /// let memory_ref = MemoryRef::new(MemorySize::Bits8, 0x1234);
+    /// let requirement = memory_ref.bitwise_and(50);
+    /// assert_eq!(*requirement.lhs(), TypedValue::Memory(memory_ref));
+    /// assert_eq!(requirement.operator(), Some(ArithmeticOperator::BitwiseAnd));
+    /// ```
     pub fn bitwise_and(self, rhs: impl Into<TypedValue>) -> ArithmeticRequirement {
         ArithmeticRequirement::new(ArithmeticFlag::default(), self).bitwise_and(rhs)
     }
 
     /// Creates a new bitwise xor [`ArithmeticRequirement`].
+    ///
+    /// # Examples
+    /// ```
+    /// # use rustcheevos::types::operator::ArithmeticOperator;
+    /// use rustcheevos::prelude::*;
+    ///
+    /// let memory_ref = MemoryRef::new(MemorySize::Bits8, 0x1234);
+    /// let requirement = memory_ref.bitwise_xor(50);
+    /// assert_eq!(*requirement.lhs(), TypedValue::Memory(memory_ref));
+    /// assert_eq!(requirement.operator(), Some(ArithmeticOperator::BitwiseXor));
+    /// ```
     pub fn bitwise_xor(self, rhs: impl Into<TypedValue>) -> ArithmeticRequirement {
         ArithmeticRequirement::new(ArithmeticFlag::default(), self).bitwise_xor(rhs)
     }
 
+    /// Sets the given flag on this requirement.
+    ///
+    /// # Examples
+    /// ```
+    /// # use rustcheevos::types::operator::ArithmeticOperator;
+    /// # use rustcheevos::types::flag::ArithmeticFlag;
+    /// use rustcheevos::prelude::*;
+    ///
+    /// let memory_ref = MemoryRef::new(MemorySize::Bits8, 0x1234);
+    /// let requirement = memory_ref.with_flag(ArithmeticFlag::AddSource);
+    /// assert_eq!(requirement.flag(), ArithmeticFlag::AddSource);
+    /// assert_eq!(*requirement.lhs(), TypedValue::Memory(memory_ref));
+    /// assert_eq!(requirement.operator(), None);
+    /// ```
     pub fn with_flag(self, flag: ArithmeticFlag) -> ArithmeticRequirement {
         ArithmeticRequirement::new(flag, self)
     }
@@ -199,39 +455,76 @@ impl fmt::Display for MemoryRef {
 /// A bit index.
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub enum BitIndex {
+    /// The first bit (index 0).
     Zero,
+    /// The second bit (index 1).
     One,
+    /// The third bit (index 2).
     Two,
+    /// The fourth bit (index 3).
     Three,
+    /// The fifth bit (index 4).
     Four,
+    /// The sixth bit (index 5).
     Five,
+    /// The seventh bit (index 6).
     Six,
+    /// The eighth bit (index 7).
     Seven,
 }
 
 /// A memory size.
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub enum MemorySize {
+    /// A bit index.
     BitIndex(BitIndex),
+    /// The lower 4 bits.
     Lower4,
+    /// The upper 4 bits.
     Upper4,
+    /// 8 bits.
     Bits8,
+    /// 16 bits.
     Bits16,
+    /// 24 bits.
     Bits24,
+    /// 32 bits.
     Bits32,
+    /// 16 bits in big endian.
     Bits16BE,
+    /// 24 bits in big endian.
     Bits24BE,
+    /// 32 bits in big endian.
     Bits32BE,
+    /// The number of bits set to 1.
     BitCount,
+    /// A float.
     Float,
+    /// A float in big endian.
     FloatBE,
+    /// A double.
     Double32,
+    /// A double in big endian.
     Double32BE,
+    /// An MBF32.
     MBF32,
+    /// An MBF32 in little endian.
     MBF32LE,
 }
 
 impl MemorySize {
+    /// Parses a memory size from a character.
+    ///
+    /// # Errors
+    /// Returns an error if the character is not a valid memory size.
+    ///
+    /// # Examples
+    /// ```
+    /// use rustcheevos::prelude::*;
+    ///
+    /// let memory_size = MemorySize::parse_bit_size('H').unwrap();
+    /// assert_eq!(memory_size, MemorySize::Bits8);
+    /// ```
     pub fn parse_bit_size(c: char) -> Result<MemorySize, ParseError> {
         match c {
             'H' => Ok(MemorySize::Bits8),
@@ -256,6 +549,18 @@ impl MemorySize {
         }
     }
 
+    /// Parses a float size from a character.
+    ///
+    /// # Errors
+    /// Returns an error if the character is not a valid float size.
+    ///
+    /// # Examples
+    /// ```
+    /// use rustcheevos::prelude::*;
+    ///
+    /// let memory_size = MemorySize::parse_float_size('F').unwrap();
+    /// assert_eq!(memory_size, MemorySize::Float);
+    /// ```
     pub fn parse_float_size(c: char) -> Result<MemorySize, ParseError> {
         match c {
             'F' => Ok(MemorySize::Float),
@@ -347,13 +652,19 @@ impl fmt::Display for MemorySize {
     }
 }
 
+/// An access mode defining how or when a memory reference is accessed.
 #[derive(Default, Debug, Clone, Copy, PartialEq)]
 pub enum AccessMode {
+    /// The memory reference is accessed as normal.
     #[default]
     Memory,
+    /// The memory reference is accessed on the previous frame.
     Delta,
+    /// The memory reference is accessed as the previously stored value.
     Prior,
+    /// The memory reference is accessed as a binary coded decimal.
     BCD,
+    /// The memory reference is accessed by inverting the bits.
     Invert,
 }
 
@@ -384,24 +695,27 @@ impl fmt::Display for AccessMode {
     }
 }
 
+#[allow(missing_docs, clippy::missing_docs_in_private_items)]
 macro_rules! memory_ref_constructors {
     ($($variant:ident($inner:ident::$inner_variant:ident) => $method:ident),*$(,)?) => {
-        $(
-            impl MemoryRef {
-                pub const fn $method(address: usize) -> Self {
-                    Self::new(MemorySize::$variant($inner::$inner_variant), address)
-                }
-            }
-        )*
+        impl MemoryRef {
+            $(
+                    #[allow(missing_docs, clippy::missing_docs_in_private_items)]
+                    pub const fn $method(address: usize) -> Self {
+                        Self::new(MemorySize::$variant($inner::$inner_variant), address)
+                    }
+            )*
+        }
     };
     ($($variant:ident => $method:ident),*$(,)?) => {
-        $(
-            impl MemoryRef {
-                pub const fn $method(address: usize) -> Self {
-                    Self::new(MemorySize::$variant, address)
-                }
-            }
-        )*
+        impl MemoryRef {
+            $(
+                    #[allow(missing_docs, clippy::missing_docs_in_private_items)]
+                    pub const fn $method(address: usize) -> Self {
+                        Self::new(MemorySize::$variant, address)
+                    }
+            )*
+        }
     };
 }
 

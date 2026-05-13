@@ -1,3 +1,5 @@
+//! Core rustcheevos types.
+
 pub mod achievement;
 pub mod chain;
 pub mod flag;

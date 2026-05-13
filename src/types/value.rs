@@ -1,3 +1,5 @@
+//! Type definitions for values.
+
 use std::{fmt, str::FromStr};
 
 use winnow::Parser;
@@ -13,13 +15,18 @@ use super::{
 /// A value that can be used in a condition.
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub enum TypedValue {
+    /// A memory reference value.
     Memory(MemoryRef),
+    /// An integer value.
     Integer(u32),
+    /// A float value.
     Float(f32),
+    /// A recalled value.
     Recall,
 }
 
 impl TypedValue {
+    // TODO: Implement for T: Into<TypedValue> instead.
     /// Creates a new equals [`ComparisonRequirement`].
     pub fn eq(self, rhs: impl Into<TypedValue>) -> ComparisonRequirement {
         ComparisonRequirement::eq(self, rhs)

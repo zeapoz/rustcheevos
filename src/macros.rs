@@ -1,3 +1,5 @@
+//! Convenience and style macros provided by the crate.
+
 /// Creates a memory reference to the value of the first bit (index 0) at the given address.
 #[macro_export]
 macro_rules! bit0 {

@@ -1,3 +1,5 @@
+//! Parser functions for memory types.
+
 use winnow::{
     Parser, Result,
     ascii::hex_digit1,
@@ -7,12 +9,14 @@ use winnow::{
 
 use crate::types::memory::*;
 
+/// Parses a memory access mode.
 pub fn parse_memory_access_mode(input: &mut &str) -> Result<AccessMode> {
     one_of(['d', 'p', 'b', '~'])
         .try_map(AccessMode::try_from)
         .parse_next(input)
 }
 
+/// Parses a memory size.
 pub fn parse_memory_size(input: &mut &str) -> Result<MemorySize> {
     let bits = one_of([
         'H', ' ', 'X', 'W', 'I', 'J', 'G', 'K', 'L', 'U', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T',
@@ -28,6 +32,7 @@ pub fn parse_memory_size(input: &mut &str) -> Result<MemorySize> {
     Ok(memsize)
 }
 
+/// Parses a memory reference.
 pub fn parse_memory_ref(input: &mut &str) -> Result<MemoryRef> {
     let (access_mode, memsize, addr) = (
         opt(parse_memory_access_mode),
@@ -38,6 +43,7 @@ pub fn parse_memory_ref(input: &mut &str) -> Result<MemoryRef> {
     Ok(MemoryRef::new(memsize, addr).with_access_mode(access_mode.unwrap_or_default()))
 }
 
+/// Parses a hex address.
 fn parse_hex_address(input: &mut &str) -> Result<usize> {
     hex_digit1
         .try_map(|hex| usize::from_str_radix(hex, 16))

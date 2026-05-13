@@ -1,3 +1,5 @@
+//! Leaderboard type definitions.
+
 use std::fmt;
 use std::str::FromStr;
 
@@ -7,6 +9,34 @@ use crate::prelude::Requirement;
 use super::chain::ChainGroup;
 
 /// A leaderboard definition.
+///
+/// This type defines the core properties of a leaderboard and is used to populate
+/// an [`AchievementSet`][`crate::types::game::AchievementSet`].
+///
+/// # Examples
+///
+/// ```
+/// # fn start_condition() -> Chain { Chain::default() }
+/// # fn cancel_condition() -> Chain { Chain::default() }
+/// # fn submit_condition() -> Chain { Chain::default() }
+/// # use rustcheevos::bits8;
+/// # fn value() -> MemoryRef { bits8!(0) }
+/// use rustcheevos::{prelude::*, measured};
+///
+/// let leaderboard = Leaderboard::new(
+///     "Speed Run",
+///     "Complete the level as fast as possible",
+///     start_condition(),
+///     cancel_condition(),
+///     submit_condition(),
+///     measured!(value()),
+///     LeaderboardFormat::Seconds,
+///     true,
+/// );
+/// ```
+///
+/// [`Leaderboard::new()`] sets all of the required properties. To set ID, use
+/// [`Leaderboard::with_id()`].
 #[derive(Debug, Clone, PartialEq)]
 pub struct Leaderboard {
     /// The leaderboard ID.
@@ -30,18 +60,28 @@ pub struct Leaderboard {
 }
 
 impl Leaderboard {
-    /// Creates a new leaderboard.
+    /// Creates a new leaderboard with the given title, description, conditions, and format.
     ///
-    /// # Arguments
+    /// # Examples
+    /// ```
+    /// # fn start_condition() -> Chain { Chain::default() }
+    /// # fn cancel_condition() -> Chain { Chain::default() }
+    /// # fn submit_condition() -> Chain { Chain::default() }
+    /// # use rustcheevos::bits8;
+    /// # fn value() -> MemoryRef { bits8!(0) }
+    /// use rustcheevos::{prelude::*, measured};
     ///
-    /// * `title` - The leaderboard title.
-    /// * `description` - The leaderboard description.
-    /// * `start` - The leaderboard start condition.
-    /// * `cancel` - The leaderboard cancel condition.
-    /// * `submit` - The leaderboard submit condition.
-    /// * `value` - The leaderboard value condition.
-    /// * `format` - The value format.
-    /// * `lower_is_better` - Whether lower values are better.
+    /// let leaderboard = Leaderboard::new(
+    ///     "Speed Run",
+    ///     "Complete the level as fast as possible",
+    ///     start_condition(),
+    ///     cancel_condition(),
+    ///     submit_condition(),
+    ///     measured!(value()),
+    ///     LeaderboardFormat::Seconds,
+    ///     true,
+    /// );
+    /// ```
     #[expect(clippy::too_many_arguments, reason = "all fields are required")]
     pub fn new(
         title: impl Into<String>,
@@ -66,16 +106,21 @@ impl Leaderboard {
         }
     }
 
-    /// Creates a new leaderboard with an instant submission.
+    /// Creates a new instant submission leaderboard.
     ///
-    /// # Arguments
+    /// # Examples
+    /// ```
+    /// use rustcheevos::prelude::*;
     ///
-    /// * `title` - The leaderboard title.
-    /// * `description` - The leaderboard description.
-    /// * `start` - The leaderboard start condition.
-    /// * `value` - The leaderboard value condition.
-    /// * `format` - The value format.
-    /// * `lower_is_better` - Whether lower values are better.
+    /// let leaderboard = Leaderboard::new_instant_submission(
+    ///     "Speed Run",
+    ///     "Complete the level as fast as possible",
+    ///     Requirement::always_true(),
+    ///     Requirement::always_true(),
+    ///     LeaderboardFormat::Seconds,
+    ///     true,
+    /// );
+    /// ```
     pub fn new_instant_submission(
         title: impl Into<String>,
         description: impl Into<String>,
@@ -98,9 +143,27 @@ impl Leaderboard {
 
     /// Sets the leaderboard ID.
     ///
-    /// # Arguments
+    /// # Examples
+    /// ```
+    /// # fn start_condition() -> Chain { Chain::default() }
+    /// # fn cancel_condition() -> Chain { Chain::default() }
+    /// # fn submit_condition() -> Chain { Chain::default() }
+    /// # use rustcheevos::bits8;
+    /// # fn value() -> MemoryRef { bits8!(0) }
+    /// use rustcheevos::{prelude::*, measured};
     ///
-    /// * `id` - The leaderboard ID.
+    /// let leaderboard = Leaderboard::new(
+    ///     "Speed Run",
+    ///     "Complete the game as fast as possible",
+    ///     start_condition(),
+    ///     cancel_condition(),
+    ///     submit_condition(),
+    ///     measured!(value()),
+    ///     LeaderboardFormat::Seconds,
+    ///     true,
+    /// )
+    /// .with_id(600707);
+    /// ```
     pub fn with_id(mut self, id: u32) -> Self {
         self.id = id;
         self

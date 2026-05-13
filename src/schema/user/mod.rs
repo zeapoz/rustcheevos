@@ -1,12 +1,14 @@
-use std::fmt;
+//! Definitions for user files
 
-use header::Header;
+use std::fmt;
 
 use thiserror::Error;
 
+use header::Header;
+
 use crate::prelude::{Achievement, Leaderboard};
 
-pub mod header;
+mod header;
 
 /// The suffix for user files.
 pub const USER_FILE_SUFFIX: &str = "-User";
@@ -20,10 +22,13 @@ const DEFAULT_TIMESTAMP: &str = "0";
 /// The badge ID to use when none is specified.
 const DEFAULT_BADGE_ID: &str = "00000";
 
+/// The error type for user file parsing.
 #[derive(Error, Debug, Clone)]
 pub enum ParseError {
+    /// The protocol version is invalid.
     #[error("invalid protocol version: {0}")]
     InvalidProtocolVersion(String),
+    /// The header is invalid.
     #[error("invalid header: {0}")]
     InvalidHeader(String),
 }
@@ -31,14 +36,18 @@ pub enum ParseError {
 /// The user file schema.
 #[derive(Debug, Clone)]
 pub struct UserFile {
+    /// The header of the user file.
     pub header: Header,
+    /// The achievement entries of the user file.
     pub achievements: Vec<AchievementEntry>,
+    /// The leaderboard entries of the user file.
     pub leaderboards: Vec<LeaderboardEntry>,
+    /// The code note entries of the user file.
     pub notes: Vec<CodeNote>,
 }
 
 impl UserFile {
-    /// Creates a new user file.
+    /// Creates and returns a new user file.
     pub fn new(
         game_title: impl Into<String>,
         achievements: impl IntoIterator<Item = impl Into<AchievementEntry>>,
@@ -72,17 +81,29 @@ impl fmt::Display for UserFile {
 /// An achievement entry in a user file.
 #[derive(Debug, Clone, PartialEq)]
 pub struct AchievementEntry {
+    /// The achievement ID.
     pub id: u32,
+    /// The requirements for the achievement.
     pub requirements: String,
+    /// The achievement title.
     pub title: String,
+    /// The achievement description.
     pub description: String,
+    /// The tag for the achive  
     pub tag: String,
+    /// The author of the achievement.
     pub author: String,
+    /// The number of points for the achievement.
     pub points: u32,
+    /// The date the achievement was created.
     pub created: String,
+    /// The date the achievement was last updated.
     pub updated: String,
+    /// The number of upvotes for the achievement, unused.
     pub upvotes: u32,
+    /// The number of downvotes for the achievement, unused.
     pub downvotes: u32,
+    /// The link to the badge icon for the achievement.
     pub badge: String,
 }
 
@@ -129,14 +150,23 @@ impl From<&Achievement> for AchievementEntry {
 /// A leaderboard entry in a user file.
 #[derive(Debug, Clone, PartialEq)]
 pub struct LeaderboardEntry {
+    /// The leaderboard ID.
     pub id: u32,
+    /// The leaderboard start condition.
     pub start: String,
+    /// The leaderboard cancel condition.
     pub cancel: String,
+    /// The leaderboard submit condition.
     pub submit: String,
+    /// The leaderboard value condition.
     pub value: String,
+    /// The leaderboard format.
     pub format: String,
+    /// The leaderboard title.
     pub title: String,
+    /// The leaderboard description.
     pub description: String,
+    /// Whether lower values are to be considered better.
     pub lower_is_better: bool,
 }
 
@@ -177,7 +207,9 @@ impl From<&Leaderboard> for LeaderboardEntry {
 /// A code note in a user file.
 #[derive(Debug, Clone, PartialEq)]
 pub struct CodeNote {
+    /// The address of the code note.
     pub address: u32,
+    /// The note.
     pub note: String,
 }
 

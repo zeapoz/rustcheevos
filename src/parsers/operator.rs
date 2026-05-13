@@ -1,7 +1,10 @@
+//! Parser functions for operators.
+
 use winnow::{Parser, Result, combinator::alt};
 
 use crate::types::operator::*;
 
+/// Parses an arithmetic operator.
 pub fn parse_arithmetic_operator(input: &mut &str) -> Result<ArithmeticOperator> {
     let operators = alt(("+", "-", "*", "/"));
     operators
@@ -9,6 +12,7 @@ pub fn parse_arithmetic_operator(input: &mut &str) -> Result<ArithmeticOperator>
         .parse_next(input)
 }
 
+/// Parses a comparison operator.
 pub fn parse_comparison_operator(input: &mut &str) -> Result<ComparisonOperator> {
     let operators = alt(("<=", "<", ">=", ">", "!=", "="));
     operators

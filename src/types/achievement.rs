@@ -1,12 +1,38 @@
+//! Type definitions for achievements.
+
 use std::{fmt, str::FromStr};
 
 use crate::parsers::ParseError;
 
 use super::chain::ChainGroup;
 
+// TODO: Refactor into builder pattern.
 /// An achievement definition.
+///
+/// This type defines the core properties of an achievement and is used to populate
+/// an [AchievementSet][`crate::types::game::AchievementSet`].
+///
+/// # Examples
+///
+/// ```
+/// # enum Galaxy { Alpha }
+/// # enum Medal { Bronze }
+/// # fn galaxy_all_medals_condition(galaxy: Galaxy, medal: Medal) -> Chain { Chain::default() }
+/// use rustcheevos::prelude::*;
+///
+/// let achievement = Achievement::new(
+///     "Alpha Amateur",
+///     "Earn a Bronze medal or higher on every planet of the Alpha galaxy",
+///     galaxy_all_medals_condition(Galaxy::Alpha, Medal::Bronze),
+///     3,
+/// );
+/// ```
+///
+/// [`Achievement::new()`] sets all of the required properties and uses default values for optional
+/// ones. To set ID or tag, you can use [`Achievement::with_id()`] and [`Achievement::with_tag()`].
 #[derive(Debug, Clone, PartialEq)]
 pub struct Achievement {
+    /// The achievement ID.
     pub id: u32,
     /// The achievement title.
     pub title: String,
@@ -23,12 +49,20 @@ pub struct Achievement {
 impl Achievement {
     /// Creates a new achievement with the given title, description, conditions, and points.
     ///
-    /// # Arguments
+    /// # Examples
+    /// ```
+    /// # enum Galaxy { Alpha }
+    /// # enum Medal { Bronze }
+    /// # fn galaxy_all_medals_condition(galaxy: Galaxy, medal: Medal) -> Chain { Chain::default() }
+    /// use rustcheevos::prelude::*;
     ///
-    /// * `title` - The achievement title.
-    /// * `description` - The achievement description.
-    /// * `requirements` - The achievement conditions that must be met.
-    /// * `points` - The point value.
+    /// let achievement = Achievement::new(
+    ///     "Alpha Amateur",
+    ///     "Earn a Bronze medal or higher on every planet of the Alpha galaxy",
+    ///     galaxy_all_medals_condition(Galaxy::Alpha, Medal::Bronze),
+    ///     3,
+    /// );
+    /// ```
     pub fn new(
         title: impl Into<String>,
         description: impl Into<String>,
@@ -47,9 +81,21 @@ impl Achievement {
 
     /// Sets the achievement ID.
     ///
-    /// # Arguments
+    /// # Examples
+    /// ```
+    /// # enum Galaxy { Alpha }
+    /// # enum Medal { Bronze }
+    /// # fn galaxy_all_medals_condition(galaxy: Galaxy, medal: Medal) -> Chain { Chain::default() }
+    /// use rustcheevos::prelude::*;
     ///
-    /// * `id` - The achievement ID.
+    /// let achievement = Achievement::new(
+    ///     "Alpha Amateur",
+    ///     "Earn a Bronze medal or higher on every planet of the Alpha galaxy",
+    ///     galaxy_all_medals_condition(Galaxy::Alpha, Medal::Bronze),
+    ///     3,
+    /// )
+    /// .with_id(600707);
+    /// ```
     pub fn with_id(mut self, id: u32) -> Self {
         self.id = id;
         self
@@ -57,26 +103,57 @@ impl Achievement {
 
     /// Sets the achievement tag.
     ///
-    /// # Arguments
+    /// # Examples
+    /// ```
+    /// # enum Galaxy { Alpha }
+    /// # enum Medal { Bronze }
+    /// # fn galaxy_all_medals_condition(galaxy: Galaxy, medal: Medal) -> Chain { Chain::default() }
+    /// use rustcheevos::prelude::*;
     ///
-    /// * `tag` - The achievement tag.
+    /// let achievement = Achievement::new(
+    ///     "Alpha Amateur",
+    ///     "Earn a Bronze medal or higher on every planet of the Alpha galaxy",
+    ///     galaxy_all_medals_condition(Galaxy::Alpha, Medal::Bronze),
+    ///     3,
+    /// )
+    /// .with_tag(Tag::Progression);
+    /// ```
     pub fn with_tag(mut self, tag: Tag) -> Self {
         self.tag = tag;
         self
     }
 }
 
-/// Tags for achievements.
+/// An achievement tag.
+///
+/// This enum defines all the unique tags that can be applied to an [Achievement].
+/// Use with [Achievement::with_tag] to specify a tag.
+///
+/// # Examples
+/// ```
+/// # enum Medal { Bronze }
+/// # fn all_medals_condition(medal: Medal) -> Chain { Chain::default() }
+/// use rustcheevos::prelude::*;
+///
+/// let achievement = Achievement::new(
+///     "Solar System Sentinel",
+///     "Earn a Bronze medal or higher on every planet in every galaxy excluding the Lambda galaxy",
+///     all_medals_condition(Medal::Bronze),
+///     3,
+/// )
+/// .with_tag(Tag::WinCondition);
+/// ```
 #[derive(Default, Debug, Clone, PartialEq, Eq, Hash)]
 pub enum Tag {
-    /// No special tag.
+    // TODO: Remove in favor of `Option`.
+    /// The default, no tag.
     #[default]
     None,
-    /// Progression achievement.
+    /// Represents a progression achievement.
     Progression,
-    /// Win condition.
+    /// Represents ta win condition.
     WinCondition,
-    /// Missable achievement.
+    /// Represents a missable achievement.
     Missable,
 }
 

@@ -1,7 +1,10 @@
+//! Parser functions for memory types.
+
 use winnow::{Parser, Result, combinator::alt, token::one_of};
 
 use crate::types::flag::*;
 
+/// Parses a comparison flag.
 pub fn parse_comparison_flag(input: &mut &str) -> Result<ComparisonFlag> {
     let flags = one_of(['P', 'R', 'Z', 'C', 'D', 'N', 'O', 'M', 'G', 'Q', 'T']);
 
@@ -10,6 +13,7 @@ pub fn parse_comparison_flag(input: &mut &str) -> Result<ComparisonFlag> {
     Ok(flag)
 }
 
+/// Parses an arithmetic flag.
 pub fn parse_arithmetic_flag(input: &mut &str) -> Result<ArithmeticFlag> {
     let flags = one_of(['A', 'B', 'I', 'K', 'M']);
 
@@ -18,6 +22,7 @@ pub fn parse_arithmetic_flag(input: &mut &str) -> Result<ArithmeticFlag> {
     Ok(flag)
 }
 
+/// Parses a flag.
 pub fn parse_flag(input: &mut &str) -> Result<Flag> {
     let flag = alt((
         parse_comparison_flag.map(Flag::from),

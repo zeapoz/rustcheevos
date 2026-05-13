@@ -1,36 +1,15 @@
+//! Definitions for user file headers.
+
 use std::{fmt, str::FromStr};
 
 use super::ParseError;
 
-/// The protocol version of a user file.
-#[derive(Debug, Clone, Copy, PartialEq)]
-pub enum ProtocolVersion {
-    V1_3,
-}
-
-impl FromStr for ProtocolVersion {
-    type Err = ParseError;
-
-    fn from_str(s: &str) -> Result<Self, Self::Err> {
-        match s {
-            "1.3" => Ok(ProtocolVersion::V1_3),
-            _ => Err(ParseError::InvalidProtocolVersion(s.to_string())),
-        }
-    }
-}
-
-impl fmt::Display for ProtocolVersion {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self {
-            ProtocolVersion::V1_3 => write!(f, "1.3"),
-        }
-    }
-}
-
 /// The header of a user file.
 #[derive(Debug, Clone, PartialEq)]
 pub struct Header {
+    /// The protocol version.
     pub version: ProtocolVersion,
+    /// The game title.
     pub game_title: String,
 }
 
@@ -62,5 +41,31 @@ impl FromStr for Header {
 impl fmt::Display for Header {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "{}\n{}", self.version, self.game_title)
+    }
+}
+
+/// The protocol version of a user file.
+#[allow(clippy::missing_docs_in_private_items)]
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub enum ProtocolVersion {
+    V1_3,
+}
+
+impl FromStr for ProtocolVersion {
+    type Err = ParseError;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        match s {
+            "1.3" => Ok(ProtocolVersion::V1_3),
+            _ => Err(ParseError::InvalidProtocolVersion(s.to_string())),
+        }
+    }
+}
+
+impl fmt::Display for ProtocolVersion {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            ProtocolVersion::V1_3 => write!(f, "1.3"),
+        }
     }
 }

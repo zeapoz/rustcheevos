@@ -1,3 +1,5 @@
+//! Type definition for the core game container struct.
+
 use std::{fs, io, path::Path};
 
 use crate::{
@@ -7,9 +9,65 @@ use crate::{
 
 use super::rich::RichPresence;
 
+/// A set of achievements.
 pub type AchievementSet = Vec<Achievement>;
+/// A set of leaderboards.
 pub type LeaderboardSet = Vec<Leaderboard>;
 
+/// The core game struct containing all the assets.
+///
+/// # Examples
+///
+/// ```no_run
+/// use rustcheevos::{prelude::*, bits8, chain, measured};
+///
+/// // Create a new game.
+/// let mut game = Game::new("GAME123", "Super Adventure");
+///
+/// // Define an achievement with conditions.
+/// let achievement_condition = chain!(
+///     bits8!(0x1234).eq(1),
+///     bits8!(0x5678).ge(100),
+/// );
+/// let achievement = Achievement::new(
+///     "First Step",
+///     "Complete the tutorial level",
+///     achievement_condition,
+///     5,
+/// );
+///
+/// // Define a leaderboard with conditions.
+/// let start = chain!(bits8!(0x1234).eq(1));
+/// let cancel = chain!(bits8!(0x1234).eq(0));
+/// let submit = chain!(bits8!(0xABCD).eq(1));
+/// let value = measured!(bits8!(0xDEF0));
+/// let leaderboard = Leaderboard::new(
+///     "Speed Run",
+///     "Complete the game as fast as possible",
+///     start,
+///     cancel,
+///     submit,
+///     value,
+///     LeaderboardFormat::Seconds,
+///     true,
+/// );
+///
+/// // Define rich presence.
+/// let mut rich_presence = RichPresence::new();
+/// let display_condition = chain!(bits8!(0x1234).ge(1));
+/// rich_presence.add_conditional_display(display_condition, "Playing: @Stage(0x1234)");
+/// rich_presence.add_static_display("Super Adventure");
+///
+/// // Add all assets to the game.
+/// game.add(achievement)
+///     .add(leaderboard)
+///     .set_rich_presence(rich_presence);
+///
+/// // Export to a directory.
+/// let directory = std::env::temp_dir().join("rustcheevos_example");
+/// std::fs::create_dir_all(&directory).unwrap();
+/// game.export(&directory).unwrap();
+/// ```
 #[derive(Debug, Clone, PartialEq)]
 pub struct Game {
     /// The game ID.
@@ -25,12 +83,15 @@ pub struct Game {
 }
 
 impl Game {
-    /// Creates a new game.
+    /// Creates a new game with the given ID and name.
     ///
-    /// # Arguments
+    /// # Examples
     ///
-    /// * `id` - The game ID.
-    /// * `name` - The game name.
+    /// ```
+    /// use rustcheevos::prelude::*;
+    ///
+    /// let game = Game::new("GAME001", "Super Adventure");
+    /// ```
     pub fn new(id: impl Into<String>, name: impl Into<String>) -> Self {
         Self {
             id: id.into(),
@@ -43,9 +104,18 @@ impl Game {
 
     /// Adds an asset to this game.
     ///
-    /// # Arguments
+    /// # Examples
     ///
-    /// * `item` - The asset to add.
+    /// ```
+    /// # use rustcheevos::{prelude::*, chain, bits8};
+    /// let mut game = Game::new("GAME001", "Super Adventure");
+    ///
+    /// let condition = chain!(bits8!(0x1234).eq(1));
+    /// let achievement = Achievement::new("First Step", "Complete the tutorial", condition, 5);
+    ///
+    /// game.add(achievement);
+    /// assert_eq!(game.achievements().count(), 1);
+    /// ```
     pub fn add(&mut self, item: impl Into<GameAsset>) -> &mut Self {
         match item.into() {
             GameAsset::Achievement(achievement) => self.core_set.push(achievement),
@@ -57,9 +127,19 @@ impl Game {
 
     /// Adds multiple assets to this game.
     ///
-    /// # Arguments
+    /// # Examples
     ///
-    /// * `items` - The assets to add.
+    /// ```
+    /// # use rustcheevos::{prelude::*, chain, bits8};
+    /// let mut game = Game::new("GAME001", "Super Adventure");
+    ///
+    /// let condition = chain!(bits8!(0x1234).eq(1));
+    /// let achievement_a = Achievement::new("Step A", "Do A", condition.clone(), 5);
+    /// let achievement_b = Achievement::new("Step B", "Do B", condition, 10);
+    ///
+    /// game.add_many([achievement_a, achievement_b]);
+    /// assert_eq!(game.achievements().count(), 2);
+    /// ```
     pub fn add_many(&mut self, items: impl IntoIterator<Item = impl Into<GameAsset>>) -> &mut Self {
         for item in items {
             self.add(item);
@@ -69,9 +149,18 @@ impl Game {
 
     /// Sets the core achievement set for this game.
     ///
-    /// # Arguments
+    /// # Examples
     ///
-    /// * `core_set` - The core achievement set to set.
+    /// ```
+    /// # use rustcheevos::{prelude::*, chain, bits8};
+    /// let mut game = Game::new("GAME001", "Super Adventure");
+    ///
+    /// let condition = chain!(bits8!(0x1234).eq(1));
+    /// let achievement = Achievement::new("First Step", "Complete the tutorial", condition, 5);
+    ///
+    /// game.set_core_set(vec![achievement]);
+    /// assert_eq!(game.achievements().count(), 1);
+    /// ```
     pub fn set_core_set(&mut self, core_set: impl Into<AchievementSet>) -> &mut Self {
         self.core_set = core_set.into();
         self
@@ -79,9 +168,30 @@ impl Game {
 
     /// Sets the leaderboards for this game.
     ///
-    /// # Arguments
+    /// # Examples
     ///
-    /// * `leaderboards` - The leaderboards to set.
+    /// ```
+    /// # use rustcheevos::{prelude::*, chain, bits8, measured};
+    /// let mut game = Game::new("GAME001", "Super Adventure");
+    ///
+    /// let start = chain!(bits8!(0x1234).eq(1));
+    /// let cancel = chain!(bits8!(0x1234).eq(0));
+    /// let submit = chain!(bits8!(0xABCD).eq(1));
+    /// let value = measured!(bits8!(0xDEF0));
+    /// let leaderboard = Leaderboard::new(
+    ///     "Speed Run",
+    ///     "Complete the game fast",
+    ///     start,
+    ///     cancel,
+    ///     submit,
+    ///     value,
+    ///     LeaderboardFormat::Seconds,
+    ///     true,
+    /// );
+    ///
+    /// game.set_leaderboards(vec![leaderboard]);
+    /// assert_eq!(game.leaderboards().count(), 1);
+    /// ```
     pub fn set_leaderboards(&mut self, leaderboards: impl Into<LeaderboardSet>) -> &mut Self {
         self.leaderboards = leaderboards.into();
         self
@@ -89,20 +199,50 @@ impl Game {
 
     /// Sets the rich presence for this game.
     ///
-    /// # Arguments
+    /// # Examples
     ///
-    /// * `rich_presence` - The rich presence to set.
+    /// ```
+    /// # use rustcheevos::prelude::*;
+    /// let mut game = Game::new("GAME001", "Super Adventure");
+    ///
+    /// let mut rich_presence = RichPresence::new();
+    /// rich_presence.add_static_display("Playing Super Adventure");
+    ///
+    /// game.set_rich_presence(rich_presence);
+    /// ```
     pub fn set_rich_presence(&mut self, rich_presence: impl Into<RichPresence>) -> &mut Self {
         self.rich_presence = rich_presence.into();
         self
     }
 
     /// Returns an iterator over the achievements in this game.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # use rustcheevos::prelude::*;
+    /// let game = Game::new("GAME001", "Test");
+    ///
+    /// for achievement in game.achievements() {
+    ///     println!("{}", achievement.title);
+    /// }
+    /// ```
     pub fn achievements(&self) -> impl Iterator<Item = &Achievement> {
         self.core_set.iter()
     }
 
     /// Returns an iterator over the leaderboards in this game.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # use rustcheevos::prelude::*;
+    /// let game = Game::new("GAME001", "Test");
+    ///
+    /// for lb in game.leaderboards() {
+    ///     println!("{}", lb.title);
+    /// }
+    /// ```
     pub fn leaderboards(&self) -> impl Iterator<Item = &Leaderboard> {
         self.leaderboards.iter()
     }
@@ -114,9 +254,28 @@ impl Game {
 
     /// Exports the assets of this game to the given directory.
     ///
-    /// # Arguments
+    /// This exports the user file and the rich presence file to the given directory.
     ///
-    /// * `dir` - The directory to export to.
+    /// # Errors
+    ///
+    /// Returns an error if the directory cannot be created or if writing fails.
+    ///
+    /// # Examples
+    ///
+    /// ```no_run
+    /// use rustcheevos::prelude::*;
+    ///
+    /// let mut game = Game::new("GAME001", "Super Adventure");
+    ///
+    /// let mut rich_presence = RichPresence::new();
+    /// rich_presence.add_static_display("Playing Super Adventure");
+    /// game.set_rich_presence(rich_presence);
+    ///
+    /// let temp_dir = std::env::temp_dir().join("rustcheevos_export_test");
+    /// std::fs::create_dir_all(&temp_dir).unwrap();
+    ///
+    /// game.export(&temp_dir).unwrap();
+    /// ```
     pub fn export(&self, dir: impl AsRef<Path>) -> io::Result<()> {
         let dir = dir.as_ref();
         self.export_user_file(dir)?;
@@ -125,9 +284,26 @@ impl Game {
 
     /// Exports the user file for this game to the given directory.
     ///
-    /// # Arguments
+    /// # Errors
     ///
-    /// * `dir` - The directory to export to.
+    /// Returns an error if the directory cannot be created or if writing fails.
+    ///
+    /// # Examples
+    ///
+    /// ```no_run
+    /// use rustcheevos::{prelude::*, chain, bits8};
+    ///
+    /// let mut game = Game::new("GAME001", "Super Adventure");
+    ///
+    /// let condition = chain!(bits8!(0x1234).eq(1));
+    /// let achievement = Achievement::new("First Step", "Complete the tutorial", condition, 5);
+    /// game.add(achievement);
+    ///
+    /// let temp_dir = std::env::temp_dir().join("rustcheevos_user_file_test");
+    /// std::fs::create_dir_all(&temp_dir).unwrap();
+    ///
+    /// game.export_user_file(&temp_dir).unwrap();
+    /// ```
     pub fn export_user_file(&self, dir: impl AsRef<Path>) -> io::Result<()> {
         let user_file = self.user_file();
         let filename = format!("{}{USER_FILE_SUFFIX}{USER_FILE_EXTENSION}", self.id);
@@ -137,10 +313,26 @@ impl Game {
 }
 
 /// An asset for a game.
+///
+/// # Examples
+///
+/// ```
+/// use rustcheevos::{prelude::*, chain, bits8};
+/// use rustcheevos::types::game::GameAsset;
+///
+/// // GameAsset can be created from Achievement, Leaderboard, or RichPresence
+/// let condition = chain!(bits8!(0x1234).eq(1));
+/// let achievement = Achievement::new("First Step", "Complete the tutorial", condition, 5);
+///
+/// let game_asset: GameAsset = achievement.into();
+/// ```
 #[derive(Debug, Clone, PartialEq)]
 pub enum GameAsset {
+    /// An achievement.
     Achievement(Achievement),
+    /// A leaderboard.
     Leaderboard(Leaderboard),
+    /// A rich presence.
     RichPresence(RichPresence),
 }
 

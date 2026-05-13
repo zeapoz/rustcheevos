@@ -1,3 +1,5 @@
+//! Parser functions for requirements.
+
 use winnow::{
     Parser, Result,
     combinator::{alt, opt},
@@ -12,6 +14,7 @@ use super::{
     parse_comparison_operator, parse_int_value, parse_typed_value,
 };
 
+/// Parses a requirement.
 pub fn parse_requirement(input: &mut &str) -> Result<Requirement> {
     let requirement = alt((
         parse_arithmetic_requirement.map(Requirement::from),
@@ -21,6 +24,7 @@ pub fn parse_requirement(input: &mut &str) -> Result<Requirement> {
     Ok(requirement)
 }
 
+/// Parses a comparison requirement.
 pub fn parse_comparison_requirement(input: &mut &str) -> Result<ComparisonRequirement> {
     let flag = opt(parse_comparison_flag).parse_next(input)?;
     let lhs = parse_typed_value.parse_next(input)?;
@@ -34,18 +38,21 @@ pub fn parse_comparison_requirement(input: &mut &str) -> Result<ComparisonRequir
     })
 }
 
+/// Parses a comparison operation.
 fn parse_comparison_operation(input: &mut &str) -> Result<ComparisonOperation> {
-    let comparator = parse_comparison_operator.parse_next(input)?;
+    let operator = parse_comparison_operator.parse_next(input)?;
     let rhs = parse_typed_value.parse_next(input)?;
-    Ok(ComparisonOperation { comparator, rhs })
+    Ok(ComparisonOperation { operator, rhs })
 }
 
+/// Parses a hit count.
 pub fn parse_hit_count(input: &mut &str) -> Result<HitCount> {
     let (_open, hit_count, _close) =
         ('.', parse_int_value.map(HitCount::from), '.').parse_next(input)?;
     Ok(hit_count)
 }
 
+/// Parses an arithmetic requirement.
 pub fn parse_arithmetic_requirement(input: &mut &str) -> Result<ArithmeticRequirement> {
     let flag = parse_arithmetic_flag.parse_next(input)?;
     let lhs = parse_typed_value.parse_next(input)?;
@@ -57,6 +64,7 @@ pub fn parse_arithmetic_requirement(input: &mut &str) -> Result<ArithmeticRequir
     })
 }
 
+/// Parses an arithmetic operation.
 fn parse_arithmetic_operation(input: &mut &str) -> Result<ArithmeticOperation> {
     let operator = parse_arithmetic_operator.parse_next(input)?;
     let rhs = parse_typed_value.parse_next(input)?;
@@ -84,7 +92,7 @@ mod tests {
                 flag: None,
                 lhs: TypedValue::Memory(MemoryRef::new(MemorySize::Bits32, 0x1234)),
                 operation: ComparisonOperation {
-                    comparator: ComparisonOperator::Equals,
+                    operator: ComparisonOperator::Equals,
                     rhs: TypedValue::Memory(MemoryRef::new(MemorySize::Bits32, 0x5678))
                 },
                 hit_count: HitCount::new(0)
@@ -139,7 +147,7 @@ mod tests {
             requirement.lhs,
             TypedValue::Memory(MemoryRef::new(MemorySize::Bits32, 0x1234))
         );
-        assert_eq!(requirement.operation.comparator, ComparisonOperator::Equals);
+        assert_eq!(requirement.operation.operator, ComparisonOperator::Equals);
         assert_eq!(
             requirement.operation.rhs,
             TypedValue::Memory(MemoryRef::new(MemorySize::Bits32, 0x5678))

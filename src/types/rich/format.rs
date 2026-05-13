@@ -1,14 +1,34 @@
+//! Type definition for rich presence formats.
+
 use std::fmt;
 
 /// A rich presence format definition.
+///
+/// # Examples
+///
+/// ```
+/// use rustcheevos::types::rich::format::{Format, FormatType};
+///
+/// let format = Format::new("Score", FormatType::Score);
+/// ```
 #[derive(Debug, Clone, PartialEq)]
 pub struct Format {
+    /// The name of the format.
     pub name: String,
+    /// The format type.
     pub format_type: FormatType,
 }
 
 impl Format {
     /// Creates a new rich presence format definition.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use rustcheevos::types::rich::format::{Format, FormatType};
+    ///
+    /// let format = Format::new("Score", FormatType::Score);
+    /// ```
     pub fn new(name: impl Into<String>, format_type: FormatType) -> Self {
         Self {
             name: name.into(),
@@ -25,29 +45,58 @@ impl fmt::Display for Format {
 }
 
 /// Rich presence format types.
+///
+/// # Examples
+///
+/// ```
+/// use rustcheevos::types::rich::format::FormatType;
+///
+/// let format_type = FormatType::Seconds;
+/// ```
 #[derive(Default, Debug, Clone, Copy, PartialEq)]
 pub enum FormatType {
+    /// A score.
     Score,
+    /// A frame counnt.
     Frames,
+    /// Milliseconds.
     Milliseconds,
+    /// Seconds.
     Seconds,
+    /// Minutes.
     Minutes,
+    /// Seconds as minutes.
     SecsAsMins,
+    /// A value.
     #[default]
     Value,
+    /// An unsigned value.
     Unsigned,
+    /// Tens.
     Tens,
+    /// Hundreds.
     Hundreds,
+    /// Thousands.
     Thousands,
+    /// Fixed 1.
     Fixed1,
+    /// Fixed 2.
     Fixed2,
+    /// Fixed 3.
     Fixed3,
+    /// Points.
     Points,
+    /// Float 1.
     Float1,
+    /// Float 2.
     Float2,
+    /// Float 3.
     Float3,
+    /// Float 4.
     Float4,
+    /// Float 5.
     Float5,
+    /// Float 6.
     Float6,
 }
 

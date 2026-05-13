@@ -1,16 +1,27 @@
+//! Re-exports of the most commonly used types.
+
+// TODO: Consider trimming down the prelude to just essential traits.
+#[doc(inline)]
 pub use crate::types::{
     achievement::{Achievement, Tag},
     chain::{
         pending::{Chainable, PendingChain},
         {Chain, ChainGroup},
     },
-    flag::traits::*,
+    flag::traits::{
+        AddAddress, AddHits, AddSource, AndNext, Measured, MeasuredIf, MeasuredPercentage, OrNext,
+        PauseIf, Remember, ResetIf, ResetNextIf, SubHits, SubSource, Trigger,
+    },
     game::{AchievementSet, Game, LeaderboardSet},
     leaderboard::{Leaderboard, LeaderboardFormat},
-    memory::MemoryRef,
+    memory::{AccessMode, MemoryRef, MemorySize},
     requirement::{
         Requirement, arithmetic::ArithmeticRequirement, comparison::ComparisonRequirement,
     },
-    rich::{RichPresence, format::FormatType, lookup::LookupTable},
+    rich::{
+        RichPresence,
+        format::FormatType,
+        lookup::{Entry, EntryKey, LookupTable},
+    },
     value::TypedValue,
 };

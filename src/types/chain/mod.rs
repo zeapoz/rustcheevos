@@ -1,27 +1,62 @@
+//! Type definitions for requirement chains.
+
 use std::{fmt, str::FromStr};
 
-use crate::{
-    impl_arithmetic_flag_traits, impl_comparison_flag_traits,
-    parsers::ParseError,
-    prelude::Requirement,
-    types::flag::{ArithmeticFlag, ComparisonFlag},
-};
+use crate::{parsers::ParseError, prelude::Requirement};
 
 pub mod pending;
 
 /// A holding struct for many groups of requirements.
+///
+/// This type is used to group requirements together for use in an
+/// [Achievement][`crate::types::achievement::Achievement`].
+///
+/// # Examples
+///
+/// ```
+/// use rustcheevos::{prelude::*, bits8, chain, delta};
+///
+/// let core_condition = chain!(
+///     delta!(bits8!(0x1234)).lt(10),
+///     bits8!(0x1234).ge(10),
+/// );
+///
+/// let alt_condition_a = chain!(
+///     delta!(bits8!(0x1234)).lt(10),
+///     bits8!(0x1234).ge(10),
+/// );
+///
+/// let alt_condition_b = chain!(
+///     delta!(bits8!(0x1234)).lt(10),
+///     bits8!(0x1234).ge(10),
+/// );
+///
+/// let mut chain_group = ChainGroup::new(core_condition);
+/// chain_group.push_alt_group(alt_condition_a);
+/// chain_group.push_alt_group(alt_condition_b);
+/// ```
 #[derive(Debug, Clone, PartialEq)]
 pub struct ChainGroup {
+    /// The core group.
     core: Chain,
+    /// The alternative groups.
     alt_groups: Vec<Chain>,
 }
 
 impl ChainGroup {
     /// Creates a new chain with the given core chain.
     ///
-    /// # Arguments
+    /// # Examples
+    /// ```
+    /// use rustcheevos::{prelude::*, bits8, chain, delta};
     ///
-    /// * `core` - The core chain.
+    /// let core_condition = chain!(
+    ///     delta!(bits8!(0x1234)).lt(10),
+    ///     bits8!(0x1234).ge(10),
+    /// );
+    ///
+    /// let chain_group = ChainGroup::new(core_condition);
+    /// ```
     pub fn new(core: impl Into<Chain>) -> Self {
         Self {
             core: core.into(),
@@ -31,18 +66,43 @@ impl ChainGroup {
 
     /// Adds an alternative group of requirements.
     ///
-    /// # Arguments
+    /// # Examples
+    /// ```
+    /// # let core_condition = Chain::default();
+    /// use rustcheevos::{prelude::*, bits8, chain, delta};
     ///
-    /// * `alt_group` - The alternative group of requirements.
+    /// let alt_group = chain!(
+    ///     delta!(bits8!(0x1234)).lt(10),
+    ///     bits8!(0x1234).ge(10),
+    /// );
+    ///
+    /// let mut chain_group = ChainGroup::new(core_condition);
+    /// chain_group.push_alt_group(alt_group);
+    /// ```
     pub fn push_alt_group(&mut self, group: Chain) {
         self.alt_groups.push(group);
     }
 
     /// Adds multiple alternative groups of requirements.
     ///
-    /// # Arguments
+    /// # Examples
+    /// ```
+    /// # let core_condition = Chain::default();
+    /// use rustcheevos::{prelude::*, bits8, chain, delta};
     ///
-    /// * `alt_groups` - The alternative groups of requirements.
+    /// let alt_group_a = chain!(
+    ///     delta!(bits8!(0x1234)).lt(10),
+    ///     bits8!(0x1234).ge(10),
+    /// );
+    ///
+    /// let alt_group_b = chain!(
+    ///     delta!(bits8!(0x1234)).lt(10),
+    ///     bits8!(0x1234).ge(10),
+    /// );
+    ///
+    /// let mut chain_group = ChainGroup::new(core_condition);
+    /// chain_group.with_alt_groups(vec![alt_group_a, alt_group_b]);
+    /// ```
     pub fn with_alt_groups(
         mut self,
         alt_groups: impl IntoIterator<Item = impl Into<Chain>>,
@@ -66,77 +126,119 @@ impl fmt::Display for ChainGroup {
 }
 
 /// A chain of requirements that must all be true.
+///
+/// This type is used to group requirements together for use in an
+/// [Achievement][`crate::types::achievement::Achievement`].
+///
+/// While this type can be used directly, it is recommend to use the
+/// [`chain!`][`crate::chain!`] macro instead for better ergonomics.
+///
+/// # Examples
+///
+/// ```
+/// use rustcheevos::{prelude::*, bits8, chain, delta};
+///
+/// let chain_a = chain!(
+///     delta!(bits8!(0x1234)).lt(10),
+///     bits8!(0x1234).ge(10),
+/// );
+///
+/// let mut chain_b = Chain::new();
+/// chain_b.push(delta!(bits8!(0x1234)).lt(10));
+/// chain_b.push(bits8!(0x1234).ge(10));
+///
+/// assert_eq!(chain_a, chain_b);
+/// ```
 #[derive(Default, Debug, Clone, PartialEq)]
 pub struct Chain(Vec<Requirement>);
 
 impl Chain {
-    /// Creates a new chain
+    /// Creates a new chain.
+    ///
+    /// # Examples
+    /// ```
+    /// use rustcheevos::{prelude::*, bits8, chain, delta};
+    ///
+    /// let mut chain = Chain::new();
+    ///
+    /// let requirement = delta!(bits8!(0x1234)).lt(10);
+    /// chain.push(requirement);
+    /// ```
     pub fn new() -> Self {
         Self::default()
     }
 
-    /// Pushes a new requirement to the group.
+    /// Pushes a new requirement to the chain.
     ///
-    /// # Arguments
+    /// # Examples
+    /// ```
+    /// use rustcheevos::{prelude::*, bits8, chain, delta};
     ///
-    /// * `requirement` - The requirement to push.
+    /// let requirement = delta!(bits8!(0x1234)).lt(10);
+    ///
+    /// let mut chain = Chain::new();
+    /// chain.push(requirement);
+    /// ```
     pub fn push(&mut self, requirement: impl Into<Requirement>) {
         self.0.push(requirement.into());
     }
 
-    /// Extends the group with the given requirements.
+    /// Extends the chain with the given requirements.
     ///
-    /// # Arguments
+    /// # Examples
+    /// ```
+    /// use rustcheevos::{prelude::*, bits8, chain, delta};
     ///
-    /// * `item` - The requirements to extend the group with.
+    /// let mut chain_a = chain!(
+    ///     delta!(bits8!(0x1234)).lt(10),
+    ///     bits8!(0x1234).ge(10),
+    /// );
+    ///
+    ///
+    /// let chain_b = chain!(
+    ///     delta!(bits8!(0x1234)).lt(10),
+    ///     bits8!(0x1234).ge(10),
+    /// );
+    ///
+    /// chain_a.extend(chain_b);
+    /// ```
+    ///
     pub fn extend(&mut self, item: impl Into<Chain>) {
         self.0.extend_from_slice(&item.into().into_inner());
     }
 
-    /// Returns an iterator over the requirements in this group.
+    /// Returns an iterator over the requirements in this chain.
     ///
-    /// # Returns
+    /// # Examples
+    /// ```
+    /// use rustcheevos::{prelude::*, bits8, chain, delta};
     ///
-    /// An iterator over references to the requirements.
+    /// let chain = chain!(
+    ///     delta!(bits8!(0x1234)).lt(10),
+    ///     bits8!(0x1234).ge(10),
+    /// );
+    ///
+    /// chain.iter().for_each(|requirement| {
+    ///     println!("{requirement}");
+    /// });
+    /// ```
     pub fn iter(&self) -> impl Iterator<Item = &Requirement> {
         self.0.iter()
     }
 
-    /// Consumes this group and returns the inner requirements.
+    /// Consumes this chain and returns the inner requirements.
     ///
-    /// # Returns
+    /// # Examples
+    /// ```
+    /// use rustcheevos::{prelude::*, bits8, chain, delta};
     ///
-    /// The inner requirements.
+    /// let requirement = delta!(bits8!(0x1234)).lt(10);
+    ///
+    /// let chain = chain!(requirement.clone());
+    /// assert_eq!(chain.into_inner(), vec![requirement.into()]);
+    /// ```
     pub fn into_inner(self) -> Vec<Requirement> {
         self.0
-    }
-
-    /// Sets the comparison flag for all the inner comparison requirements.
-    pub fn with_comparison_flag(self, flag: ComparisonFlag) -> Self {
-        self.0
-            .into_iter()
-            .map(|r| {
-                if let Requirement::Comparison(comparison) = r {
-                    Requirement::Comparison(comparison.with_flag(flag))
-                } else {
-                    r
-                }
-            })
-            .collect()
-    }
-
-    /// Sets the arithemetic flag for all the inner arithmetic requirements.
-    pub fn with_arithmetic_flag(self, flag: ArithmeticFlag) -> Self {
-        self.0
-            .into_iter()
-            .map(|r| {
-                if let Requirement::Arithmetic(arithmetic) = r {
-                    Requirement::Arithmetic(arithmetic.with_flag(flag))
-                } else {
-                    r
-                }
-            })
-            .collect()
     }
 }
 
@@ -193,6 +295,3 @@ impl fmt::Display for Chain {
         )
     }
 }
-
-impl_comparison_flag_traits!(Chain, with_comparison_flag);
-impl_arithmetic_flag_traits!(Chain, with_arithmetic_flag);

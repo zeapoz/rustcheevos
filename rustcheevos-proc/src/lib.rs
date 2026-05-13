@@ -2,6 +2,17 @@ use proc_macro::TokenStream;
 use quote::quote;
 use syn::parse_macro_input;
 
+/// Chains together multiple requirements.
+///
+/// # Examples
+/// ```
+/// use rustcheevos::{prelude::*, bits8, chain, delta};
+///
+/// chain!(
+///     delta!(bits8!(0x1234)).lt(10),
+///     bits8!(0x1234).ge(10),
+/// );
+/// ```
 #[proc_macro]
 pub fn chain(input: TokenStream) -> TokenStream {
     let exprs = parse_macro_input!(input as ChainInput);

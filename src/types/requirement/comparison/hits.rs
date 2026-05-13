@@ -1,9 +1,12 @@
-use std::{fmt, str::FromStr};
+//! Type definition for hit counts.
+
+use std::{fmt, ops::Deref, str::FromStr};
 
 use winnow::Parser;
 
 use crate::{parsers::ParseError, parsers::parse_hit_count};
 
+/// A hit count requirement.
 #[derive(Default, Debug, Clone, Copy, PartialEq)]
 pub struct HitCount(u32);
 
@@ -16,6 +19,14 @@ impl HitCount {
     /// Sets the hits on this hit count.
     pub fn set_hits(&mut self, hits: u32) {
         self.0 = hits;
+    }
+}
+
+impl Deref for HitCount {
+    type Target = u32;
+
+    fn deref(&self) -> &Self::Target {
+        &self.0
     }
 }
 

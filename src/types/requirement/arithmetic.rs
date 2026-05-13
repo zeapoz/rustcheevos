@@ -1,3 +1,5 @@
+//! Type definition for arithmetic requirements.
+
 use std::{fmt, str::FromStr};
 
 use winnow::Parser;
@@ -12,13 +14,26 @@ use crate::{
 /// An arithmetic operation between two values.
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub struct ArithmeticRequirement {
+    /// The flag of the arithmetic operation.
     pub flag: ArithmeticFlag,
+    /// The left hand side of the arithmetic requirement.
     pub lhs: TypedValue,
+    /// The operation of the arithmetic requirement, containing the operator and right hand side.
     pub operation: Option<ArithmeticOperation>,
 }
 
 impl ArithmeticRequirement {
     /// Creates a new arithmetic requirement.
+    ///
+    /// # Examples
+    /// ```
+    /// # use rustcheevos::types::flag::ArithmeticFlag;
+    /// # use rustcheevos::types::requirement::arithmetic::ArithmeticRequirement;
+    /// # use rustcheevos::types::value::TypedValue;
+    /// let arithmetic = ArithmeticRequirement::new(ArithmeticFlag::AddSource, 10);
+    /// assert_eq!(arithmetic.flag(), ArithmeticFlag::AddSource);
+    /// assert_eq!(arithmetic.lhs(), &TypedValue::from(10));
+    /// ```
     pub fn new(flag: ArithmeticFlag, lhs: impl Into<TypedValue>) -> Self {
         Self {
             flag,
@@ -27,7 +42,70 @@ impl ArithmeticRequirement {
         }
     }
 
-    /// Sets the arithmetic flag.
+    /// Returns the arithmetic flag.
+    ///
+    /// # Examples
+    /// ```
+    /// # use rustcheevos::types::flag::ArithmeticFlag;
+    /// # use rustcheevos::types::requirement::arithmetic::ArithmeticRequirement;
+    /// let arithmetic = ArithmeticRequirement::new(ArithmeticFlag::AddSource, 10);
+    /// assert_eq!(arithmetic.flag(), ArithmeticFlag::AddSource);
+    /// ```
+    pub fn flag(&self) -> ArithmeticFlag {
+        self.flag
+    }
+
+    /// Returns the left hand side of the arithmetic requirement.
+    ///
+    /// # Examples
+    /// ```
+    /// # use rustcheevos::types::flag::ArithmeticFlag;
+    /// # use rustcheevos::types::requirement::arithmetic::ArithmeticRequirement;
+    /// # use rustcheevos::types::value::TypedValue;
+    /// let arithmetic = ArithmeticRequirement::new(ArithmeticFlag::AddSource, 10);
+    /// assert_eq!(arithmetic.lhs(), &TypedValue::from(10));
+    /// ```
+    pub fn lhs(&self) -> &TypedValue {
+        &self.lhs
+    }
+
+    /// Returns the arithmetic operator.
+    ///
+    /// # Examples
+    /// ```
+    /// # use rustcheevos::types::flag::ArithmeticFlag;
+    /// # use rustcheevos::types::requirement::arithmetic::ArithmeticRequirement;
+    /// let arithmetic = ArithmeticRequirement::new(ArithmeticFlag::AddSource, 10);
+    /// assert_eq!(arithmetic.operator(), None);
+    /// ```
+    pub fn operator(&self) -> Option<ArithmeticOperator> {
+        self.operation.map(|o| o.operator)
+    }
+
+    /// Returns the right hand side of the arithmetic requirement.
+    ///
+    /// # Examples
+    /// ```
+    /// # use rustcheevos::types::flag::ArithmeticFlag;
+    /// # use rustcheevos::types::requirement::arithmetic::ArithmeticRequirement;
+    /// let arithmetic = ArithmeticRequirement::new(ArithmeticFlag::AddSource, 10);
+    /// assert_eq!(arithmetic.rhs(), None);
+    /// ```
+    pub fn rhs(&self) -> Option<TypedValue> {
+        self.operation.map(|o| o.rhs)
+    }
+
+    /// Sets the arithmetic flag on this requirement.
+    ///
+    /// # Examples
+    /// ```
+    /// # use rustcheevos::types::flag::ArithmeticFlag;
+    /// # use rustcheevos::types::requirement::arithmetic::ArithmeticRequirement;
+    /// let arithmetic = ArithmeticRequirement::new(ArithmeticFlag::AddSource, 10);
+    /// assert_eq!(arithmetic.flag(), ArithmeticFlag::AddSource);
+    /// let arithmetic = arithmetic.with_flag(ArithmeticFlag::SubSource);
+    /// assert_eq!(arithmetic.flag(), ArithmeticFlag::SubSource);
+    /// ```
     pub fn with_flag(mut self, flag: ArithmeticFlag) -> Self {
         self.flag = flag;
         self
@@ -38,6 +116,16 @@ impl ArithmeticRequirement {
     /// # Arguments
     ///
     /// * `operation` - The operation to perform.
+    ///
+    /// # Examples
+    /// ```
+    /// # use rustcheevos::types::flag::ArithmeticFlag;
+    /// # use rustcheevos::types::operator::ArithmeticOperator;
+    /// # use rustcheevos::types::requirement::arithmetic::{ArithmeticRequirement, ArithmeticOperation};
+    /// let arithmetic = ArithmeticRequirement::new(ArithmeticFlag::AddSource, 10)
+    ///     .with_operation(ArithmeticOperation::add(5));
+    /// assert_eq!(arithmetic.operator(), Some(ArithmeticOperator::Add));
+    /// ```
     pub fn with_operation(mut self, operation: ArithmeticOperation) -> Self {
         self.operation = Some(operation);
         self
@@ -48,6 +136,15 @@ impl ArithmeticRequirement {
     /// # Arguments
     ///
     /// * `rhs` - The right hand side of the operation.
+    ///
+    /// # Examples
+    /// ```
+    /// # use rustcheevos::types::flag::ArithmeticFlag;
+    /// # use rustcheevos::types::operator::ArithmeticOperator;
+    /// # use rustcheevos::types::requirement::arithmetic::ArithmeticRequirement;
+    /// let arithmetic = ArithmeticRequirement::new(ArithmeticFlag::AddSource, 10).add(5);
+    /// assert_eq!(arithmetic.operator(), Some(ArithmeticOperator::Add));
+    /// ```
     #[expect(
         clippy::should_implement_trait,
         reason = "not using arithmetic in the traditional sense"
@@ -61,6 +158,15 @@ impl ArithmeticRequirement {
     /// # Arguments
     ///
     /// * `rhs` - The right hand side of the operation.
+    ///
+    /// # Examples
+    /// ```
+    /// # use rustcheevos::types::flag::ArithmeticFlag;
+    /// # use rustcheevos::types::operator::ArithmeticOperator;
+    /// # use rustcheevos::types::requirement::arithmetic::ArithmeticRequirement;
+    /// let arithmetic = ArithmeticRequirement::new(ArithmeticFlag::AddSource, 10).sub(5);
+    /// assert_eq!(arithmetic.operator(), Some(ArithmeticOperator::Subtract));
+    /// ```
     #[expect(
         clippy::should_implement_trait,
         reason = "not using arithmetic in the traditional sense"
@@ -74,6 +180,15 @@ impl ArithmeticRequirement {
     /// # Arguments
     ///
     /// * `rhs` - The right hand side of the operation.
+    ///
+    /// # Examples
+    /// ```
+    /// # use rustcheevos::types::flag::ArithmeticFlag;
+    /// # use rustcheevos::types::operator::ArithmeticOperator;
+    /// # use rustcheevos::types::requirement::arithmetic::ArithmeticRequirement;
+    /// let arithmetic = ArithmeticRequirement::new(ArithmeticFlag::AddSource, 10).mul(5);
+    /// assert_eq!(arithmetic.operator(), Some(ArithmeticOperator::Multiply));
+    /// ```
     #[expect(
         clippy::should_implement_trait,
         reason = "not using arithmetic in the traditional sense"
@@ -87,6 +202,15 @@ impl ArithmeticRequirement {
     /// # Arguments
     ///
     /// * `rhs` - The right hand side of the operation.
+    ///
+    /// # Examples
+    /// ```
+    /// # use rustcheevos::types::flag::ArithmeticFlag;
+    /// # use rustcheevos::types::operator::ArithmeticOperator;
+    /// # use rustcheevos::types::requirement::arithmetic::ArithmeticRequirement;
+    /// let arithmetic = ArithmeticRequirement::new(ArithmeticFlag::AddSource, 10).div(5);
+    /// assert_eq!(arithmetic.operator(), Some(ArithmeticOperator::Divide));
+    /// ```
     #[expect(
         clippy::should_implement_trait,
         reason = "not using arithmetic in the traditional sense"
@@ -100,6 +224,15 @@ impl ArithmeticRequirement {
     /// # Arguments
     ///
     /// * `rhs` - The right hand side of the operation.
+    ///
+    /// # Examples
+    /// ```
+    /// # use rustcheevos::types::flag::ArithmeticFlag;
+    /// # use rustcheevos::types::operator::ArithmeticOperator;
+    /// # use rustcheevos::types::requirement::arithmetic::ArithmeticRequirement;
+    /// let arithmetic = ArithmeticRequirement::new(ArithmeticFlag::AddSource, 10).modulo(3);
+    /// assert_eq!(arithmetic.operator(), Some(ArithmeticOperator::Modulo));
+    /// ```
     pub fn modulo(self, rhs: impl Into<TypedValue>) -> Self {
         self.with_operation(ArithmeticOperation::modulo(rhs))
     }
@@ -109,6 +242,15 @@ impl ArithmeticRequirement {
     /// # Arguments
     ///
     /// * `rhs` - The right hand side of the operation.
+    ///
+    /// # Examples
+    /// ```
+    /// # use rustcheevos::types::flag::ArithmeticFlag;
+    /// # use rustcheevos::types::operator::ArithmeticOperator;
+    /// # use rustcheevos::types::requirement::arithmetic::ArithmeticRequirement;
+    /// let arithmetic = ArithmeticRequirement::new(ArithmeticFlag::AddSource, 10).bitwise_and(6);
+    /// assert_eq!(arithmetic.operator(), Some(ArithmeticOperator::BitwiseAnd));
+    /// ```
     pub fn bitwise_and(self, rhs: impl Into<TypedValue>) -> Self {
         self.with_operation(ArithmeticOperation::bitwise_and(rhs))
     }
@@ -118,6 +260,15 @@ impl ArithmeticRequirement {
     /// # Arguments
     ///
     /// * `rhs` - The right hand side of the operation.
+    ///
+    /// # Examples
+    /// ```
+    /// # use rustcheevos::types::flag::ArithmeticFlag;
+    /// # use rustcheevos::types::operator::ArithmeticOperator;
+    /// # use rustcheevos::types::requirement::arithmetic::ArithmeticRequirement;
+    /// let arithmetic = ArithmeticRequirement::new(ArithmeticFlag::AddSource, 10).bitwise_xor(6);
+    /// assert_eq!(arithmetic.operator(), Some(ArithmeticOperator::BitwiseXor));
+    /// ```
     pub fn bitwise_xor(self, rhs: impl Into<TypedValue>) -> Self {
         self.with_operation(ArithmeticOperation::bitwise_xor(rhs))
     }
@@ -143,11 +294,24 @@ impl fmt::Display for ArithmeticRequirement {
 /// An operation in an arithmetic expression.
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub struct ArithmeticOperation {
+    /// The operator of the arithmetic operation.
     pub operator: ArithmeticOperator,
+    /// The right hand side of the arithmetic operation.
     pub rhs: TypedValue,
 }
 
 impl ArithmeticOperation {
+    /// Creates a new arithmetic operation.
+    ///
+    /// # Examples
+    /// ```
+    /// # use rustcheevos::types::operator::ArithmeticOperator;
+    /// # use rustcheevos::types::requirement::arithmetic::ArithmeticOperation;
+    /// # use rustcheevos::types::value::TypedValue;
+    /// let operation = ArithmeticOperation::new(ArithmeticOperator::Add, 10);
+    /// assert_eq!(operation.operator, ArithmeticOperator::Add);
+    /// assert_eq!(operation.rhs, TypedValue::from(10));
+    /// ```
     pub fn new(operator: ArithmeticOperator, rhs: impl Into<TypedValue>) -> Self {
         Self {
             operator,
@@ -160,6 +324,14 @@ impl ArithmeticOperation {
     /// # Arguments
     ///
     /// * `rhs` - The right hand side of the operation.
+    ///
+    /// # Examples
+    /// ```
+    /// # use rustcheevos::types::operator::ArithmeticOperator;
+    /// # use rustcheevos::types::requirement::arithmetic::ArithmeticOperation;
+    /// let operation = ArithmeticOperation::add(10);
+    /// assert_eq!(operation.operator, ArithmeticOperator::Add);
+    /// ```
     pub fn add(rhs: impl Into<TypedValue>) -> Self {
         Self::new(ArithmeticOperator::Add, rhs)
     }
@@ -169,6 +341,14 @@ impl ArithmeticOperation {
     /// # Arguments
     ///
     /// * `rhs` - The right hand side of the operation.
+    ///
+    /// # Examples
+    /// ```
+    /// # use rustcheevos::types::operator::ArithmeticOperator;
+    /// # use rustcheevos::types::requirement::arithmetic::ArithmeticOperation;
+    /// let operation = ArithmeticOperation::sub(10);
+    /// assert_eq!(operation.operator, ArithmeticOperator::Subtract);
+    /// ```
     pub fn sub(rhs: impl Into<TypedValue>) -> Self {
         Self::new(ArithmeticOperator::Subtract, rhs)
     }
@@ -178,6 +358,14 @@ impl ArithmeticOperation {
     /// # Arguments
     ///
     /// * `rhs` - The right hand side of the operation.
+    ///
+    /// # Examples
+    /// ```
+    /// # use rustcheevos::types::operator::ArithmeticOperator;
+    /// # use rustcheevos::types::requirement::arithmetic::ArithmeticOperation;
+    /// let operation = ArithmeticOperation::mul(10);
+    /// assert_eq!(operation.operator, ArithmeticOperator::Multiply);
+    /// ```
     pub fn mul(rhs: impl Into<TypedValue>) -> Self {
         Self::new(ArithmeticOperator::Multiply, rhs)
     }
@@ -187,6 +375,14 @@ impl ArithmeticOperation {
     /// # Arguments
     ///
     /// * `rhs` - The right hand side of the operation.
+    ///
+    /// # Examples
+    /// ```
+    /// # use rustcheevos::types::operator::ArithmeticOperator;
+    /// # use rustcheevos::types::requirement::arithmetic::ArithmeticOperation;
+    /// let operation = ArithmeticOperation::div(10);
+    /// assert_eq!(operation.operator, ArithmeticOperator::Divide);
+    /// ```
     pub fn div(rhs: impl Into<TypedValue>) -> Self {
         Self::new(ArithmeticOperator::Divide, rhs)
     }
@@ -196,6 +392,14 @@ impl ArithmeticOperation {
     /// # Arguments
     ///
     /// * `rhs` - The right hand side of the operation.
+    ///
+    /// # Examples
+    /// ```
+    /// # use rustcheevos::types::operator::ArithmeticOperator;
+    /// # use rustcheevos::types::requirement::arithmetic::ArithmeticOperation;
+    /// let operation = ArithmeticOperation::modulo(10);
+    /// assert_eq!(operation.operator, ArithmeticOperator::Modulo);
+    /// ```
     pub fn modulo(rhs: impl Into<TypedValue>) -> Self {
         Self::new(ArithmeticOperator::Modulo, rhs)
     }
@@ -205,6 +409,14 @@ impl ArithmeticOperation {
     /// # Arguments
     ///
     /// * `rhs` - The right hand side of the operation.
+    ///
+    /// # Examples
+    /// ```
+    /// # use rustcheevos::types::operator::ArithmeticOperator;
+    /// # use rustcheevos::types::requirement::arithmetic::ArithmeticOperation;
+    /// let operation = ArithmeticOperation::bitwise_and(10);
+    /// assert_eq!(operation.operator, ArithmeticOperator::BitwiseAnd);
+    /// ```
     pub fn bitwise_and(rhs: impl Into<TypedValue>) -> Self {
         Self::new(ArithmeticOperator::BitwiseAnd, rhs)
     }
@@ -214,6 +426,14 @@ impl ArithmeticOperation {
     /// # Arguments
     ///
     /// * `rhs` - The right hand side of the operation.
+    ///
+    /// # Examples
+    /// ```
+    /// # use rustcheevos::types::operator::ArithmeticOperator;
+    /// # use rustcheevos::types::requirement::arithmetic::ArithmeticOperation;
+    /// let operation = ArithmeticOperation::bitwise_xor(10);
+    /// assert_eq!(operation.operator, ArithmeticOperator::BitwiseXor);
+    /// ```
     pub fn bitwise_xor(rhs: impl Into<TypedValue>) -> Self {
         Self::new(ArithmeticOperator::BitwiseXor, rhs)
     }

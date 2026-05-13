@@ -1,3 +1,5 @@
+//! Type definitions for operators.
+
 use std::{fmt, str::FromStr};
 
 use winnow::Parser;
@@ -10,12 +12,19 @@ use crate::{
 /// Operators that can be used in arithmetic.
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub enum ArithmeticOperator {
+    /// The addition operator.
     Add,
+    /// The subtraction operator.
     Subtract,
+    /// The multiplication operator.
     Multiply,
+    /// The division operator.
     Divide,
+    /// The modulo operator.
     Modulo,
+    /// The bitwise and operator.
     BitwiseAnd,
+    /// The bitwise xor operator.
     BitwiseXor,
 }
 
@@ -64,11 +73,17 @@ impl fmt::Display for ArithmeticOperator {
 /// Operators that can be used in comparisons.
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub enum ComparisonOperator {
+    /// The less than operator.
     LessThan,
+    /// The less than or equals operator.
     LessThanOrEquals,
+    /// The greater than operator.
     GreaterThan,
+    /// The greater than or equals operator.
     GreaterThanOrEquals,
+    /// The equals operator.
     Equals,
+    /// The not equals operator.
     NotEquals,
 }
 

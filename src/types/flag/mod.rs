@@ -1,3 +1,5 @@
+//! Type definitions for flags.
+
 use std::{fmt, str::FromStr};
 
 use winnow::Parser;
@@ -49,16 +51,27 @@ impl fmt::Display for Flag {
 /// A flag used in comparisons.
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub enum ComparisonFlag {
+    /// Pause if the condition is met.
     PauseIf,
+    /// Reset if the condition is met.
     ResetIf,
+    /// Reset next if the condition is met.
     ResetNextIf,
+    /// Add hits to the condition.
     AddHits,
+    /// Subtract hits from the condition.
     SubHits,
+    /// And next with the following condition.
     AndNext,
+    /// Or next with the following condition.
     OrNext,
+    /// Measure the condition.
     Measured,
+    /// Measure the condition as a percentage.
     MeasuredPercentage,
+    /// Measure the condition if the condition is met.
     MeasuredIf,
+    /// Trigger on the condition.
     Trigger,
 }
 
@@ -102,15 +115,20 @@ impl fmt::Display for ComparisonFlag {
     }
 }
 
-/// A flag in an arithmetic expression.
+/// A flag used in an arithmetic expression.
 #[derive(Default, Debug, Clone, Copy, PartialEq)]
 pub enum ArithmeticFlag {
+    /// Add a source to the accumulator.
     #[default]
     AddSource,
+    /// Sub a source from the accumulator.
     SubSource,
+    /// Add a address to the accumulator.
     AddAddress,
+    /// Remember a value.
     Remember,
-    // A special exception only to be used in a leaderboard value group.
+    // :HACK: A special exception only to be used in a leaderboard value group.
+    /// Measure a value.
     Measured,
 }
 
