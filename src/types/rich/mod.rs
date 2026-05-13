@@ -87,13 +87,8 @@ impl RichPresence {
     ///
     /// * `game_id` - The game id.
     /// * `dir` - The directory to export to.
-    pub fn export(&self, game_id: impl Into<String>, dir: impl AsRef<Path>) -> io::Result<()> {
-        let filename = format!(
-            "{}{}.{}",
-            game_id.into(),
-            RICH_PESENCE_FILE_SUFFIX,
-            RICH_PESENCE_FILE_EXTENSION
-        );
+    pub fn export(&self, game_id: impl fmt::Display, dir: impl AsRef<Path>) -> io::Result<()> {
+        let filename = format!("{game_id}{RICH_PESENCE_FILE_SUFFIX}.{RICH_PESENCE_FILE_EXTENSION}");
         let path = dir.as_ref().join(filename);
         self.export_to_file(path)
     }

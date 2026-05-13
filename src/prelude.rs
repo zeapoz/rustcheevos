@@ -5,12 +5,12 @@ pub use crate::types::{
         {Chain, ChainGroup},
     },
     flag::traits::*,
+    game::{AchievementSet, Game, LeaderboardSet},
     leaderboard::{Leaderboard, LeaderboardFormat},
     memory::MemoryRef,
     requirement::{
         Requirement, arithmetic::ArithmeticRequirement, comparison::ComparisonRequirement,
     },
     rich::{RichPresence, format::FormatType, lookup::LookupTable},
-    set::Set,
     value::TypedValue,
 };

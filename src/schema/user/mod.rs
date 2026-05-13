@@ -4,7 +4,7 @@ use header::Header;
 
 use thiserror::Error;
 
-use crate::prelude::{Achievement, Leaderboard, Set};
+use crate::prelude::{Achievement, Leaderboard};
 
 pub mod header;
 
@@ -37,6 +37,22 @@ pub struct UserFile {
     pub notes: Vec<CodeNote>,
 }
 
+impl UserFile {
+    /// Creates a new user file.
+    pub fn new(
+        game_title: impl Into<String>,
+        achievements: impl IntoIterator<Item = impl Into<AchievementEntry>>,
+        leaderboards: impl IntoIterator<Item = impl Into<LeaderboardEntry>>,
+    ) -> Self {
+        Self {
+            header: Header::new(game_title),
+            achievements: achievements.into_iter().map(Into::into).collect(),
+            leaderboards: leaderboards.into_iter().map(Into::into).collect(),
+            notes: Vec::new(),
+        }
+    }
+}
+
 impl fmt::Display for UserFile {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         writeln!(f, "{}", self.header)?;
@@ -50,28 +66,6 @@ impl fmt::Display for UserFile {
             writeln!(f, "{note}")?;
         }
         Ok(())
-    }
-}
-
-impl From<Set> for UserFile {
-    fn from(set: Set) -> Self {
-        let header = Header::new(set.game_name);
-        let achievements = set
-            .achievements
-            .into_iter()
-            .map(AchievementEntry::from)
-            .collect();
-        let leaderboards = set
-            .leaderboards
-            .into_iter()
-            .map(LeaderboardEntry::from)
-            .collect();
-        UserFile {
-            header,
-            achievements,
-            leaderboards,
-            notes: Vec::new(),
-        }
     }
 }
 
@@ -113,13 +107,13 @@ impl fmt::Display for AchievementEntry {
     }
 }
 
-impl From<Achievement> for AchievementEntry {
-    fn from(value: Achievement) -> Self {
+impl From<&Achievement> for AchievementEntry {
+    fn from(value: &Achievement) -> Self {
         Self {
             id: value.id,
             requirements: value.requirements.to_string(),
-            title: value.title,
-            description: value.description,
+            title: value.title.clone(),
+            description: value.description.clone(),
             tag: value.tag.to_string(),
             author: DEFAULT_AUTHOR.to_string(),
             points: value.points,
@@ -164,8 +158,8 @@ impl fmt::Display for LeaderboardEntry {
     }
 }
 
-impl From<Leaderboard> for LeaderboardEntry {
-    fn from(value: Leaderboard) -> Self {
+impl From<&Leaderboard> for LeaderboardEntry {
+    fn from(value: &Leaderboard) -> Self {
         Self {
             id: value.id,
             start: value.start.to_string(),
@@ -173,8 +167,8 @@ impl From<Leaderboard> for LeaderboardEntry {
             submit: value.submit.to_string(),
             value: value.value.to_string(),
             format: value.format.to_string(),
-            title: value.title,
-            description: value.description,
+            title: value.title.clone(),
+            description: value.description.clone(),
             lower_is_better: value.lower_is_better,
         }
     }

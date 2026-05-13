@@ -1,10 +1,10 @@
 pub mod achievement;
 pub mod chain;
 pub mod flag;
+pub mod game;
 pub mod leaderboard;
 pub mod memory;
 pub mod operator;
 pub mod requirement;
 pub mod rich;
-pub mod set;
 pub mod value;
