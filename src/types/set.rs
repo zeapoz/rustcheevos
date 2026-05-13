@@ -51,7 +51,7 @@ impl Set {
     /// # Arguments
     ///
     /// * `items` - The items to add.
-    pub fn add_many(&mut self, items: impl IntoIterator<Item = SetItem>) -> &mut Self {
+    pub fn add_many(&mut self, items: impl IntoIterator<Item = impl Into<SetItem>>) -> &mut Self {
         for item in items {
             self.add(item);
         }

@@ -3,11 +3,12 @@ use std::{fmt, str::FromStr};
 use winnow::Parser;
 
 use crate::{
-    ParseError,
+    ParseError, impl_arithmetic_flag_traits,
     parsers::{parse_value, parse_value_type},
 };
 
 use super::{
+    flag::ArithmeticFlag,
     memory::MemoryRef,
     requirement::{arithmetic::ArithmeticRequirement, comparison::ComparisonRequirement},
 };
@@ -125,6 +126,11 @@ impl TypedValue {
         }
     }
 
+    /// Creates a new arithmetic [`ArithmeticRequirement`].
+    pub fn with_arithmetic_flag(self, flag: ArithmeticFlag) -> ArithmeticRequirement {
+        ArithmeticRequirement::new(flag, self)
+    }
+
     //// Returns the type of the typed value.
     pub fn value_type(&self) -> ValueType {
         match self {
@@ -233,3 +239,5 @@ impl fmt::Display for ValueType {
         write!(f, "{s}")
     }
 }
+
+impl_arithmetic_flag_traits!(TypedValue, with_arithmetic_flag, ArithmeticRequirement);

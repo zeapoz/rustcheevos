@@ -4,7 +4,6 @@ use crate::{
     ParseError, impl_arithmetic_flag_traits, impl_comparison_flag_traits,
     prelude::Requirement,
     types::flag::{ArithmeticFlag, ComparisonFlag},
-    types::value::TypedValue,
 };
 
 pub mod pending;
@@ -137,44 +136,6 @@ impl Chain {
                 }
             })
             .collect()
-    }
-
-    /// Applies delta to the left-hand side of the last requirement.
-    pub fn delta(self) -> Self {
-        self.transform_last(TypedValue::delta)
-    }
-
-    /// Applies prior to the left-hand side of the last requirement.
-    pub fn prior(self) -> Self {
-        self.transform_last(TypedValue::prior)
-    }
-
-    /// Applies BCD to the left-hand side of the last requirement.
-    pub fn bcd(self) -> Self {
-        self.transform_last(TypedValue::bcd)
-    }
-
-    /// Applies invert to the left-hand side of the last requirement.
-    pub fn invert(self) -> Self {
-        self.transform_last(TypedValue::invert)
-    }
-
-    fn transform_last(self, f: impl FnOnce(TypedValue) -> TypedValue) -> Self {
-        let mut reqs = self.0;
-        if let Some(last) = reqs.pop() {
-            let new_last = match last {
-                Requirement::Comparison(mut c) => {
-                    c.lhs = f(c.lhs);
-                    Requirement::Comparison(c)
-                }
-                Requirement::Arithmetic(mut a) => {
-                    a.lhs = f(a.lhs);
-                    Requirement::Arithmetic(a)
-                }
-            };
-            reqs.push(new_last);
-        }
-        Self(reqs)
     }
 }
 
