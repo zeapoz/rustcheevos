@@ -3,7 +3,7 @@ use std::{fmt, str::FromStr};
 use winnow::Parser;
 
 use crate::{
-    ParseError,
+    parsers::ParseError,
     parsers::{parse_arithmetic_operator, parse_comparison_operator},
 };
 

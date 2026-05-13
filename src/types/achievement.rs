@@ -1,6 +1,6 @@
 use std::{fmt, str::FromStr};
 
-use crate::ParseError;
+use crate::parsers::ParseError;
 
 use super::chain::ChainGroup;
 

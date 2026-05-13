@@ -1,6 +1,17 @@
-use winnow::{Parser, Result, ascii::hex_digit1, combinator::alt, token::one_of};
+use winnow::{
+    Parser, Result,
+    ascii::hex_digit1,
+    combinator::{alt, opt},
+    token::one_of,
+};
 
 use crate::types::memory::*;
+
+pub fn parse_memory_access_mode(input: &mut &str) -> Result<AccessMode> {
+    one_of(['d', 'p', 'b', '~'])
+        .try_map(|m| AccessMode::try_from(m))
+        .parse_next(input)
+}
 
 pub fn parse_memory_size(input: &mut &str) -> Result<MemorySize> {
     let bits = one_of([
@@ -18,8 +29,13 @@ pub fn parse_memory_size(input: &mut &str) -> Result<MemorySize> {
 }
 
 pub fn parse_memory_ref(input: &mut &str) -> Result<MemoryRef> {
-    let (memsize, addr) = (parse_memory_size, parse_hex_address).parse_next(input)?;
-    Ok(MemoryRef::new(memsize, addr))
+    let (access_mode, memsize, addr) = (
+        opt(parse_memory_access_mode),
+        parse_memory_size,
+        parse_hex_address,
+    )
+        .parse_next(input)?;
+    Ok(MemoryRef::new(memsize, addr).with_access_mode(access_mode.unwrap_or_default()))
 }
 
 fn parse_hex_address(input: &mut &str) -> Result<usize> {
@@ -57,16 +73,18 @@ mod tests {
     fn test_parse_valid_bit_memory_ref() {
         let input = "0xH1234";
         let memory_ref = input.parse::<MemoryRef>().unwrap();
-        assert_eq!(memory_ref.size, MemorySize::Bits8);
-        assert_eq!(memory_ref.address, 0x1234);
+        assert_eq!(memory_ref.size(), MemorySize::Bits8);
+        assert_eq!(memory_ref.address(), 0x1234);
+        assert_eq!(memory_ref.access_mode(), AccessMode::default());
     }
 
     #[test]
     fn test_parse_valid_float_memory_ref() {
         let input = "fF1234";
         let memory_ref = input.parse::<MemoryRef>().unwrap();
-        assert_eq!(memory_ref.size, MemorySize::Float);
-        assert_eq!(memory_ref.address, 0x1234);
+        assert_eq!(memory_ref.size(), MemorySize::Float);
+        assert_eq!(memory_ref.address(), 0x1234);
+        assert_eq!(memory_ref.access_mode(), AccessMode::default());
     }
 
     #[test]

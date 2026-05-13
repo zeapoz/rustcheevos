@@ -2,7 +2,7 @@ use std::{fmt, str::FromStr};
 
 use winnow::Parser;
 
-use crate::{ParseError, parsers::parse_requirement};
+use crate::{parsers::ParseError, parsers::parse_requirement};
 
 use arithmetic::ArithmeticRequirement;
 use comparison::ComparisonRequirement;

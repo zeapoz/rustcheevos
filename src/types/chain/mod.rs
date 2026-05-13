@@ -1,7 +1,8 @@
 use std::{fmt, str::FromStr};
 
 use crate::{
-    ParseError, impl_arithmetic_flag_traits, impl_comparison_flag_traits,
+    impl_arithmetic_flag_traits, impl_comparison_flag_traits,
+    parsers::ParseError,
     prelude::Requirement,
     types::flag::{ArithmeticFlag, ComparisonFlag},
 };

@@ -3,7 +3,8 @@ use std::{fmt, str::FromStr};
 use winnow::Parser;
 
 use crate::{
-    ParseError, impl_arithmetic_flag_traits,
+    impl_arithmetic_flag_traits,
+    parsers::ParseError,
     parsers::parse_arithmetic_requirement,
     types::{flag::ArithmeticFlag, operator::ArithmeticOperator, value::TypedValue},
 };

@@ -2,7 +2,7 @@ use std::{fmt, str::FromStr};
 
 use winnow::Parser;
 
-use crate::{ParseError, parsers::parse_hit_count};
+use crate::{parsers::ParseError, parsers::parse_hit_count};
 
 #[derive(Default, Debug, Clone, Copy, PartialEq)]
 pub struct HitCount(u32);

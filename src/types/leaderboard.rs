@@ -1,7 +1,7 @@
 use std::fmt;
 use std::str::FromStr;
 
-use crate::ParseError;
+use crate::parsers::ParseError;
 
 use super::chain::ChainGroup;
 

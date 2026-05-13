@@ -2,7 +2,8 @@ use std::{fmt, str::FromStr};
 use winnow::Parser;
 
 use crate::{
-    ParseError, impl_arithmetic_flag_traits,
+    impl_arithmetic_flag_traits,
+    parsers::ParseError,
     parsers::{parse_memory_ref, parse_memory_size},
     prelude::Measured,
 };
@@ -16,8 +17,9 @@ use super::{
 /// A reference to a memory location.
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub struct MemoryRef {
-    pub size: MemorySize,
-    pub address: usize,
+    size: MemorySize,
+    address: usize,
+    access_mode: AccessMode,
 }
 
 impl MemoryRef {
@@ -27,33 +29,58 @@ impl MemoryRef {
     ///
     /// * `size` - The size of the memory reference.
     /// * `address` - The address of the memory reference.
-    pub fn new(size: MemorySize, address: usize) -> Self {
-        Self { size, address }
+    pub const fn new(size: MemorySize, address: usize) -> Self {
+        Self {
+            size,
+            address,
+            access_mode: AccessMode::Memory,
+        }
     }
 
-    /// Converts the memory reference into a [`TypedValue::Memory`].
-    pub fn memory(self) -> TypedValue {
-        TypedValue::Memory(self)
+    /// Returns the access mode of the memory reference.
+    pub fn size(&self) -> MemorySize {
+        self.size
     }
 
-    /// Converts the memory reference into a [`TypedValue::Delta`].
-    pub fn delta(self) -> TypedValue {
-        TypedValue::Delta(self)
+    /// Returns the address of the memory reference.
+    pub fn address(&self) -> usize {
+        self.address
     }
 
-    /// Converts the memory reference into a [`TypedValue::Prior`].
-    pub fn prior(self) -> TypedValue {
-        TypedValue::Prior(self)
+    /// Returns the access mode of the memory reference.
+    pub fn access_mode(&self) -> AccessMode {
+        self.access_mode
     }
 
-    /// Converts the memory reference into a [`TypedValue::BCD`].
-    pub fn bcd(self) -> TypedValue {
-        TypedValue::BCD(self)
+    /// Sets the access mode of the memory reference.
+    pub fn with_access_mode(mut self, access_mode: AccessMode) -> Self {
+        self.access_mode = access_mode;
+        self
     }
 
-    /// Converts the memory reference into a [`TypedValue::Invert`].
-    pub fn invert(self) -> TypedValue {
-        TypedValue::Invert(self)
+    /// Sets the access mode to [`AccessMode::Memory`].
+    pub fn memory(self) -> Self {
+        self.with_access_mode(AccessMode::Memory)
+    }
+
+    /// Sets the access mode to [`AccessMode::Delta`].
+    pub fn delta(self) -> Self {
+        self.with_access_mode(AccessMode::Delta)
+    }
+
+    /// Sets the access mode to [`AccessMode::Prior`].
+    pub fn prior(self) -> Self {
+        self.with_access_mode(AccessMode::Prior)
+    }
+
+    /// Sets the access mode to [`AccessMode::BCD`].
+    pub fn bcd(self) -> Self {
+        self.with_access_mode(AccessMode::BCD)
+    }
+
+    /// Sets the access mode to [`AccessMode::Invert`].
+    pub fn invert(self) -> Self {
+        self.with_access_mode(AccessMode::Invert)
     }
 
     /// Creates a new equals [`ComparisonRequirement`].
@@ -149,7 +176,7 @@ impl FromStr for MemoryRef {
 impl fmt::Display for MemoryRef {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let hex_addr = format!("{:x}", self.address);
-        write!(f, "{}{hex_addr}", self.size)
+        write!(f, "{}{}{hex_addr}", self.access_mode, self.size)
     }
 }
 
@@ -304,15 +331,49 @@ impl fmt::Display for MemorySize {
     }
 }
 
+#[derive(Default, Debug, Clone, Copy, PartialEq)]
+pub enum AccessMode {
+    #[default]
+    Memory,
+    Delta,
+    Prior,
+    BCD,
+    Invert,
+}
+
+impl TryFrom<char> for AccessMode {
+    type Error = ParseError;
+
+    fn try_from(c: char) -> Result<Self, Self::Error> {
+        match c {
+            'd' => Ok(AccessMode::Delta),
+            'p' => Ok(AccessMode::Prior),
+            'b' => Ok(AccessMode::BCD),
+            '~' => Ok(AccessMode::Invert),
+            _ => Err(ParseError::InvalidMemoryAccessMode(c.to_string())),
+        }
+    }
+}
+
+impl fmt::Display for AccessMode {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        let s = match self {
+            AccessMode::Memory => "",
+            AccessMode::Delta => "d",
+            AccessMode::Prior => "p",
+            AccessMode::BCD => "b",
+            AccessMode::Invert => "~",
+        };
+        write!(f, "{s}")
+    }
+}
+
 macro_rules! memory_ref_constructors {
     ($($variant:ident($inner:ident::$inner_variant:ident) => $method:ident),*$(,)?) => {
         $(
             impl MemoryRef {
                 pub const fn $method(address: usize) -> Self {
-                    Self {
-                        size: MemorySize::$variant($inner::$inner_variant),
-                        address,
-                    }
+                    Self::new(MemorySize::$variant($inner::$inner_variant), address)
                 }
             }
         )*
@@ -321,10 +382,7 @@ macro_rules! memory_ref_constructors {
         $(
             impl MemoryRef {
                 pub const fn $method(address: usize) -> Self {
-                    Self {
-                        size: MemorySize::$variant,
-                        address,
-                    }
+                    Self::new(MemorySize::$variant, address)
                 }
             }
         )*

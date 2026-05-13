@@ -57,15 +57,15 @@ impl Chainable for TypedValue {
 }
 
 impl Chainable for MemoryRef {
-    type Output = PendingChain<TypedValue>;
+    type Output = PendingChain<MemoryRef>;
 
     fn chain(self, chain: Chain) -> Self::Output {
-        PendingChain::new(self.memory(), chain)
+        PendingChain::new(self, chain)
     }
 }
 
-impl Chainable for PendingChain<TypedValue> {
-    type Output = PendingChain<TypedValue>;
+impl<T: Chainable> Chainable for PendingChain<T> {
+    type Output = PendingChain<T>;
 
     fn chain(self, chain: Chain) -> Self::Output {
         PendingChain::new(self.head, self.pending.chain(chain))
@@ -87,78 +87,7 @@ impl<T> PendingChain<T> {
     }
 }
 
-impl PendingChain<TypedValue> {
-    fn extend_req(self, req: impl Into<Requirement>) -> Chain {
-        let mut chain = self.pending;
-        chain.extend(req);
-        chain
-    }
-
-    pub fn eq(self, rhs: impl Into<TypedValue>) -> Chain {
-        let head = self.head;
-        self.extend_req(head.eq(rhs))
-    }
-
-    pub fn ne(self, rhs: impl Into<TypedValue>) -> Chain {
-        let head = self.head;
-        self.extend_req(head.ne(rhs))
-    }
-
-    pub fn lt(self, rhs: impl Into<TypedValue>) -> Chain {
-        let head = self.head;
-        self.extend_req(head.lt(rhs))
-    }
-
-    pub fn le(self, rhs: impl Into<TypedValue>) -> Chain {
-        let head = self.head;
-        self.extend_req(head.le(rhs))
-    }
-
-    pub fn gt(self, rhs: impl Into<TypedValue>) -> Chain {
-        let head = self.head;
-        self.extend_req(head.gt(rhs))
-    }
-
-    pub fn ge(self, rhs: impl Into<TypedValue>) -> Chain {
-        let head = self.head;
-        self.extend_req(head.ge(rhs))
-    }
-
-    pub fn add(self, rhs: impl Into<TypedValue>) -> Chain {
-        let head = self.head;
-        self.extend_req(head.add(rhs))
-    }
-
-    pub fn sub(self, rhs: impl Into<TypedValue>) -> Chain {
-        let head = self.head;
-        self.extend_req(head.sub(rhs))
-    }
-
-    pub fn mul(self, rhs: impl Into<TypedValue>) -> Chain {
-        let head = self.head;
-        self.extend_req(head.mul(rhs))
-    }
-
-    pub fn div(self, rhs: impl Into<TypedValue>) -> Chain {
-        let head = self.head;
-        self.extend_req(head.div(rhs))
-    }
-
-    pub fn modulo(self, rhs: impl Into<TypedValue>) -> Chain {
-        let head = self.head;
-        self.extend_req(head.modulo(rhs))
-    }
-
-    pub fn bitwise_and(self, rhs: impl Into<TypedValue>) -> Chain {
-        let head = self.head;
-        self.extend_req(head.bitwise_and(rhs))
-    }
-
-    pub fn bitwise_xor(self, rhs: impl Into<TypedValue>) -> Chain {
-        let head = self.head;
-        self.extend_req(head.bitwise_xor(rhs))
-    }
-
+impl PendingChain<MemoryRef> {
     pub fn delta(self) -> Self {
         Self {
             head: self.head.delta(),
@@ -185,5 +114,78 @@ impl PendingChain<TypedValue> {
             head: self.head.invert(),
             pending: self.pending,
         }
+    }
+}
+
+impl<T: Into<TypedValue> + Copy> PendingChain<T> {
+    fn extend_req(self, req: impl Into<Requirement>) -> Chain {
+        let mut chain = self.pending;
+        chain.extend(req);
+        chain
+    }
+
+    pub fn eq(self, rhs: impl Into<TypedValue>) -> Chain {
+        let head: TypedValue = self.head.into();
+        self.extend_req(head.eq(rhs))
+    }
+
+    pub fn ne(self, rhs: impl Into<TypedValue>) -> Chain {
+        let head: TypedValue = self.head.into();
+        self.extend_req(head.ne(rhs))
+    }
+
+    pub fn lt(self, rhs: impl Into<TypedValue>) -> Chain {
+        let head: TypedValue = self.head.into();
+        self.extend_req(head.lt(rhs))
+    }
+
+    pub fn le(self, rhs: impl Into<TypedValue>) -> Chain {
+        let head: TypedValue = self.head.into();
+        self.extend_req(head.le(rhs))
+    }
+
+    pub fn gt(self, rhs: impl Into<TypedValue>) -> Chain {
+        let head: TypedValue = self.head.into();
+        self.extend_req(head.gt(rhs))
+    }
+
+    pub fn ge(self, rhs: impl Into<TypedValue>) -> Chain {
+        let head: TypedValue = self.head.into();
+        self.extend_req(head.ge(rhs))
+    }
+
+    pub fn add(self, rhs: impl Into<TypedValue>) -> Chain {
+        let head: TypedValue = self.head.into();
+        self.extend_req(head.add(rhs))
+    }
+
+    pub fn sub(self, rhs: impl Into<TypedValue>) -> Chain {
+        let head: TypedValue = self.head.into();
+        self.extend_req(head.sub(rhs))
+    }
+
+    pub fn mul(self, rhs: impl Into<TypedValue>) -> Chain {
+        let head: TypedValue = self.head.into();
+        self.extend_req(head.mul(rhs))
+    }
+
+    pub fn div(self, rhs: impl Into<TypedValue>) -> Chain {
+        let head: TypedValue = self.head.into();
+        self.extend_req(head.div(rhs))
+    }
+
+    pub fn modulo(self, rhs: impl Into<TypedValue>) -> Chain {
+        let head: TypedValue = self.head.into();
+        self.extend_req(head.modulo(rhs))
+    }
+
+    pub fn bitwise_and(self, rhs: impl Into<TypedValue>) -> Chain {
+        let head: TypedValue = self.head.into();
+        self.extend_req(head.bitwise_and(rhs))
+    }
+
+    pub fn bitwise_xor(self, rhs: impl Into<TypedValue>) -> Chain {
+        let head: TypedValue = self.head.into();
+        self.extend_req(head.bitwise_xor(rhs))
     }
 }

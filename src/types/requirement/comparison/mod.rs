@@ -5,7 +5,8 @@ use winnow::Parser;
 pub mod hits;
 
 use crate::{
-    ParseError, impl_comparison_flag_traits,
+    impl_comparison_flag_traits,
+    parsers::ParseError,
     parsers::parse_comparison_requirement,
     types::{flag::ComparisonFlag, operator::ComparisonOperator, value::TypedValue},
 };

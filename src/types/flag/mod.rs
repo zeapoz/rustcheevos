@@ -2,7 +2,7 @@ use std::{fmt, str::FromStr};
 
 use winnow::Parser;
 
-use crate::{ParseError, parsers::parse_flag};
+use crate::{parsers::ParseError, parsers::parse_flag};
 
 pub mod traits;
 
