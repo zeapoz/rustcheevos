@@ -15,32 +15,32 @@ mod value;
 #[derive(Error, Debug, Clone)]
 pub enum ParseError {
     #[error("invalid flag: {0}")]
-    InvalidFlag(String),
+    Flag(String),
 
     #[error("invalid operator: {0}")]
-    InvalidOperator(String),
+    Operator(String),
 
     #[error("invalid memory access mode: {0}")]
-    InvalidMemoryAccessMode(String),
+    MemoryAccessMode(String),
 
     #[error("invalid memory size: {0}")]
-    InvalidMemorySize(String),
+    MemorySize(String),
 
     #[error("invalid memory ref: {0}")]
-    InvalidMemoryRef(String),
+    MemoryRef(String),
 
     #[error("invalid value: {0}")]
-    InvalidValue(String),
+    Value(String),
 
     #[error("invalid hit count: {0}")]
-    InvalidHitCount(String),
+    HitCount(String),
 
     #[error("invalid requirement: {0}")]
-    InvalidRequirement(String),
+    Requirement(String),
 
     #[error("invalid tag: {0}")]
-    InvalidTag(String),
+    Tag(String),
 
     #[error("invalid leaderboard: {0}")]
-    InvalidLeaderboardFormat(String),
+    Leaderboard(String),
 }

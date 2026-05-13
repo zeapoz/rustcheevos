@@ -101,7 +101,7 @@ impl FromStr for Tag {
             "progression" => Self::Progression,
             "win_condition" => Self::WinCondition,
             "missable" => Self::Missable,
-            s => return Err(ParseError::InvalidTag(s.to_string())),
+            s => return Err(ParseError::Tag(s.to_string())),
         };
         Ok(tag)
     }

@@ -33,7 +33,7 @@ impl FromStr for Flag {
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         parse_flag
             .parse(s)
-            .map_err(|s| ParseError::InvalidFlag(s.to_string()))
+            .map_err(|s| ParseError::Flag(s.to_string()))
     }
 }
 
@@ -78,7 +78,7 @@ impl TryFrom<char> for ComparisonFlag {
             'G' => Ok(ComparisonFlag::MeasuredPercentage),
             'Q' => Ok(ComparisonFlag::MeasuredIf),
             'T' => Ok(ComparisonFlag::Trigger),
-            _ => Err(ParseError::InvalidFlag(c.to_string())),
+            _ => Err(ParseError::Flag(c.to_string())),
         }
     }
 }
@@ -124,7 +124,7 @@ impl TryFrom<char> for ArithmeticFlag {
             'I' => Ok(ArithmeticFlag::AddAddress),
             'K' => Ok(ArithmeticFlag::Remember),
             'M' => Ok(ArithmeticFlag::Measured),
-            _ => Err(ParseError::InvalidFlag(c.to_string())),
+            _ => Err(ParseError::Flag(c.to_string())),
         }
     }
 }

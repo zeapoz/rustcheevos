@@ -66,13 +66,13 @@ impl fmt::Display for ChainGroup {
 }
 
 /// A chain of requirements that must all be true.
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Default, Debug, Clone, PartialEq)]
 pub struct Chain(Vec<Requirement>);
 
 impl Chain {
     /// Creates a new chain
     pub fn new() -> Self {
-        Self(Vec::new())
+        Self::default()
     }
 
     /// Pushes a new requirement to the group.
@@ -149,7 +149,7 @@ impl<T: Into<Requirement>> From<T> for Chain {
 impl<const N: usize, T: Into<Requirement>> From<[T; N]> for Chain {
     fn from(arr: [T; N]) -> Self {
         let arr = arr.into_iter().map(T::into).collect::<Vec<_>>();
-        Chain(arr.into())
+        Chain(arr)
     }
 }
 

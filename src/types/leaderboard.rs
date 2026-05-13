@@ -41,6 +41,7 @@ impl Leaderboard {
     /// * `value` - The leaderboard value condition.
     /// * `format` - The value format.
     /// * `lower_is_better` - Whether lower values are better.
+    #[expect(clippy::too_many_arguments, reason = "all fields are required")]
     pub fn new(
         title: impl Into<String>,
         description: impl Into<String>,
@@ -167,7 +168,7 @@ impl FromStr for LeaderboardFormat {
             "FIXED3" => Self::Fixed3,
             "POINTS" => Self::Points,
             "CUSTOM" => Self::Custom,
-            s => return Err(ParseError::InvalidLeaderboardFormat(s.to_string())),
+            s => return Err(ParseError::Leaderboard(s.to_string())),
         };
         Ok(format)
     }

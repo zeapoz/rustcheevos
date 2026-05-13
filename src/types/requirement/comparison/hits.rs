@@ -25,7 +25,7 @@ impl FromStr for HitCount {
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         parse_hit_count
             .parse(s)
-            .map_err(|s| ParseError::InvalidHitCount(s.to_string()))
+            .map_err(|s| ParseError::HitCount(s.to_string()))
     }
 }
 

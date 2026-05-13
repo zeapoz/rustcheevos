@@ -5,14 +5,14 @@ use crate::types::operator::*;
 pub fn parse_arithmetic_operator(input: &mut &str) -> Result<ArithmeticOperator> {
     let operators = alt(("+", "-", "*", "/"));
     operators
-        .try_map(|s| ArithmeticOperator::try_from(s))
+        .try_map(ArithmeticOperator::try_from)
         .parse_next(input)
 }
 
 pub fn parse_comparison_operator(input: &mut &str) -> Result<ComparisonOperator> {
     let operators = alt(("<=", "<", ">=", ">", "!=", "="));
     operators
-        .try_map(|s| ComparisonOperator::try_from(s))
+        .try_map(ComparisonOperator::try_from)
         .parse_next(input)
 }
 

@@ -114,21 +114,37 @@ impl MemoryRef {
     }
 
     /// Creates a new add [`ArithmeticRequirement`].
+    #[expect(
+        clippy::should_implement_trait,
+        reason = "not using arithmetic in the traditional sense"
+    )]
     pub fn add(self, rhs: impl Into<TypedValue>) -> ArithmeticRequirement {
         ArithmeticRequirement::new(ArithmeticFlag::default(), self).add(rhs)
     }
 
     /// Creates a new subtract [`ArithmeticRequirement`].
+    #[expect(
+        clippy::should_implement_trait,
+        reason = "not using arithmetic in the traditional sense"
+    )]
     pub fn sub(self, rhs: impl Into<TypedValue>) -> ArithmeticRequirement {
         ArithmeticRequirement::new(ArithmeticFlag::default(), self).sub(rhs)
     }
 
     /// Creates a new multiply [`ArithmeticRequirement`].
+    #[expect(
+        clippy::should_implement_trait,
+        reason = "not using arithmetic in the traditional sense"
+    )]
     pub fn mul(self, rhs: impl Into<TypedValue>) -> ArithmeticRequirement {
         ArithmeticRequirement::new(ArithmeticFlag::default(), self).mul(rhs)
     }
 
     /// Creates a new divide [`ArithmeticRequirement`].
+    #[expect(
+        clippy::should_implement_trait,
+        reason = "not using arithmetic in the traditional sense"
+    )]
     pub fn div(self, rhs: impl Into<TypedValue>) -> ArithmeticRequirement {
         ArithmeticRequirement::new(ArithmeticFlag::default(), self).div(rhs)
     }
@@ -169,7 +185,7 @@ impl FromStr for MemoryRef {
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         parse_memory_ref
             .parse(s)
-            .map_err(|s| ParseError::InvalidMemoryRef(s.to_string()))
+            .map_err(|s| ParseError::MemoryRef(s.to_string()))
     }
 }
 
@@ -236,7 +252,7 @@ impl MemorySize {
             'R' => Ok(MemorySize::BitIndex(BitIndex::Five)),
             'S' => Ok(MemorySize::BitIndex(BitIndex::Six)),
             'T' => Ok(MemorySize::BitIndex(BitIndex::Seven)),
-            _ => Err(ParseError::InvalidMemorySize(c.to_string())),
+            _ => Err(ParseError::MemorySize(c.to_string())),
         }
     }
 
@@ -248,7 +264,7 @@ impl MemorySize {
             'I' => Ok(MemorySize::Double32BE),
             'M' => Ok(MemorySize::MBF32),
             'L' => Ok(MemorySize::MBF32LE),
-            _ => Err(ParseError::InvalidMemorySize(c.to_string())),
+            _ => Err(ParseError::MemorySize(c.to_string())),
         }
     }
 }
@@ -282,7 +298,7 @@ impl TryFrom<&str> for MemorySize {
             "fI" => Ok(MemorySize::Double32BE),
             "fM" => Ok(MemorySize::MBF32),
             "fL" => Ok(MemorySize::MBF32LE),
-            _ => Err(ParseError::InvalidMemorySize(s.to_string())),
+            _ => Err(ParseError::MemorySize(s.to_string())),
         }
     }
 }
@@ -293,7 +309,7 @@ impl FromStr for MemorySize {
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         parse_memory_size
             .parse(s)
-            .map_err(|s| ParseError::InvalidMemorySize(s.to_string()))
+            .map_err(|s| ParseError::MemorySize(s.to_string()))
     }
 }
 
@@ -350,7 +366,7 @@ impl TryFrom<char> for AccessMode {
             'p' => Ok(AccessMode::Prior),
             'b' => Ok(AccessMode::BCD),
             '~' => Ok(AccessMode::Invert),
-            _ => Err(ParseError::InvalidMemoryAccessMode(c.to_string())),
+            _ => Err(ParseError::MemoryAccessMode(c.to_string())),
         }
     }
 }

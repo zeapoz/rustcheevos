@@ -116,6 +116,6 @@ impl fmt::Display for MacroValue {
             Self::Memory(memory) => memory.to_string(),
             Self::Arithmetic(arithmetic) => arithmetic.to_string(),
         };
-        write!(f, "{}", s)
+        write!(f, "{s}")
     }
 }

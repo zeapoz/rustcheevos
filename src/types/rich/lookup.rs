@@ -59,10 +59,10 @@ impl fmt::Display for LookupTable {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         writeln!(f, "Lookup:{}", self.name)?;
         for entry in &self.entries {
-            writeln!(f, "{}", entry)?;
+            writeln!(f, "{entry}")?;
         }
         if let Some(fallback) = &self.fallback {
-            writeln!(f, "*={}", fallback)?;
+            writeln!(f, "*={fallback}")?;
         }
         Ok(())
     }
@@ -152,7 +152,7 @@ impl From<RangeInclusive<u32>> for EntryKey {
 impl fmt::Display for EntryKey {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
-            Self::Value(value) => write!(f, "{}", value),
+            Self::Value(value) => write!(f, "{value}"),
             Self::Range(range) => write!(f, "{}-{}", range.start(), range.end()),
         }
     }

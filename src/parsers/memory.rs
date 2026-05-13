@@ -9,7 +9,7 @@ use crate::types::memory::*;
 
 pub fn parse_memory_access_mode(input: &mut &str) -> Result<AccessMode> {
     one_of(['d', 'p', 'b', '~'])
-        .try_map(|m| AccessMode::try_from(m))
+        .try_map(AccessMode::try_from)
         .parse_next(input)
 }
 
@@ -20,8 +20,8 @@ pub fn parse_memory_size(input: &mut &str) -> Result<MemorySize> {
     let floats = one_of(['F', 'B', 'H', 'I', 'M', 'L']);
 
     let (_prefix, memsize) = alt((
-        ("0x", bits.try_map(|c| MemorySize::parse_bit_size(c))),
-        ("f", floats.try_map(|c| MemorySize::parse_float_size(c))),
+        ("0x", bits.try_map(MemorySize::parse_bit_size)),
+        ("f", floats.try_map(MemorySize::parse_float_size)),
     ))
     .parse_next(input)?;
 

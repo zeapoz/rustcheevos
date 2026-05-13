@@ -5,9 +5,7 @@ use crate::types::flag::*;
 pub fn parse_comparison_flag(input: &mut &str) -> Result<ComparisonFlag> {
     let flags = one_of(['P', 'R', 'Z', 'C', 'D', 'N', 'O', 'M', 'G', 'Q', 'T']);
 
-    let flag = flags
-        .try_map(|c| ComparisonFlag::try_from(c))
-        .parse_next(input)?;
+    let flag = flags.try_map(ComparisonFlag::try_from).parse_next(input)?;
     let _colon = ":".parse_next(input)?;
     Ok(flag)
 }
@@ -15,9 +13,7 @@ pub fn parse_comparison_flag(input: &mut &str) -> Result<ComparisonFlag> {
 pub fn parse_arithmetic_flag(input: &mut &str) -> Result<ArithmeticFlag> {
     let flags = one_of(['A', 'B', 'I', 'K', 'M']);
 
-    let flag = flags
-        .try_map(|c| ArithmeticFlag::try_from(c))
-        .parse_next(input)?;
+    let flag = flags.try_map(ArithmeticFlag::try_from).parse_next(input)?;
     let _colon = ":".parse_next(input)?;
     Ok(flag)
 }

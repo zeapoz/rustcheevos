@@ -87,7 +87,7 @@ impl FromStr for ComparisonRequirement {
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         parse_comparison_requirement
             .parse(s)
-            .map_err(|s| ParseError::InvalidRequirement(s.to_string()))
+            .map_err(|s| ParseError::Requirement(s.to_string()))
     }
 }
 

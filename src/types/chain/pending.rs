@@ -154,21 +154,37 @@ impl<T: Into<TypedValue> + Copy> PendingChain<T> {
         self.extend_req(head.ge(rhs))
     }
 
+    #[expect(
+        clippy::should_implement_trait,
+        reason = "not using arithmetic in the traditional sense"
+    )]
     pub fn add(self, rhs: impl Into<TypedValue>) -> Chain {
         let head: TypedValue = self.head.into();
         self.extend_req(head.add(rhs))
     }
 
+    #[expect(
+        clippy::should_implement_trait,
+        reason = "not using arithmetic in the traditional sense"
+    )]
     pub fn sub(self, rhs: impl Into<TypedValue>) -> Chain {
         let head: TypedValue = self.head.into();
         self.extend_req(head.sub(rhs))
     }
 
+    #[expect(
+        clippy::should_implement_trait,
+        reason = "not using arithmetic in the traditional sense"
+    )]
     pub fn mul(self, rhs: impl Into<TypedValue>) -> Chain {
         let head: TypedValue = self.head.into();
         self.extend_req(head.mul(rhs))
     }
 
+    #[expect(
+        clippy::should_implement_trait,
+        reason = "not using arithmetic in the traditional sense"
+    )]
     pub fn div(self, rhs: impl Into<TypedValue>) -> Chain {
         let head: TypedValue = self.head.into();
         self.extend_req(head.div(rhs))

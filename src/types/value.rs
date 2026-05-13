@@ -51,21 +51,37 @@ impl TypedValue {
     }
 
     /// Creates a new add [`ArithmeticRequirement`].
+    #[expect(
+        clippy::should_implement_trait,
+        reason = "not using arithmetic in the traditional sense"
+    )]
     pub fn add(self, rhs: impl Into<TypedValue>) -> ArithmeticRequirement {
         ArithmeticRequirement::new(crate::types::flag::ArithmeticFlag::default(), self).add(rhs)
     }
 
     /// Creates a new subtract [`ArithmeticRequirement`].
+    #[expect(
+        clippy::should_implement_trait,
+        reason = "not using arithmetic in the traditional sense"
+    )]
     pub fn sub(self, rhs: impl Into<TypedValue>) -> ArithmeticRequirement {
         ArithmeticRequirement::new(crate::types::flag::ArithmeticFlag::default(), self).sub(rhs)
     }
 
     /// Creates a new multiply [`ArithmeticRequirement`].
+    #[expect(
+        clippy::should_implement_trait,
+        reason = "not using arithmetic in the traditional sense"
+    )]
     pub fn mul(self, rhs: impl Into<TypedValue>) -> ArithmeticRequirement {
         ArithmeticRequirement::new(crate::types::flag::ArithmeticFlag::default(), self).mul(rhs)
     }
 
     /// Creates a new divide [`ArithmeticRequirement`].
+    #[expect(
+        clippy::should_implement_trait,
+        reason = "not using arithmetic in the traditional sense"
+    )]
     pub fn div(self, rhs: impl Into<TypedValue>) -> ArithmeticRequirement {
         ArithmeticRequirement::new(crate::types::flag::ArithmeticFlag::default(), self).div(rhs)
     }
@@ -117,7 +133,7 @@ impl FromStr for TypedValue {
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         parse_typed_value
             .parse(s)
-            .map_err(|s| ParseError::InvalidValue(s.to_string()))
+            .map_err(|s| ParseError::Value(s.to_string()))
     }
 }
 

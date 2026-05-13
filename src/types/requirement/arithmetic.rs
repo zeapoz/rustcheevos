@@ -48,6 +48,10 @@ impl ArithmeticRequirement {
     /// # Arguments
     ///
     /// * `rhs` - The right hand side of the operation.
+    #[expect(
+        clippy::should_implement_trait,
+        reason = "not using arithmetic in the traditional sense"
+    )]
     pub fn add(self, rhs: impl Into<TypedValue>) -> Self {
         self.with_operation(ArithmeticOperation::add(rhs))
     }
@@ -57,6 +61,10 @@ impl ArithmeticRequirement {
     /// # Arguments
     ///
     /// * `rhs` - The right hand side of the operation.
+    #[expect(
+        clippy::should_implement_trait,
+        reason = "not using arithmetic in the traditional sense"
+    )]
     pub fn sub(self, rhs: impl Into<TypedValue>) -> Self {
         self.with_operation(ArithmeticOperation::sub(rhs))
     }
@@ -66,6 +74,10 @@ impl ArithmeticRequirement {
     /// # Arguments
     ///
     /// * `rhs` - The right hand side of the operation.
+    #[expect(
+        clippy::should_implement_trait,
+        reason = "not using arithmetic in the traditional sense"
+    )]
     pub fn mul(self, rhs: impl Into<TypedValue>) -> Self {
         self.with_operation(ArithmeticOperation::mul(rhs))
     }
@@ -75,6 +87,10 @@ impl ArithmeticRequirement {
     /// # Arguments
     ///
     /// * `rhs` - The right hand side of the operation.
+    #[expect(
+        clippy::should_implement_trait,
+        reason = "not using arithmetic in the traditional sense"
+    )]
     pub fn div(self, rhs: impl Into<TypedValue>) -> Self {
         self.with_operation(ArithmeticOperation::div(rhs))
     }
@@ -113,7 +129,7 @@ impl FromStr for ArithmeticRequirement {
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         parse_arithmetic_requirement
             .parse(s)
-            .map_err(|s| ParseError::InvalidRequirement(s.to_string()))
+            .map_err(|s| ParseError::Requirement(s.to_string()))
     }
 }
 

@@ -13,7 +13,7 @@ pub mod lookup;
 pub mod macros;
 
 /// The rich presence core type.
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Default, Debug, Clone, PartialEq)]
 pub struct RichPresence {
     lookup_tables: Vec<Rc<LookupTable>>,
     formats: Vec<Rc<Format>>,
@@ -108,28 +108,17 @@ impl RichPresence {
     }
 }
 
-impl Default for RichPresence {
-    fn default() -> Self {
-        Self {
-            formats: Vec::new(),
-            lookup_tables: Vec::new(),
-            conditional_displays: Vec::new(),
-            static_display: String::new(),
-        }
-    }
-}
-
 impl fmt::Display for RichPresence {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         for lookup_table in &self.lookup_tables {
-            writeln!(f, "{}", lookup_table)?;
+            writeln!(f, "{lookup_table}")?;
         }
         for format in &self.formats {
-            writeln!(f, "{}", format)?;
+            writeln!(f, "{format}")?;
         }
         writeln!(f, "Display:")?;
         for conditional_display in &self.conditional_displays {
-            writeln!(f, "{}", conditional_display)?;
+            writeln!(f, "{conditional_display}")?;
         }
         writeln!(f, "{}", self.static_display)
     }

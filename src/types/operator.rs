@@ -31,7 +31,7 @@ impl TryFrom<&str> for ArithmeticOperator {
             "%" => Ok(ArithmeticOperator::Modulo),
             "&" => Ok(ArithmeticOperator::BitwiseAnd),
             "^" => Ok(ArithmeticOperator::BitwiseXor),
-            _ => Err(ParseError::InvalidOperator(s.to_string())),
+            _ => Err(ParseError::Operator(s.to_string())),
         }
     }
 }
@@ -42,7 +42,7 @@ impl FromStr for ArithmeticOperator {
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         parse_arithmetic_operator
             .parse(s)
-            .map_err(|s| ParseError::InvalidOperator(s.to_string()))
+            .map_err(|s| ParseError::Operator(s.to_string()))
     }
 }
 
@@ -83,7 +83,7 @@ impl TryFrom<&str> for ComparisonOperator {
             ">=" => Ok(ComparisonOperator::GreaterThanOrEquals),
             "=" => Ok(ComparisonOperator::Equals),
             "!=" => Ok(ComparisonOperator::NotEquals),
-            _ => Err(ParseError::InvalidOperator(s.to_string())),
+            _ => Err(ParseError::Operator(s.to_string())),
         }
     }
 }
@@ -94,7 +94,7 @@ impl FromStr for ComparisonOperator {
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         parse_comparison_operator
             .parse(s)
-            .map_err(|s| ParseError::InvalidOperator(s.to_string()))
+            .map_err(|s| ParseError::Operator(s.to_string()))
     }
 }
 
