@@ -74,7 +74,7 @@
 //!     table.set_fallback("Main Menu");
 //!
 //!     // This returns a macro call handle than can be used directly in format! strings.
-//!     let stage = rich_presence.register_lookup_table(table).call(bits8!(0x1234));
+//!     let stage = rich_presence.register_lookup(table, bits8!(0x1234));
 //!     rich_presence.add_static_display("Currently in {stage}");
 //!
 //!     game.set_rich_presence(rich_presence);

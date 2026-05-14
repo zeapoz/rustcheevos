@@ -10,96 +10,9 @@ use super::{format::Format, lookup::LookupTable};
 
 pub mod builtin;
 
-/// A rich presence macro call.
+/// The type of macro being referenced.
 #[derive(Debug, Clone, PartialEq)]
-pub struct MacroCall {
-    /// The macro reference (builtin, format, or lookup).
-    pub macro_type: MacroRef,
-    /// The value to pass to the macro.
-    pub value: MacroValue,
-}
-
-impl MacroCall {
-    /// Creates a new macro call with the given macro reference and value.
-    ///
-    /// # Examples
-    ///
-    /// ```
-    /// use rustcheevos::{prelude::*, bits8};
-    /// use rustcheevos::types::rich::macros::{MacroCall, MacroRef, builtin::BuiltInMacro};
-    ///
-    /// let call = MacroCall::new(
-    ///     MacroRef::Builtin(BuiltInMacro::Score),
-    ///     bits8!(0x1234),
-    /// );
-    /// assert_eq!(call.to_string(), "@Score(0xH1234)");
-    /// ```
-    pub fn new(macro_type: MacroRef, value: impl Into<MacroValue>) -> Self {
-        Self {
-            macro_type,
-            value: value.into(),
-        }
-    }
-
-    /// Creates a new macro call for a builtin macro.
-    ///
-    /// # Examples
-    ///
-    /// ```
-    /// use rustcheevos::{prelude::*, bits8};
-    /// use rustcheevos::types::rich::macros::{MacroCall, builtin::BuiltInMacro};
-    ///
-    /// let call = MacroCall::builtin(BuiltInMacro::Score, bits8!(0x1234));
-    /// assert_eq!(call.to_string(), "@Score(0xH1234)");
-    /// ```
-    pub fn builtin(builtin: BuiltInMacro, value: impl Into<MacroValue>) -> MacroCall {
-        Self::new(MacroRef::Builtin(builtin), value)
-    }
-
-    /// Creates a new macro call for a custom format.
-    ///
-    /// # Examples
-    ///
-    /// ```
-    /// use std::rc::Rc;
-    /// use rustcheevos::{prelude::*, bits8};
-    /// use rustcheevos::types::rich::{format::Format, format::FormatType, macros::MacroCall};
-    ///
-    /// let format = Rc::new(Format::new("Score".to_string(), FormatType::Score));
-    /// let call = MacroCall::format(format, bits8!(0x1234));
-    /// assert_eq!(call.to_string(), "@Score(0xH1234)");
-    /// ```
-    pub fn format(format: Rc<Format>, value: impl Into<MacroValue>) -> MacroCall {
-        Self::new(MacroRef::Format(format), value)
-    }
-
-    /// Creates a new macro call for a lookup table.
-    ///
-    /// # Examples
-    ///
-    /// ```
-    /// use std::rc::Rc;
-    /// use rustcheevos::{prelude::*, bits8};
-    /// use rustcheevos::types::rich::{lookup::LookupTable, macros::MacroCall};
-    ///
-    /// let lookup = Rc::new(LookupTable::new("Health".to_string()));
-    /// let call = MacroCall::lookup(lookup, bits8!(0x1234));
-    /// assert_eq!(call.to_string(), "@Health(0xH1234)");
-    /// ```
-    pub fn lookup(lookup: Rc<LookupTable>, value: impl Into<MacroValue>) -> MacroCall {
-        Self::new(MacroRef::Lookup(lookup), value)
-    }
-}
-
-impl fmt::Display for MacroCall {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "@{}({})", self.macro_type, self.value)
-    }
-}
-
-/// References to available macro types.
-#[derive(Debug, Clone, PartialEq)]
-pub enum MacroRef {
+pub enum MacroType {
     /// A builtin macro (e.g., Number, Score, Seconds).
     Builtin(BuiltInMacro),
     /// A custom format reference.
@@ -108,74 +21,27 @@ pub enum MacroRef {
     Lookup(Rc<LookupTable>),
 }
 
-impl MacroRef {
-    /// Creates a builtin macro reference.
-    ///
-    /// # Examples
-    ///
-    /// ```
-    /// use rustcheevos::types::rich::macros::{MacroRef, builtin::BuiltInMacro};
-    ///
-    /// let ref_ = MacroRef::builtin(BuiltInMacro::Score);
-    /// assert_eq!(ref_.to_string(), "Score");
-    /// ```
+impl MacroType {
+    /// Creates a builtin macro type.
     #[must_use]
     pub fn builtin(builtin: BuiltInMacro) -> Self {
         Self::Builtin(builtin)
     }
 
-    /// Creates a format reference.
-    ///
-    /// # Examples
-    ///
-    /// ```
-    /// use std::rc::Rc;
-    /// use rustcheevos::types::rich::{format::Format, format::FormatType, macros::MacroRef};
-    ///
-    /// let format = Rc::new(Format::new("Score".to_string(), FormatType::Score));
-    /// let ref_ = MacroRef::format(format);
-    /// assert_eq!(ref_.to_string(), "Score");
-    /// ```
+    /// Creates a format macro type.
     #[must_use]
     pub fn format(format: Rc<Format>) -> Self {
         Self::Format(format)
     }
 
-    /// Creates a lookup table reference.
-    ///
-    /// # Examples
-    ///
-    /// ```
-    /// use std::rc::Rc;
-    /// use rustcheevos::types::rich::{lookup::LookupTable, macros::MacroRef};
-    ///
-    /// let lookup = Rc::new(LookupTable::new("Health".to_string()));
-    /// let ref_ = MacroRef::lookup(lookup);
-    /// assert_eq!(ref_.to_string(), "Health");
-    /// ```
+    /// Creates a lookup macro type.
     #[must_use]
     pub fn lookup(lookup: Rc<LookupTable>) -> Self {
         Self::Lookup(lookup)
     }
-
-    /// Calls the referenced macro with the given value to generate a [`MacroCall`].
-    ///
-    /// # Examples
-    ///
-    /// ```
-    /// use rustcheevos::{prelude::*, bits16};
-    /// use rustcheevos::types::rich::macros::{MacroRef, builtin::BuiltInMacro};
-    ///
-    /// let ref_ = MacroRef::builtin(BuiltInMacro::Number);
-    /// let call = ref_.call(bits16!(0x1234));
-    /// assert_eq!(call.to_string(), "@Number(0x 1234)");
-    /// ```
-    pub fn call(&self, value: impl Into<MacroValue>) -> MacroCall {
-        MacroCall::new(self.clone(), value)
-    }
 }
 
-impl fmt::Display for MacroRef {
+impl fmt::Display for MacroType {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let s = match self {
             Self::Builtin(builtin) => builtin.to_string(),
@@ -183,6 +49,78 @@ impl fmt::Display for MacroRef {
             Self::Lookup(lookup) => lookup.name.to_string(),
         };
         write!(f, "{s}")
+    }
+}
+
+/// A rich presence macro reference.
+#[derive(Debug, Clone, PartialEq)]
+pub struct MacroRef {
+    /// The type of macro being referenced.
+    pub macro_type: MacroType,
+    /// The macro value.
+    pub value: MacroValue,
+}
+
+impl MacroRef {
+    /// Creates a new macro reference.
+    #[must_use]
+    pub fn new(macro_type: MacroType, value: impl Into<MacroValue>) -> Self {
+        Self {
+            macro_type,
+            value: value.into(),
+        }
+    }
+
+    /// Creates a new builtin macro reference.
+    ///
+    /// # Examples
+    /// ```
+    /// use rustcheevos::bits8;
+    /// use rustcheevos::types::rich::macros::{builtin::BuiltInMacro, MacroRef};
+    ///
+    /// let macro_ref = MacroRef::builtin(BuiltInMacro::Number, bits8!(0x1234));
+    /// assert_eq!(macro_ref.to_string(), "@Number(0xH1234)");
+    /// ```
+    pub fn builtin(builtin: BuiltInMacro, value: impl Into<MacroValue>) -> MacroRef {
+        Self::new(MacroType::Builtin(builtin), value)
+    }
+
+    /// Creates a new format macro reference.
+    ///
+    /// # Examples
+    /// ```
+    /// use std::rc::Rc;
+    /// use rustcheevos::bits8;
+    /// use rustcheevos::types::rich::{macros::MacroRef, format::{Format, FormatType}};
+    ///
+    /// let format = Rc::new(Format::new("CustomFormat", FormatType::Value));
+    /// let macro_ref = MacroRef::format(format, bits8!(0x1234));
+    /// assert_eq!(macro_ref.to_string(), "@CustomFormat(0xH1234)");
+    /// ```
+    pub fn format(format: Rc<Format>, value: impl Into<MacroValue>) -> MacroRef {
+        Self::new(MacroType::Format(format), value)
+    }
+
+    /// Creates a new lookup macro reference.
+    ///
+    /// # Examples
+    /// ```
+    /// use std::rc::Rc;
+    /// use rustcheevos::bits8;
+    /// use rustcheevos::types::rich::{lookup::LookupTable, macros::MacroRef};
+    ///
+    /// let lookup = Rc::new(LookupTable::new("LookupTable"));
+    /// let macro_ref = MacroRef::lookup(lookup, bits8!(0x1234));
+    /// assert_eq!(macro_ref.to_string(), "@LookupTable(0xH1234)");
+    /// ``
+    pub fn lookup(lookup: Rc<LookupTable>, value: impl Into<MacroValue>) -> MacroRef {
+        Self::new(MacroType::Lookup(lookup), value)
+    }
+}
+
+impl fmt::Display for MacroRef {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "@{}({})", self.macro_type, self.value)
     }
 }
 

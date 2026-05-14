@@ -6,7 +6,6 @@ use crate::parsers::ParseError;
 
 use super::chain::ChainGroup;
 
-// TODO: Refactor into builder pattern.
 /// An achievement definition.
 ///
 /// This type defines the core properties of an achievement and is used to populate
@@ -71,6 +70,40 @@ impl Achievement {
     ) -> Self {
         Self {
             id: 0,
+            title: title.into(),
+            description: description.into(),
+            requirements: requirements.into(),
+            tag: None,
+            points,
+        }
+    }
+
+    /// Creates a new achievement with the given ID, title, description, conditions, and points.
+    ///
+    /// # Examples
+    /// ```
+    /// # enum Galaxy { Alpha }
+    /// # enum Medal { Bronze }
+    /// # fn galaxy_all_medals_condition(galaxy: Galaxy, medal: Medal) -> Chain { Chain::default() }
+    /// use rustcheevos::prelude::*;
+    ///
+    /// let achievement = Achievement::new_with_id(
+    ///     600707,
+    ///     "Alpha Amateur",
+    ///     "Earn a Bronze medal or higher on every planet of the Alpha galaxy",
+    ///     galaxy_all_medals_condition(Galaxy::Alpha, Medal::Bronze),
+    ///     3,
+    /// );
+    /// ```
+    pub fn new_with_id(
+        id: u32,
+        title: impl Into<String>,
+        description: impl Into<String>,
+        requirements: impl Into<ChainGroup>,
+        points: u32,
+    ) -> Self {
+        Self {
+            id,
             title: title.into(),
             description: description.into(),
             requirements: requirements.into(),

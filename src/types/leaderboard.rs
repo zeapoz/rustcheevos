@@ -106,17 +106,21 @@ impl Leaderboard {
         }
     }
 
+    // TODO: Adjust docs.
     /// Creates a new instant submission leaderboard.
     ///
     /// # Examples
     /// ```
+    /// # use rustcheevos::{bits8, measured};
+    /// # fn start_condition() -> Chain { Chain::default() }
+    /// # fn value() -> MemoryRef { bits8!(0) }
     /// use rustcheevos::prelude::*;
     ///
     /// let leaderboard = Leaderboard::new_instant_submission(
     ///     "Speed Run",
     ///     "Complete the level as fast as possible",
-    ///     Requirement::always_true(),
-    ///     Requirement::always_true(),
+    ///     start_condition(),
+    ///     measured!(value()),
     ///     LeaderboardFormat::Seconds,
     ///     true,
     /// );

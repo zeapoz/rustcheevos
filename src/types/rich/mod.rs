@@ -4,7 +4,7 @@ use std::{fmt, fs, io, path::Path, rc::Rc};
 
 use format::{Format, FormatType};
 use lookup::LookupTable;
-use macros::{MacroRef, builtin::BuiltInMacro};
+use macros::{MacroRef, MacroValue, builtin::BuiltInMacro};
 
 use crate::schema::rich::{RICH_PESENCE_FILE_EXTENSION, RICH_PESENCE_FILE_SUFFIX};
 
@@ -30,7 +30,7 @@ pub mod macros;
 /// table.add_entry(Entry::new(2..=3, "Level 2"));
 /// table.set_fallback("Main Menu");
 ///
-/// let level = rich_presence.register_lookup_table(table).call(bits8!(0x1234));
+/// let level = rich_presence.register_lookup(table, bits8!(0x1234));
 ///
 /// // Add a conditional display based on game state.
 /// let condition = chain!(bits8!(0x1234).ge(1));
@@ -58,13 +58,28 @@ impl RichPresence {
         Self::default()
     }
 
-    /// Returns a new [`MacroRef`] for a builtin macro.
-    #[must_use]
-    pub fn builtin_macro(builtin: BuiltInMacro) -> MacroRef {
-        MacroRef::builtin(builtin)
+    /// Registers a builtin macro and returns a [`MacroRef`] for it.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use rustcheevos::{prelude::*, bits8};
+    /// use rustcheevos::types::rich::macros::builtin::BuiltInMacro;
+    ///
+    /// let mut rich_presence = RichPresence::new();
+    /// let score = rich_presence.builtin_macro(BuiltInMacro::Score, bits8!(0x1234));
+    ///
+    /// rich_presence.add_conditional_display(Requirement::always_true(), "Score: {score}");
+    /// ```
+    pub fn builtin_macro(
+        &mut self,
+        builtin: BuiltInMacro,
+        value: impl Into<MacroValue>,
+    ) -> MacroRef {
+        MacroRef::builtin(builtin, value)
     }
 
-    /// Registers a new lookup table and returns a [`MacroRef`] for it.
+    /// Registers a lookup table and returns a [`MacroRef`] for it.
     ///
     /// # Examples
     ///
@@ -76,17 +91,21 @@ impl RichPresence {
     /// let mut table = LookupTable::new("Stage");
     /// table.add_entry(Entry::new(0, "Main Menu"));
     /// table.add_entry(Entry::new(1, "Level 1"));
-    /// let stage = rich_presence.register_lookup_table(table).call(bits8!(0x1234));
+    /// let stage = rich_presence.register_lookup(table, bits8!(0x1234));
     ///
     /// rich_presence.add_conditional_display(Requirement::always_true(), "Currently in {stage}");
     /// ```
-    pub fn register_lookup_table(&mut self, table: impl Into<LookupTable>) -> MacroRef {
+    pub fn register_lookup(
+        &mut self,
+        table: impl Into<LookupTable>,
+        value: impl Into<MacroValue>,
+    ) -> MacroRef {
         let idx = self.lookup_tables.len();
         self.lookup_tables.push(Rc::new(table.into()));
-        MacroRef::Lookup(self.lookup_tables[idx].clone())
+        MacroRef::lookup(self.lookup_tables[idx].clone(), value)
     }
 
-    /// Registers a new format and returns a [`MacroRef`] for it.
+    /// Registers a format and returns a [`MacroRef`] for it.
     ///
     /// # Examples
     ///
@@ -94,7 +113,7 @@ impl RichPresence {
     /// use rustcheevos::{prelude::*, bits8};
     ///
     /// let mut rich_presence = RichPresence::new();
-    /// let score = rich_presence.register_format("Score", FormatType::Score).call(bits8!(0x1234));
+    /// let score = rich_presence.register_format("Score", FormatType::Score, bits8!(0x1234));
     ///
     /// rich_presence.add_conditional_display(Requirement::always_true(), "Score: {score}");
     /// ```
@@ -102,11 +121,12 @@ impl RichPresence {
         &mut self,
         name: impl Into<String>,
         format_type: FormatType,
+        value: impl Into<MacroValue>,
     ) -> MacroRef {
         let format = Format::new(name.into(), format_type);
         let idx = self.formats.len();
         self.formats.push(Rc::new(format));
-        MacroRef::format(self.formats[idx].clone())
+        MacroRef::format(self.formats[idx].clone(), value)
     }
 
     /// Adds a conditional display.
