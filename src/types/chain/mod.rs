@@ -44,7 +44,7 @@ pub struct ChainGroup {
 }
 
 impl ChainGroup {
-    /// Creates a new chain with the given core chain.
+    /// Creates a new group with the given core chain.
     ///
     /// # Examples
     /// ```
@@ -79,11 +79,11 @@ impl ChainGroup {
     /// let mut chain_group = ChainGroup::new(core_condition);
     /// chain_group.push_alt_group(alt_group);
     /// ```
-    pub fn push_alt_group(&mut self, group: Chain) {
-        self.alt_groups.push(group);
+    pub fn push_alt_group(&mut self, group: impl Into<Chain>) {
+        self.alt_groups.push(group.into());
     }
 
-    /// Adds multiple alternative groups of requirements.
+    /// Adds multiple alternative groups of requirements to this chain group.
     ///
     /// # Examples
     /// ```
@@ -101,15 +101,10 @@ impl ChainGroup {
     /// );
     ///
     /// let mut chain_group = ChainGroup::new(core_condition);
-    /// chain_group.with_alt_groups(vec![alt_group_a, alt_group_b]);
+    /// chain_group.set_alt_groups(vec![alt_group_a, alt_group_b]);
     /// ```
-    #[must_use]
-    pub fn with_alt_groups(
-        mut self,
-        alt_groups: impl IntoIterator<Item = impl Into<Chain>>,
-    ) -> Self {
+    pub fn set_alt_groups(&mut self, alt_groups: impl IntoIterator<Item = impl Into<Chain>>) {
         self.alt_groups = alt_groups.into_iter().map(Into::into).collect();
-        self
     }
 }
 
