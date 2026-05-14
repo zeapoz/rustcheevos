@@ -1,6 +1,6 @@
-//! Type definition for comparison requirements.
+//! Type definition for comparison conditions.
 
-use hits::HitCount;
+pub use hits::HitCount;
 use std::{fmt, str::FromStr};
 use winnow::Parser;
 
@@ -9,14 +9,13 @@ pub mod hits;
 use crate::{
     impl_comparison_flag_traits,
     parsers::ParseError,
-    parsers::parse_comparison_requirement,
+    parsers::parse_condition,
     types::{flag::ComparisonFlag, operator::ComparisonOperator, value::TypedValue},
 };
 
-// TODO: Make fields private.
 /// A comparison between two values.
 #[derive(Debug, Clone, Copy, PartialEq)]
-pub struct ComparisonRequirement {
+pub struct Condition {
     /// The flag of the comparison.
     pub flag: Option<ComparisonFlag>,
     /// The left hand side of the comparison.
@@ -27,15 +26,15 @@ pub struct ComparisonRequirement {
     pub hit_count: HitCount,
 }
 
-impl ComparisonRequirement {
+impl Condition {
     /// Returns a new comparison between two values.
     ///
     /// # Examples
     /// ```
     /// # use rustcheevos::types::operator::ComparisonOperator;
-    /// # use rustcheevos::types::requirement::comparison::ComparisonRequirement;
+    /// # use rustcheevos::types::requirement::condition::Condition;
     /// # use rustcheevos::types::value::TypedValue;
-    /// let comparison = ComparisonRequirement::new(10, ComparisonOperator::Equals, 10);
+    /// let comparison = Condition::new(10, ComparisonOperator::Equals, 10);
     /// assert_eq!(comparison.lhs(), &TypedValue::from(10));
     /// assert_eq!(comparison.operator(), ComparisonOperator::Equals);
     /// assert_eq!(comparison.rhs(), &TypedValue::from(10));
@@ -61,8 +60,8 @@ impl ComparisonRequirement {
     /// # Examples
     /// ```
     /// # use rustcheevos::types::operator::ComparisonOperator;
-    /// # use rustcheevos::types::requirement::comparison::ComparisonRequirement;
-    /// let comparison = ComparisonRequirement::new(10, ComparisonOperator::Equals, 10);
+    /// # use rustcheevos::types::requirement::condition::Condition;
+    /// let comparison = Condition::new(10, ComparisonOperator::Equals, 10);
     /// assert_eq!(comparison.flag(), None);
     /// ```
     #[must_use]
@@ -75,9 +74,9 @@ impl ComparisonRequirement {
     /// # Examples
     /// ```
     /// # use rustcheevos::types::operator::ComparisonOperator;
-    /// # use rustcheevos::types::requirement::comparison::ComparisonRequirement;
+    /// # use rustcheevos::types::requirement::condition::Condition;
     /// # use rustcheevos::types::value::TypedValue;
-    /// let comparison = ComparisonRequirement::new(10, ComparisonOperator::Equals, 10);
+    /// let comparison = Condition::new(10, ComparisonOperator::Equals, 10);
     /// assert_eq!(comparison.lhs(), &TypedValue::from(10));
     /// ```
     #[must_use]
@@ -90,8 +89,8 @@ impl ComparisonRequirement {
     /// # Examples
     /// ```
     /// # use rustcheevos::types::operator::ComparisonOperator;
-    /// # use rustcheevos::types::requirement::comparison::ComparisonRequirement;
-    /// let comparison = ComparisonRequirement::new(10, ComparisonOperator::Equals, 10);
+    /// # use rustcheevos::types::requirement::condition::Condition;
+    /// let comparison = Condition::new(10, ComparisonOperator::Equals, 10);
     /// assert_eq!(comparison.operator(), ComparisonOperator::Equals);
     /// ```
     #[must_use]
@@ -104,9 +103,9 @@ impl ComparisonRequirement {
     /// # Examples
     /// ```
     /// # use rustcheevos::types::operator::ComparisonOperator;
-    /// # use rustcheevos::types::requirement::comparison::ComparisonRequirement;
+    /// # use rustcheevos::types::requirement::condition::Condition;
     /// # use rustcheevos::types::value::TypedValue;
-    /// let comparison = ComparisonRequirement::new(10, ComparisonOperator::Equals, 10);
+    /// let comparison = Condition::new(10, ComparisonOperator::Equals, 10);
     /// assert_eq!(comparison.rhs(), &TypedValue::from(10));
     /// ```
     #[must_use]
@@ -119,8 +118,8 @@ impl ComparisonRequirement {
     /// # Examples
     /// ```
     /// # use rustcheevos::types::operator::ComparisonOperator;
-    /// # use rustcheevos::types::requirement::comparison::ComparisonRequirement;
-    /// let comparison = ComparisonRequirement::new(10, ComparisonOperator::Equals, 10);
+    /// # use rustcheevos::types::requirement::condition::Condition;
+    /// let comparison = Condition::new(10, ComparisonOperator::Equals, 10);
     /// assert_eq!(*comparison.hit_count(), 0);
     /// ```
     #[must_use]
@@ -132,8 +131,8 @@ impl ComparisonRequirement {
     ///
     /// # Examples
     /// ```
-    /// # use rustcheevos::types::requirement::comparison::ComparisonRequirement;
-    /// let comparison = ComparisonRequirement::eq(10, 10);
+    /// # use rustcheevos::types::requirement::condition::Condition;
+    /// let comparison = Condition::eq(10, 10);
     /// assert_eq!(comparison.operator().to_string(), "=");
     /// ```
     pub fn eq(lhs: impl Into<TypedValue>, rhs: impl Into<TypedValue>) -> Self {
@@ -144,8 +143,8 @@ impl ComparisonRequirement {
     ///
     /// # Examples
     /// ```
-    /// # use rustcheevos::types::requirement::comparison::ComparisonRequirement;
-    /// let comparison = ComparisonRequirement::ne(10, 10);
+    /// # use rustcheevos::types::requirement::condition::Condition;
+    /// let comparison = Condition::ne(10, 10);
     /// assert_eq!(comparison.operator().to_string(), "!=");
     /// ```
     pub fn ne(lhs: impl Into<TypedValue>, rhs: impl Into<TypedValue>) -> Self {
@@ -156,8 +155,8 @@ impl ComparisonRequirement {
     ///
     /// # Examples
     /// ```
-    /// # use rustcheevos::types::requirement::comparison::ComparisonRequirement;
-    /// let comparison = ComparisonRequirement::lt(10, 10);
+    /// # use rustcheevos::types::requirement::condition::Condition;
+    /// let comparison = Condition::lt(10, 10);
     /// assert_eq!(comparison.operator().to_string(), "<");
     /// ```
     pub fn lt(lhs: impl Into<TypedValue>, rhs: impl Into<TypedValue>) -> Self {
@@ -168,8 +167,8 @@ impl ComparisonRequirement {
     ///
     /// # Examples
     /// ```
-    /// # use rustcheevos::types::requirement::comparison::ComparisonRequirement;
-    /// let comparison = ComparisonRequirement::le(10, 10);
+    /// # use rustcheevos::types::requirement::condition::Condition;
+    /// let comparison = Condition::le(10, 10);
     /// assert_eq!(comparison.operator().to_string(), "<=");
     /// ```
     pub fn le(lhs: impl Into<TypedValue>, rhs: impl Into<TypedValue>) -> Self {
@@ -180,8 +179,8 @@ impl ComparisonRequirement {
     ///
     /// # Examples
     /// ```
-    /// # use rustcheevos::types::requirement::comparison::ComparisonRequirement;
-    /// let comparison = ComparisonRequirement::gt(10, 10);
+    /// # use rustcheevos::types::requirement::condition::Condition;
+    /// let comparison = Condition::gt(10, 10);
     /// assert_eq!(comparison.operator().to_string(), ">");
     /// ```
     pub fn gt(lhs: impl Into<TypedValue>, rhs: impl Into<TypedValue>) -> Self {
@@ -192,8 +191,8 @@ impl ComparisonRequirement {
     ///
     /// # Examples
     /// ```
-    /// # use rustcheevos::types::requirement::comparison::ComparisonRequirement;
-    /// let comparison = ComparisonRequirement::ge(10, 10);
+    /// # use rustcheevos::types::requirement::condition::Condition;
+    /// let comparison = Condition::ge(10, 10);
     /// assert_eq!(comparison.operator().to_string(), ">=");
     /// ```
     pub fn ge(lhs: impl Into<TypedValue>, rhs: impl Into<TypedValue>) -> Self {
@@ -206,9 +205,9 @@ impl ComparisonRequirement {
     /// ```
     /// # use rustcheevos::types::operator::ComparisonOperator;
     /// # use rustcheevos::types::flag::ComparisonFlag;
-    /// # use rustcheevos::types::requirement::comparison::ComparisonRequirement;
+    /// # use rustcheevos::types::requirement::condition::Condition;
     /// # use rustcheevos::types::value::TypedValue;
-    /// let comparison = ComparisonRequirement::new(10, ComparisonOperator::Equals, 10);
+    /// let comparison = Condition::new(10, ComparisonOperator::Equals, 10);
     /// assert_eq!(comparison.flag(), None);
     /// let comparison = comparison.with_flag(ComparisonFlag::AddHits);
     /// assert_eq!(comparison.flag(), Some(ComparisonFlag::AddHits));
@@ -224,9 +223,9 @@ impl ComparisonRequirement {
     /// # Examples
     /// ```
     /// # use rustcheevos::types::operator::ComparisonOperator;
-    /// # use rustcheevos::types::requirement::comparison::ComparisonRequirement;
+    /// # use rustcheevos::types::requirement::condition::Condition;
     /// # use rustcheevos::types::value::TypedValue;
-    /// let comparison = ComparisonRequirement::new(10, ComparisonOperator::Equals, 10);
+    /// let comparison = Condition::new(10, ComparisonOperator::Equals, 10);
     /// assert_eq!(*comparison.hit_count(), 0);
     /// let comparison = comparison.with_hits(10);
     /// assert_eq!(*comparison.hit_count(), 10);
@@ -236,19 +235,49 @@ impl ComparisonRequirement {
         self.hit_count.set_hits(hits);
         self
     }
-}
 
-impl FromStr for ComparisonRequirement {
-    type Err = ParseError;
+    /// Returns a condition that always evaluates to true.
+    ///
+    /// This is a shorthand for a `1 = 1` comparison.
+    ///
+    /// # Examples
+    /// ```
+    /// # use rustcheevos::types::requirement::condition::Condition;
+    /// let condition = Condition::always_true();
+    /// assert_eq!(condition.lhs(), &1.into());
+    /// ```
+    #[must_use]
+    pub fn always_true() -> Self {
+        Self::eq(1, 1)
+    }
 
-    fn from_str(s: &str) -> Result<Self, Self::Err> {
-        parse_comparison_requirement
-            .parse(s)
-            .map_err(|s| ParseError::Requirement(s.to_string()))
+    /// Returns a condition that always evaluates to false.
+    ///
+    /// This is a shorthand for a `0 = 1` comparison.
+    ///
+    /// # Examples
+    /// ```
+    /// # use rustcheevos::types::requirement::condition::Condition;
+    /// let condition = Condition::always_false();
+    /// assert_eq!(condition.lhs(), &0.into());
+    /// ```
+    #[must_use]
+    pub fn always_false() -> Self {
+        Self::eq(0, 1)
     }
 }
 
-impl fmt::Display for ComparisonRequirement {
+impl FromStr for Condition {
+    type Err = ParseError;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        parse_condition
+            .parse(s)
+            .map_err(|s| ParseError::Condition(s.to_string()))
+    }
+}
+
+impl fmt::Display for Condition {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let flag = self.flag.map(|f| f.to_string()).unwrap_or_default();
         write!(
@@ -259,7 +288,7 @@ impl fmt::Display for ComparisonRequirement {
     }
 }
 
-impl_comparison_flag_traits!(ComparisonRequirement, with_flag);
+impl_comparison_flag_traits!(Condition, with_flag);
 
 /// An operation in a comparison expression.
 #[derive(Debug, Clone, Copy, PartialEq)]

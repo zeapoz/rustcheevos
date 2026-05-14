@@ -4,7 +4,7 @@ use std::fmt;
 use std::str::FromStr;
 
 use crate::parsers::ParseError;
-use crate::prelude::Requirement;
+use crate::prelude::Condition;
 
 use super::chain::ChainGroup;
 
@@ -137,8 +137,8 @@ impl Leaderboard {
             title,
             description,
             start,
-            Requirement::always_false(),
-            Requirement::always_true(),
+            Condition::always_false(),
+            Condition::always_true(),
             value,
             format,
             lower_is_better,

@@ -12,12 +12,10 @@ pub use crate::types::{
         AddAddress, AddHits, AddSource, AndNext, Measured, MeasuredIf, MeasuredPercentage, OrNext,
         PauseIf, Remember, ResetIf, ResetNextIf, SubHits, SubSource, Trigger,
     },
-    game::{AchievementSet, Game, LeaderboardSet},
+    game::{AchievementSet, GameData, LeaderboardSet},
     leaderboard::{Leaderboard, LeaderboardFormat},
     memory::{AccessMode, MemoryRef, MemorySize},
-    requirement::{
-        Requirement, arithmetic::ArithmeticRequirement, comparison::ComparisonRequirement,
-    },
+    requirement::{Arithmetic, Condition, Requirement},
     rich::{
         RichPresence,
         format::FormatType,

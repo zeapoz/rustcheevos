@@ -261,8 +261,9 @@ impl<const N: usize, T: Into<Requirement>> From<[T; N]> for Chain {
     }
 }
 
-impl From<Vec<Requirement>> for Chain {
-    fn from(value: Vec<Requirement>) -> Self {
+impl<T: Into<Requirement>> From<Vec<T>> for Chain {
+    fn from(value: Vec<T>) -> Self {
+        let value = value.into_iter().map(T::into).collect::<Vec<_>>();
         Chain(value)
     }
 }

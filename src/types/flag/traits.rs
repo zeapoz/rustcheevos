@@ -1,6 +1,6 @@
 //! Traits for types that can be modified with flags.
 
-use crate::types::requirement::arithmetic::ArithmeticRequirement;
+use crate::types::requirement::arithmetic::Arithmetic;
 
 use super::ArithmeticFlag;
 
@@ -42,11 +42,11 @@ pub trait AddSource {
 
 impl AddSource for u32 {
     /// The output type.
-    type Output = ArithmeticRequirement;
+    type Output = Arithmetic;
 
     /// Sets the [`AddSource`][`super::ArithmeticFlag::AddSource`] flag on this type.
     fn add_source(self) -> Self::Output {
-        ArithmeticRequirement::new(ArithmeticFlag::AddSource, self)
+        Arithmetic::new(ArithmeticFlag::AddSource, self)
     }
 }
 
@@ -60,10 +60,10 @@ pub trait SubSource {
 }
 
 impl SubSource for u32 {
-    type Output = ArithmeticRequirement;
+    type Output = Arithmetic;
 
     fn sub_source(self) -> Self::Output {
-        ArithmeticRequirement::new(ArithmeticFlag::SubSource, self)
+        Arithmetic::new(ArithmeticFlag::SubSource, self)
     }
 }
 

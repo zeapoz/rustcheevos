@@ -45,9 +45,9 @@ pub enum ParseError {
     #[error("invalid hit count: {0}")]
     HitCount(String),
 
-    /// Invalid requirement.
-    #[error("invalid requirement: {0}")]
-    Requirement(String),
+    /// Invalid condition clause.
+    #[error("invalid condition: {0}")]
+    Condition(String),
 
     /// Invalid achievement tag.
     #[error("invalid tag: {0}")]

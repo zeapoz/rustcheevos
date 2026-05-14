@@ -8,7 +8,7 @@
 //!
 //! ## Core Types
 //!
-//! - [`Game`][`crate::types::game::Game`] - Container for all game assets with export functionality
+//! - [`GameData`][`crate::types::game::GameData`] - Container for all game assets with export functionality
 //! - [`Achievement`][`crate::types::achievement::Achievement`] - Achievement definitions with requirements and point values
 //! - [`Leaderboard`][`crate::types::leaderboard::Leaderboard`] - Leaderboard definitions with start/cancel/submit/value conditions
 //! - [`RichPresence`][`crate::types::rich::RichPresence`] - Dynamic display strings with lookup tables and conditions
@@ -49,7 +49,7 @@
 //! }
 //!
 //! fn main() {
-//!     let mut game = Game::new(GAME_ID, GAME_NAME);
+//!     let mut game_data = GameData::new(GAME_ID, GAME_NAME);
 //!
 //!     // Define an achievement by combining conditions.
 //!     let achievement = Achievement::new(
@@ -61,7 +61,7 @@
 //!         ),
 //!         5,
 //!     );
-//!     game.add(achievement);
+//!     game_data.add(achievement);
 //!
 //!     // Create a simple rich presence.
 //!     let mut rich_presence = RichPresence::new();
@@ -76,12 +76,12 @@
 //!     let stage = rich_presence.register_lookup(table, bits8!(0x1234));
 //!     rich_presence.add_static_display("Currently in {stage}");
 //!
-//!     game.set_rich_presence(rich_presence);
+//!     game_data.set_rich_presence(rich_presence);
 //!
 //!     // Export to a directory.
 //!     let directory = std::env::temp_dir().join("rustcheevos_example");
 //!     std::fs::create_dir_all(&directory).unwrap();
-//!     game.export(&directory).unwrap();
+//!     game_data.export(&directory).unwrap();
 //! }
 //! ```
 

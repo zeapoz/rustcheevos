@@ -10,7 +10,7 @@ use crate::{
     prelude::Measured,
 };
 
-use super::{flag::ArithmeticFlag, requirement::arithmetic::ArithmeticRequirement};
+use super::{flag::ArithmeticFlag, requirement::arithmetic::Arithmetic};
 
 /// A reference to a memory location.
 ///
@@ -187,7 +187,7 @@ impl MemoryRef {
         self.with_access_mode(AccessMode::Invert)
     }
 
-    /// Creates a new equals [`ComparisonRequirement`].
+    /// Creates a new equals [`Condition`].
     /// Sets the given flag on this requirement.
     ///
     /// # Examples
@@ -203,18 +203,18 @@ impl MemoryRef {
     /// assert_eq!(requirement.operator(), None);
     /// ```
     #[must_use]
-    pub fn with_flag(self, flag: ArithmeticFlag) -> ArithmeticRequirement {
-        ArithmeticRequirement::new(flag, self)
+    pub fn with_flag(self, flag: ArithmeticFlag) -> Arithmetic {
+        Arithmetic::new(flag, self)
     }
 }
 
-impl_arithmetic_flag_traits!(MemoryRef, with_flag, ArithmeticRequirement);
+impl_arithmetic_flag_traits!(MemoryRef, with_flag, Arithmetic);
 
 impl Measured for MemoryRef {
-    type Output = ArithmeticRequirement;
+    type Output = Arithmetic;
 
     fn measured(self) -> Self::Output {
-        ArithmeticRequirement::new(ArithmeticFlag::Measured, self)
+        Arithmetic::new(ArithmeticFlag::Measured, self)
     }
 }
 

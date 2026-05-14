@@ -9,7 +9,7 @@ use crate::{impl_arithmetic_flag_traits, parsers::ParseError, parsers::parse_typ
 use super::{
     flag::ArithmeticFlag,
     memory::MemoryRef,
-    requirement::{arithmetic::ArithmeticRequirement, comparison::ComparisonRequirement},
+    requirement::{arithmetic::Arithmetic, condition::Condition},
 };
 
 /// A value that can be used in a condition.
@@ -26,16 +26,16 @@ pub enum TypedValue {
 }
 
 impl TypedValue {
-    /// Creates a new arithmetic [`ArithmeticRequirement`].
+    /// Creates a new arithmetic [`Arithmetic`].
     #[must_use]
-    pub fn with_arithmetic_flag(self, flag: ArithmeticFlag) -> ArithmeticRequirement {
-        ArithmeticRequirement::new(flag, self)
+    pub fn with_arithmetic_flag(self, flag: ArithmeticFlag) -> Arithmetic {
+        Arithmetic::new(flag, self)
     }
 }
 
 /// Operations for types that can be converted to [`TypedValue`].
 pub trait TypedValueOps: Into<TypedValue> {
-    /// Creates an equals [`ComparisonRequirement`].
+    /// Creates an equals [`Condition`].
     ///
     /// # Examples
     /// ```
@@ -44,9 +44,9 @@ pub trait TypedValueOps: Into<TypedValue> {
     /// let memory_ref = MemoryRef::new(MemorySize::Bits8, 0x1234);
     /// let requirement = memory_ref.eq(50);
     /// ```
-    fn eq(self, rhs: impl Into<TypedValue>) -> ComparisonRequirement;
+    fn eq(self, rhs: impl Into<TypedValue>) -> Condition;
 
-    /// Creates a not equals [`ComparisonRequirement`].
+    /// Creates a not equals [`Condition`].
     ///
     /// # Examples
     /// ```
@@ -55,9 +55,9 @@ pub trait TypedValueOps: Into<TypedValue> {
     /// let memory_ref = MemoryRef::new(MemorySize::Bits8, 0x1234);
     /// let requirement = memory_ref.ne(50);
     /// ```
-    fn ne(self, rhs: impl Into<TypedValue>) -> ComparisonRequirement;
+    fn ne(self, rhs: impl Into<TypedValue>) -> Condition;
 
-    /// Creates a less than [`ComparisonRequirement`].
+    /// Creates a less than [`Condition`].
     ///
     /// # Examples
     /// ```
@@ -66,9 +66,9 @@ pub trait TypedValueOps: Into<TypedValue> {
     /// let memory_ref = MemoryRef::new(MemorySize::Bits8, 0x1234);
     /// let requirement = memory_ref.lt(50);
     /// ```
-    fn lt(self, rhs: impl Into<TypedValue>) -> ComparisonRequirement;
+    fn lt(self, rhs: impl Into<TypedValue>) -> Condition;
 
-    /// Creates a less than or equals [`ComparisonRequirement`].
+    /// Creates a less than or equals [`Condition`].
     ///
     /// # Examples
     /// ```
@@ -77,9 +77,9 @@ pub trait TypedValueOps: Into<TypedValue> {
     /// let memory_ref = MemoryRef::new(MemorySize::Bits8, 0x1234);
     /// let requirement = memory_ref.le(50);
     /// ```
-    fn le(self, rhs: impl Into<TypedValue>) -> ComparisonRequirement;
+    fn le(self, rhs: impl Into<TypedValue>) -> Condition;
 
-    /// Creates a greater than [`ComparisonRequirement`].
+    /// Creates a greater than [`Condition`].
     ///
     /// # Examples
     /// ```
@@ -88,9 +88,9 @@ pub trait TypedValueOps: Into<TypedValue> {
     /// let memory_ref = MemoryRef::new(MemorySize::Bits8, 0x1234);
     /// let requirement = memory_ref.gt(50);
     /// ```
-    fn gt(self, rhs: impl Into<TypedValue>) -> ComparisonRequirement;
+    fn gt(self, rhs: impl Into<TypedValue>) -> Condition;
 
-    /// Creates a greater than or equals [`ComparisonRequirement`].
+    /// Creates a greater than or equals [`Condition`].
     ///
     /// # Examples
     /// ```
@@ -99,9 +99,9 @@ pub trait TypedValueOps: Into<TypedValue> {
     /// let memory_ref = MemoryRef::new(MemorySize::Bits8, 0x1234);
     /// let requirement = memory_ref.ge(50);
     /// ```
-    fn ge(self, rhs: impl Into<TypedValue>) -> ComparisonRequirement;
+    fn ge(self, rhs: impl Into<TypedValue>) -> Condition;
 
-    /// Creates an add [`ArithmeticRequirement`].
+    /// Creates an add [`Arithmetic`].
     ///
     /// # Examples
     /// ```
@@ -110,9 +110,9 @@ pub trait TypedValueOps: Into<TypedValue> {
     /// let memory_ref = MemoryRef::new(MemorySize::Bits8, 0x1234);
     /// let requirement = memory_ref.add(50);
     /// ```
-    fn add(self, rhs: impl Into<TypedValue>) -> ArithmeticRequirement;
+    fn add(self, rhs: impl Into<TypedValue>) -> Arithmetic;
 
-    /// Creates a subtract [`ArithmeticRequirement`].
+    /// Creates a subtract [`Arithmetic`].
     ///
     /// # Examples
     /// ```
@@ -121,9 +121,9 @@ pub trait TypedValueOps: Into<TypedValue> {
     /// let memory_ref = MemoryRef::new(MemorySize::Bits8, 0x1234);
     /// let requirement = memory_ref.sub(50);
     /// ```
-    fn sub(self, rhs: impl Into<TypedValue>) -> ArithmeticRequirement;
+    fn sub(self, rhs: impl Into<TypedValue>) -> Arithmetic;
 
-    /// Creates a multiply [`ArithmeticRequirement`].
+    /// Creates a multiply [`Arithmetic`].
     ///
     /// # Examples
     /// ```
@@ -132,9 +132,9 @@ pub trait TypedValueOps: Into<TypedValue> {
     /// let memory_ref = MemoryRef::new(MemorySize::Bits8, 0x1234);
     /// let requirement = memory_ref.mul(50);
     /// ```
-    fn mul(self, rhs: impl Into<TypedValue>) -> ArithmeticRequirement;
+    fn mul(self, rhs: impl Into<TypedValue>) -> Arithmetic;
 
-    /// Creates a divide [`ArithmeticRequirement`].
+    /// Creates a divide [`Arithmetic`].
     ///
     /// # Examples
     /// ```
@@ -143,9 +143,9 @@ pub trait TypedValueOps: Into<TypedValue> {
     /// let memory_ref = MemoryRef::new(MemorySize::Bits8, 0x1234);
     /// let requirement = memory_ref.div(50);
     /// ```
-    fn div(self, rhs: impl Into<TypedValue>) -> ArithmeticRequirement;
+    fn div(self, rhs: impl Into<TypedValue>) -> Arithmetic;
 
-    /// Creates a modulo [`ArithmeticRequirement`].
+    /// Creates a modulo [`Arithmetic`].
     ///
     /// # Examples
     /// ```
@@ -154,9 +154,9 @@ pub trait TypedValueOps: Into<TypedValue> {
     /// let memory_ref = MemoryRef::new(MemorySize::Bits8, 0x1234);
     /// let requirement = memory_ref.modulo(50);
     /// ```
-    fn modulo(self, rhs: impl Into<TypedValue>) -> ArithmeticRequirement;
+    fn modulo(self, rhs: impl Into<TypedValue>) -> Arithmetic;
 
-    /// Creates a bitwise and [`ArithmeticRequirement`].
+    /// Creates a bitwise and [`Arithmetic`].
     ///
     /// # Examples
     /// ```
@@ -165,9 +165,9 @@ pub trait TypedValueOps: Into<TypedValue> {
     /// let memory_ref = MemoryRef::new(MemorySize::Bits8, 0x1234);
     /// let requirement = memory_ref.bitwise_and(50);
     /// ```
-    fn bitwise_and(self, rhs: impl Into<TypedValue>) -> ArithmeticRequirement;
+    fn bitwise_and(self, rhs: impl Into<TypedValue>) -> Arithmetic;
 
-    /// Creates a bitwise xor [`ArithmeticRequirement`].
+    /// Creates a bitwise xor [`Arithmetic`].
     ///
     /// # Examples
     /// ```
@@ -176,60 +176,60 @@ pub trait TypedValueOps: Into<TypedValue> {
     /// let memory_ref = MemoryRef::new(MemorySize::Bits8, 0x1234);
     /// let requirement = memory_ref.bitwise_xor(50);
     /// ```
-    fn bitwise_xor(self, rhs: impl Into<TypedValue>) -> ArithmeticRequirement;
+    fn bitwise_xor(self, rhs: impl Into<TypedValue>) -> Arithmetic;
 }
 
 impl<T: Into<TypedValue>> TypedValueOps for T {
-    fn eq(self, rhs: impl Into<TypedValue>) -> ComparisonRequirement {
-        ComparisonRequirement::eq(self, rhs)
+    fn eq(self, rhs: impl Into<TypedValue>) -> Condition {
+        Condition::eq(self, rhs)
     }
 
-    fn ne(self, rhs: impl Into<TypedValue>) -> ComparisonRequirement {
-        ComparisonRequirement::ne(self, rhs)
+    fn ne(self, rhs: impl Into<TypedValue>) -> Condition {
+        Condition::ne(self, rhs)
     }
 
-    fn lt(self, rhs: impl Into<TypedValue>) -> ComparisonRequirement {
-        ComparisonRequirement::lt(self, rhs)
+    fn lt(self, rhs: impl Into<TypedValue>) -> Condition {
+        Condition::lt(self, rhs)
     }
 
-    fn le(self, rhs: impl Into<TypedValue>) -> ComparisonRequirement {
-        ComparisonRequirement::le(self, rhs)
+    fn le(self, rhs: impl Into<TypedValue>) -> Condition {
+        Condition::le(self, rhs)
     }
 
-    fn gt(self, rhs: impl Into<TypedValue>) -> ComparisonRequirement {
-        ComparisonRequirement::gt(self, rhs)
+    fn gt(self, rhs: impl Into<TypedValue>) -> Condition {
+        Condition::gt(self, rhs)
     }
 
-    fn ge(self, rhs: impl Into<TypedValue>) -> ComparisonRequirement {
-        ComparisonRequirement::ge(self, rhs)
+    fn ge(self, rhs: impl Into<TypedValue>) -> Condition {
+        Condition::ge(self, rhs)
     }
 
-    fn add(self, rhs: impl Into<TypedValue>) -> ArithmeticRequirement {
-        ArithmeticRequirement::new(ArithmeticFlag::default(), self).add(rhs)
+    fn add(self, rhs: impl Into<TypedValue>) -> Arithmetic {
+        Arithmetic::new(ArithmeticFlag::default(), self).add(rhs)
     }
 
-    fn sub(self, rhs: impl Into<TypedValue>) -> ArithmeticRequirement {
-        ArithmeticRequirement::new(ArithmeticFlag::default(), self).sub(rhs)
+    fn sub(self, rhs: impl Into<TypedValue>) -> Arithmetic {
+        Arithmetic::new(ArithmeticFlag::default(), self).sub(rhs)
     }
 
-    fn mul(self, rhs: impl Into<TypedValue>) -> ArithmeticRequirement {
-        ArithmeticRequirement::new(ArithmeticFlag::default(), self).mul(rhs)
+    fn mul(self, rhs: impl Into<TypedValue>) -> Arithmetic {
+        Arithmetic::new(ArithmeticFlag::default(), self).mul(rhs)
     }
 
-    fn div(self, rhs: impl Into<TypedValue>) -> ArithmeticRequirement {
-        ArithmeticRequirement::new(ArithmeticFlag::default(), self).div(rhs)
+    fn div(self, rhs: impl Into<TypedValue>) -> Arithmetic {
+        Arithmetic::new(ArithmeticFlag::default(), self).div(rhs)
     }
 
-    fn modulo(self, rhs: impl Into<TypedValue>) -> ArithmeticRequirement {
-        ArithmeticRequirement::new(ArithmeticFlag::default(), self).modulo(rhs)
+    fn modulo(self, rhs: impl Into<TypedValue>) -> Arithmetic {
+        Arithmetic::new(ArithmeticFlag::default(), self).modulo(rhs)
     }
 
-    fn bitwise_and(self, rhs: impl Into<TypedValue>) -> ArithmeticRequirement {
-        ArithmeticRequirement::new(ArithmeticFlag::default(), self).bitwise_and(rhs)
+    fn bitwise_and(self, rhs: impl Into<TypedValue>) -> Arithmetic {
+        Arithmetic::new(ArithmeticFlag::default(), self).bitwise_and(rhs)
     }
 
-    fn bitwise_xor(self, rhs: impl Into<TypedValue>) -> ArithmeticRequirement {
-        ArithmeticRequirement::new(ArithmeticFlag::default(), self).bitwise_xor(rhs)
+    fn bitwise_xor(self, rhs: impl Into<TypedValue>) -> Arithmetic {
+        Arithmetic::new(ArithmeticFlag::default(), self).bitwise_xor(rhs)
     }
 }
 
@@ -273,4 +273,4 @@ impl fmt::Display for TypedValue {
     }
 }
 
-impl_arithmetic_flag_traits!(TypedValue, with_arithmetic_flag, ArithmeticRequirement);
+impl_arithmetic_flag_traits!(TypedValue, with_arithmetic_flag, Arithmetic);

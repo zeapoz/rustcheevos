@@ -1,4 +1,4 @@
-//! Type definition for arithmetic requirements.
+//! Type definition for arithmetic conditions.
 
 use std::{fmt, str::FromStr};
 
@@ -7,13 +7,13 @@ use winnow::Parser;
 use crate::{
     impl_arithmetic_flag_traits,
     parsers::ParseError,
-    parsers::parse_arithmetic_requirement,
+    parsers::parse_arithmetic,
     types::{flag::ArithmeticFlag, operator::ArithmeticOperator, value::TypedValue},
 };
 
 /// An arithmetic operation between two values.
 #[derive(Debug, Clone, Copy, PartialEq)]
-pub struct ArithmeticRequirement {
+pub struct Arithmetic {
     /// The flag of the arithmetic operation.
     pub flag: ArithmeticFlag,
     /// The left hand side of the arithmetic requirement.
@@ -22,15 +22,15 @@ pub struct ArithmeticRequirement {
     pub operation: Option<ArithmeticOperation>,
 }
 
-impl ArithmeticRequirement {
+impl Arithmetic {
     /// Creates a new arithmetic requirement.
     ///
     /// # Examples
     /// ```
     /// # use rustcheevos::types::flag::ArithmeticFlag;
-    /// # use rustcheevos::types::requirement::arithmetic::ArithmeticRequirement;
+    /// # use rustcheevos::types::requirement::arithmetic::Arithmetic;
     /// # use rustcheevos::types::value::TypedValue;
-    /// let arithmetic = ArithmeticRequirement::new(ArithmeticFlag::AddSource, 10);
+    /// let arithmetic = Arithmetic::new(ArithmeticFlag::AddSource, 10);
     /// assert_eq!(arithmetic.flag(), ArithmeticFlag::AddSource);
     /// assert_eq!(arithmetic.lhs(), &TypedValue::from(10));
     /// ```
@@ -47,8 +47,8 @@ impl ArithmeticRequirement {
     /// # Examples
     /// ```
     /// # use rustcheevos::types::flag::ArithmeticFlag;
-    /// # use rustcheevos::types::requirement::arithmetic::ArithmeticRequirement;
-    /// let arithmetic = ArithmeticRequirement::new(ArithmeticFlag::AddSource, 10);
+    /// # use rustcheevos::types::requirement::arithmetic::Arithmetic;
+    /// let arithmetic = Arithmetic::new(ArithmeticFlag::AddSource, 10);
     /// assert_eq!(arithmetic.flag(), ArithmeticFlag::AddSource);
     /// ```
     #[must_use]
@@ -61,9 +61,9 @@ impl ArithmeticRequirement {
     /// # Examples
     /// ```
     /// # use rustcheevos::types::flag::ArithmeticFlag;
-    /// # use rustcheevos::types::requirement::arithmetic::ArithmeticRequirement;
+    /// # use rustcheevos::types::requirement::arithmetic::Arithmetic;
     /// # use rustcheevos::types::value::TypedValue;
-    /// let arithmetic = ArithmeticRequirement::new(ArithmeticFlag::AddSource, 10);
+    /// let arithmetic = Arithmetic::new(ArithmeticFlag::AddSource, 10);
     /// assert_eq!(arithmetic.lhs(), &TypedValue::from(10));
     /// ```
     #[must_use]
@@ -76,8 +76,8 @@ impl ArithmeticRequirement {
     /// # Examples
     /// ```
     /// # use rustcheevos::types::flag::ArithmeticFlag;
-    /// # use rustcheevos::types::requirement::arithmetic::ArithmeticRequirement;
-    /// let arithmetic = ArithmeticRequirement::new(ArithmeticFlag::AddSource, 10);
+    /// # use rustcheevos::types::requirement::arithmetic::Arithmetic;
+    /// let arithmetic = Arithmetic::new(ArithmeticFlag::AddSource, 10);
     /// assert_eq!(arithmetic.operator(), None);
     /// ```
     #[must_use]
@@ -90,8 +90,8 @@ impl ArithmeticRequirement {
     /// # Examples
     /// ```
     /// # use rustcheevos::types::flag::ArithmeticFlag;
-    /// # use rustcheevos::types::requirement::arithmetic::ArithmeticRequirement;
-    /// let arithmetic = ArithmeticRequirement::new(ArithmeticFlag::AddSource, 10);
+    /// # use rustcheevos::types::requirement::arithmetic::Arithmetic;
+    /// let arithmetic = Arithmetic::new(ArithmeticFlag::AddSource, 10);
     /// assert_eq!(arithmetic.rhs(), None);
     /// ```
     #[must_use]
@@ -104,8 +104,8 @@ impl ArithmeticRequirement {
     /// # Examples
     /// ```
     /// # use rustcheevos::types::flag::ArithmeticFlag;
-    /// # use rustcheevos::types::requirement::arithmetic::ArithmeticRequirement;
-    /// let arithmetic = ArithmeticRequirement::new(ArithmeticFlag::AddSource, 10);
+    /// # use rustcheevos::types::requirement::arithmetic::Arithmetic;
+    /// let arithmetic = Arithmetic::new(ArithmeticFlag::AddSource, 10);
     /// assert_eq!(arithmetic.flag(), ArithmeticFlag::AddSource);
     /// let arithmetic = arithmetic.with_flag(ArithmeticFlag::SubSource);
     /// assert_eq!(arithmetic.flag(), ArithmeticFlag::SubSource);
@@ -126,8 +126,8 @@ impl ArithmeticRequirement {
     /// ```
     /// # use rustcheevos::types::flag::ArithmeticFlag;
     /// # use rustcheevos::types::operator::ArithmeticOperator;
-    /// # use rustcheevos::types::requirement::arithmetic::{ArithmeticRequirement, ArithmeticOperation};
-    /// let arithmetic = ArithmeticRequirement::new(ArithmeticFlag::AddSource, 10)
+    /// # use rustcheevos::types::requirement::arithmetic::{Arithmetic, ArithmeticOperation};
+    /// let arithmetic = Arithmetic::new(ArithmeticFlag::AddSource, 10)
     ///     .with_operation(ArithmeticOperation::add(5));
     /// assert_eq!(arithmetic.operator(), Some(ArithmeticOperator::Add));
     /// ```
@@ -147,8 +147,8 @@ impl ArithmeticRequirement {
     /// ```
     /// # use rustcheevos::types::flag::ArithmeticFlag;
     /// # use rustcheevos::types::operator::ArithmeticOperator;
-    /// # use rustcheevos::types::requirement::arithmetic::ArithmeticRequirement;
-    /// let arithmetic = ArithmeticRequirement::new(ArithmeticFlag::AddSource, 10).add(5);
+    /// # use rustcheevos::types::requirement::arithmetic::Arithmetic;
+    /// let arithmetic = Arithmetic::new(ArithmeticFlag::AddSource, 10).add(5);
     /// assert_eq!(arithmetic.operator(), Some(ArithmeticOperator::Add));
     /// ```
     #[expect(
@@ -170,8 +170,8 @@ impl ArithmeticRequirement {
     /// ```
     /// # use rustcheevos::types::flag::ArithmeticFlag;
     /// # use rustcheevos::types::operator::ArithmeticOperator;
-    /// # use rustcheevos::types::requirement::arithmetic::ArithmeticRequirement;
-    /// let arithmetic = ArithmeticRequirement::new(ArithmeticFlag::AddSource, 10).sub(5);
+    /// # use rustcheevos::types::requirement::arithmetic::Arithmetic;
+    /// let arithmetic = Arithmetic::new(ArithmeticFlag::AddSource, 10).sub(5);
     /// assert_eq!(arithmetic.operator(), Some(ArithmeticOperator::Subtract));
     /// ```
     #[expect(
@@ -193,8 +193,8 @@ impl ArithmeticRequirement {
     /// ```
     /// # use rustcheevos::types::flag::ArithmeticFlag;
     /// # use rustcheevos::types::operator::ArithmeticOperator;
-    /// # use rustcheevos::types::requirement::arithmetic::ArithmeticRequirement;
-    /// let arithmetic = ArithmeticRequirement::new(ArithmeticFlag::AddSource, 10).mul(5);
+    /// # use rustcheevos::types::requirement::arithmetic::Arithmetic;
+    /// let arithmetic = Arithmetic::new(ArithmeticFlag::AddSource, 10).mul(5);
     /// assert_eq!(arithmetic.operator(), Some(ArithmeticOperator::Multiply));
     /// ```
     #[expect(
@@ -216,8 +216,8 @@ impl ArithmeticRequirement {
     /// ```
     /// # use rustcheevos::types::flag::ArithmeticFlag;
     /// # use rustcheevos::types::operator::ArithmeticOperator;
-    /// # use rustcheevos::types::requirement::arithmetic::ArithmeticRequirement;
-    /// let arithmetic = ArithmeticRequirement::new(ArithmeticFlag::AddSource, 10).div(5);
+    /// # use rustcheevos::types::requirement::arithmetic::Arithmetic;
+    /// let arithmetic = Arithmetic::new(ArithmeticFlag::AddSource, 10).div(5);
     /// assert_eq!(arithmetic.operator(), Some(ArithmeticOperator::Divide));
     /// ```
     #[expect(
@@ -239,8 +239,8 @@ impl ArithmeticRequirement {
     /// ```
     /// # use rustcheevos::types::flag::ArithmeticFlag;
     /// # use rustcheevos::types::operator::ArithmeticOperator;
-    /// # use rustcheevos::types::requirement::arithmetic::ArithmeticRequirement;
-    /// let arithmetic = ArithmeticRequirement::new(ArithmeticFlag::AddSource, 10).modulo(3);
+    /// # use rustcheevos::types::requirement::arithmetic::Arithmetic;
+    /// let arithmetic = Arithmetic::new(ArithmeticFlag::AddSource, 10).modulo(3);
     /// assert_eq!(arithmetic.operator(), Some(ArithmeticOperator::Modulo));
     /// ```
     #[must_use]
@@ -258,8 +258,8 @@ impl ArithmeticRequirement {
     /// ```
     /// # use rustcheevos::types::flag::ArithmeticFlag;
     /// # use rustcheevos::types::operator::ArithmeticOperator;
-    /// # use rustcheevos::types::requirement::arithmetic::ArithmeticRequirement;
-    /// let arithmetic = ArithmeticRequirement::new(ArithmeticFlag::AddSource, 10).bitwise_and(6);
+    /// # use rustcheevos::types::requirement::arithmetic::Arithmetic;
+    /// let arithmetic = Arithmetic::new(ArithmeticFlag::AddSource, 10).bitwise_and(6);
     /// assert_eq!(arithmetic.operator(), Some(ArithmeticOperator::BitwiseAnd));
     /// ```
     #[must_use]
@@ -277,8 +277,8 @@ impl ArithmeticRequirement {
     /// ```
     /// # use rustcheevos::types::flag::ArithmeticFlag;
     /// # use rustcheevos::types::operator::ArithmeticOperator;
-    /// # use rustcheevos::types::requirement::arithmetic::ArithmeticRequirement;
-    /// let arithmetic = ArithmeticRequirement::new(ArithmeticFlag::AddSource, 10).bitwise_xor(6);
+    /// # use rustcheevos::types::requirement::arithmetic::Arithmetic;
+    /// let arithmetic = Arithmetic::new(ArithmeticFlag::AddSource, 10).bitwise_xor(6);
     /// assert_eq!(arithmetic.operator(), Some(ArithmeticOperator::BitwiseXor));
     /// ```
     #[must_use]
@@ -287,17 +287,17 @@ impl ArithmeticRequirement {
     }
 }
 
-impl FromStr for ArithmeticRequirement {
+impl FromStr for Arithmetic {
     type Err = ParseError;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
-        parse_arithmetic_requirement
+        parse_arithmetic
             .parse(s)
-            .map_err(|s| ParseError::Requirement(s.to_string()))
+            .map_err(|s| ParseError::Condition(s.to_string()))
     }
 }
 
-impl fmt::Display for ArithmeticRequirement {
+impl fmt::Display for Arithmetic {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let operation = self.operation.map(|o| o.to_string()).unwrap_or_default();
         write!(f, "{}{}{}", self.flag, self.lhs, operation)
@@ -458,4 +458,4 @@ impl fmt::Display for ArithmeticOperation {
     }
 }
 
-impl_arithmetic_flag_traits!(ArithmeticRequirement, with_flag);
+impl_arithmetic_flag_traits!(Arithmetic, with_flag);

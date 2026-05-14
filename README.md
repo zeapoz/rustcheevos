@@ -1,14 +1,13 @@
-# rustcheevos
+# Rustcheevos
 
-A library for building achievement sets and more for [RetroAchievements](https://retroachievements.org/)
-using [Rust](https://www.rust-lang.org/).
+A library for building [RetroAchievements](https://retroachievements.org/) sets and more using [Rust](https://www.rust-lang.org/).
 
 The core idea is to allow building achievements using small composable chains of conditions to reuse logic
 while remaining in full control of the output using a fluent chain-like API.
 
 ## Getting Started
 
-To use rustcheevos, add the following to your `Cargo.toml` file:
+To use Rustcheevos, add the following to your `Cargo.toml` file:
 
 ```toml
 [dependencies]
@@ -50,7 +49,7 @@ fn just_beat_level(level_id: u32) -> Chain {
 }
 
 fn main() {
-    let mut game = Game::new(GAME_ID, GAME_NAME);
+    let mut game_data = GameData::new(GAME_ID, GAME_NAME);
 
     // Define an achievement by combining conditions.
     let achievement = Achievement::new(
@@ -62,7 +61,7 @@ fn main() {
         ),
         5,
     );
-    game.add(achievement);
+    game_data.add(achievement);
 
     // Create a simple rich presence.
     let mut rich_presence = RichPresence::new();
@@ -77,12 +76,12 @@ fn main() {
     let stage = rich_presence.register_lookup(table, bits8!(0x1234));
     rich_presence.add_static_display("Currently in {stage}");
 
-    game.set_rich_presence(rich_presence);
+    game_data.set_rich_presence(rich_presence);
 
     // Export to a directory.
     let directory = std::env::temp_dir().join("rustcheevos_example");
     std::fs::create_dir_all(&directory).unwrap();
-    game.export(&directory).unwrap();
+    game_data.export(&directory).unwrap();
 }
 ```
 

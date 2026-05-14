@@ -1,12 +1,9 @@
 //! Type definition for pending chains.
 
 use crate::{
-    prelude::{MemoryRef, Requirement},
-    types::requirement::{arithmetic::ArithmeticRequirement, comparison::ComparisonRequirement},
+    prelude::{Arithmetic, Chain, Condition, MemoryRef, Requirement},
     types::value::{TypedValue, TypedValueOps},
 };
-
-use super::Chain;
 
 /// A trait for types that can be chained in a [`Chain`].
 pub trait Chainable {
@@ -486,7 +483,7 @@ impl Chainable for Chain {
     }
 }
 
-impl Chainable for ComparisonRequirement {
+impl Chainable for Condition {
     type Output = Chain;
 
     fn chain(self, mut chain: Chain) -> Self::Output {
@@ -495,7 +492,7 @@ impl Chainable for ComparisonRequirement {
     }
 }
 
-impl Chainable for ArithmeticRequirement {
+impl Chainable for Arithmetic {
     type Output = Chain;
 
     fn chain(self, mut chain: Chain) -> Self::Output {
@@ -524,6 +521,6 @@ impl<T: Chainable> Chainable for PendingChain<T> {
     type Output = PendingChain<T>;
 
     fn chain(self, chain: Chain) -> Self::Output {
-        PendingChain::new(self.head, self.pending.chain(chain))
+        PendingChain::new(self.head, Chainable::chain(self.pending, chain))
     }
 }
