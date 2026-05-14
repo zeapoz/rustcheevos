@@ -41,7 +41,7 @@ pub struct Achievement {
     /// The conditions that must be met for the achievement.
     pub requirements: ChainGroup,
     /// The achievement tag.
-    pub tag: Tag,
+    pub tag: Option<Tag>,
     /// The point value.
     pub points: u32,
 }
@@ -74,7 +74,7 @@ impl Achievement {
             title: title.into(),
             description: description.into(),
             requirements: requirements.into(),
-            tag: Tag::default(),
+            tag: None,
             points,
         }
     }
@@ -121,7 +121,7 @@ impl Achievement {
     /// ```
     #[must_use]
     pub fn with_tag(mut self, tag: Tag) -> Self {
-        self.tag = tag;
+        self.tag = Some(tag);
         self
     }
 }
@@ -145,12 +145,8 @@ impl Achievement {
 /// )
 /// .with_tag(Tag::WinCondition);
 /// ```
-#[derive(Default, Debug, Clone, PartialEq, Eq, Hash)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub enum Tag {
-    // TODO: Remove in favor of `Option`.
-    /// The default, no tag.
-    #[default]
-    None,
     /// Represents a progression achievement.
     Progression,
     /// Represents ta win condition.
@@ -162,7 +158,6 @@ pub enum Tag {
 impl fmt::Display for Tag {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let s = match self {
-            Tag::None => "",
             Tag::Progression => "progression",
             Tag::WinCondition => "win_condition",
             Tag::Missable => "missable",
@@ -176,7 +171,6 @@ impl FromStr for Tag {
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         let tag = match s {
-            "" => Self::None,
             "progression" => Self::Progression,
             "win_condition" => Self::WinCondition,
             "missable" => Self::Missable,

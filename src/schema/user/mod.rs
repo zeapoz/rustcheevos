@@ -135,7 +135,11 @@ impl From<&Achievement> for AchievementEntry {
             requirements: value.requirements.to_string(),
             title: value.title.clone(),
             description: value.description.clone(),
-            tag: value.tag.to_string(),
+            tag: value
+                .tag
+                .as_ref()
+                .map(ToString::to_string)
+                .unwrap_or_default(),
             author: DEFAULT_AUTHOR.to_string(),
             points: value.points,
             created: DEFAULT_TIMESTAMP.to_string(),
