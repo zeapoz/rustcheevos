@@ -3,7 +3,7 @@
 use crate::{
     prelude::{MemoryRef, Requirement},
     types::requirement::{arithmetic::ArithmeticRequirement, comparison::ComparisonRequirement},
-    types::value::TypedValue,
+    types::value::{TypedValue, TypedValueOps},
 };
 
 use super::Chain;
@@ -184,14 +184,14 @@ impl PendingChain<MemoryRef> {
 }
 
 impl<T: Into<TypedValue> + Copy> PendingChain<T> {
-    /// Extends the pending chain with the given requirement.
+    /// Extends the pending chain with a requirement.
     fn extend_req(self, req: impl Into<Requirement>) -> Chain {
         let mut chain = self.pending;
         chain.extend(req);
         chain
     }
 
-    /// Calls [`TypedValue::eq`] on the head of the pending chain and returns the new [`Chain`].
+    /// Extends the pending chain with an equals comparison.
     ///
     /// # Examples
     /// ```
@@ -207,11 +207,11 @@ impl<T: Into<TypedValue> + Copy> PendingChain<T> {
     /// assert_eq!(pending_chain.eq(0), expected);
     /// ```
     pub fn eq(self, rhs: impl Into<TypedValue>) -> Chain {
-        let head: TypedValue = self.head.into();
+        let head = self.head;
         self.extend_req(head.eq(rhs))
     }
 
-    /// Calls [`TypedValue::ne`] on the head of the pending chain and returns the new [`Chain`].
+    /// Extends the pending chain with a not equals comparison.
     ///
     /// # Examples
     /// ```
@@ -227,11 +227,11 @@ impl<T: Into<TypedValue> + Copy> PendingChain<T> {
     /// assert_eq!(pending_chain.ne(0), expected);
     /// ```
     pub fn ne(self, rhs: impl Into<TypedValue>) -> Chain {
-        let head: TypedValue = self.head.into();
+        let head = self.head;
         self.extend_req(head.ne(rhs))
     }
 
-    /// Calls [`TypedValue::lt`] on the head of the pending chain and returns the new [`Chain`].
+    /// Extends the pending chain with a less than comparison.
     ///
     /// # Examples
     /// ```
@@ -247,11 +247,11 @@ impl<T: Into<TypedValue> + Copy> PendingChain<T> {
     /// assert_eq!(pending_chain.lt(0), expected);
     /// ```
     pub fn lt(self, rhs: impl Into<TypedValue>) -> Chain {
-        let head: TypedValue = self.head.into();
+        let head = self.head;
         self.extend_req(head.lt(rhs))
     }
 
-    /// Calls [`TypedValue::le`] on the head of the pending chain and returns the new [`Chain`].
+    /// Extends the pending chain with a less than or equals comparison.
     ///
     /// # Examples
     /// ```
@@ -267,11 +267,11 @@ impl<T: Into<TypedValue> + Copy> PendingChain<T> {
     /// assert_eq!(pending_chain.le(0), expected);
     /// ```
     pub fn le(self, rhs: impl Into<TypedValue>) -> Chain {
-        let head: TypedValue = self.head.into();
+        let head = self.head;
         self.extend_req(head.le(rhs))
     }
 
-    /// Calls [`TypedValue::gt`] on the head of the pending chain and returns the new [`Chain`].
+    /// Extends the pending chain with a greater than comparison.
     ///
     /// # Examples
     /// ```
@@ -287,11 +287,11 @@ impl<T: Into<TypedValue> + Copy> PendingChain<T> {
     /// assert_eq!(pending_chain.gt(0), expected);
     /// ```
     pub fn gt(self, rhs: impl Into<TypedValue>) -> Chain {
-        let head: TypedValue = self.head.into();
+        let head = self.head;
         self.extend_req(head.gt(rhs))
     }
 
-    /// Calls [`TypedValue::ge`] on the head of the pending chain and returns the new [`Chain`].
+    /// Extends the pending chain with a greater than or equals comparison.
     ///
     /// # Examples
     /// ```
@@ -307,11 +307,11 @@ impl<T: Into<TypedValue> + Copy> PendingChain<T> {
     /// assert_eq!(pending_chain.ge(0), expected);
     /// ```
     pub fn ge(self, rhs: impl Into<TypedValue>) -> Chain {
-        let head: TypedValue = self.head.into();
+        let head = self.head;
         self.extend_req(head.ge(rhs))
     }
 
-    /// Calls [`TypedValue::add`] on the head of the pending chain and returns the new [`Chain`].
+    /// Extends the pending chain with an addition operation.
     ///
     /// # Examples
     /// ```
@@ -331,11 +331,11 @@ impl<T: Into<TypedValue> + Copy> PendingChain<T> {
         reason = "not using arithmetic in the traditional sense"
     )]
     pub fn add(self, rhs: impl Into<TypedValue>) -> Chain {
-        let head: TypedValue = self.head.into();
+        let head = self.head;
         self.extend_req(head.add(rhs))
     }
 
-    /// Calls [`TypedValue::sub`] on the head of the pending chain and returns the new [`Chain`].
+    /// Extends the pending chain with a subtraction operation.
     ///
     /// # Examples
     /// ```
@@ -355,11 +355,11 @@ impl<T: Into<TypedValue> + Copy> PendingChain<T> {
         reason = "not using arithmetic in the traditional sense"
     )]
     pub fn sub(self, rhs: impl Into<TypedValue>) -> Chain {
-        let head: TypedValue = self.head.into();
+        let head = self.head;
         self.extend_req(head.sub(rhs))
     }
 
-    /// Calls [`TypedValue::mul`] on the head of the pending chain and returns the new [`Chain`].
+    /// Extends the pending chain with a multiplication operation.
     ///
     /// # Examples
     /// ```
@@ -379,11 +379,11 @@ impl<T: Into<TypedValue> + Copy> PendingChain<T> {
         reason = "not using arithmetic in the traditional sense"
     )]
     pub fn mul(self, rhs: impl Into<TypedValue>) -> Chain {
-        let head: TypedValue = self.head.into();
+        let head = self.head;
         self.extend_req(head.mul(rhs))
     }
 
-    /// Calls [`TypedValue::div`] on the head of the pending chain and returns the new [`Chain`].
+    /// Extends the pending chain with a division operation.
     ///
     /// # Examples
     /// ```
@@ -403,11 +403,11 @@ impl<T: Into<TypedValue> + Copy> PendingChain<T> {
         reason = "not using arithmetic in the traditional sense"
     )]
     pub fn div(self, rhs: impl Into<TypedValue>) -> Chain {
-        let head: TypedValue = self.head.into();
+        let head = self.head;
         self.extend_req(head.div(rhs))
     }
 
-    /// Calls [`TypedValue::modulo`] on the head of the pending chain and returns the new [`Chain`].
+    /// Extends the pending chain with a modulo operation.
     ///
     /// # Examples
     /// ```
@@ -423,11 +423,11 @@ impl<T: Into<TypedValue> + Copy> PendingChain<T> {
     /// assert_eq!(pending_chain.modulo(0), expected);
     /// ```
     pub fn modulo(self, rhs: impl Into<TypedValue>) -> Chain {
-        let head: TypedValue = self.head.into();
+        let head = self.head;
         self.extend_req(head.modulo(rhs))
     }
 
-    /// Calls [`TypedValue::bitwise_and`] on the head of the pending chain and returns the new [`Chain`].
+    /// Extends the pending chain with a bitwise and operation.
     ///
     /// # Examples
     /// ```
@@ -443,11 +443,11 @@ impl<T: Into<TypedValue> + Copy> PendingChain<T> {
     /// assert_eq!(pending_chain.bitwise_and(0), expected);
     /// ```
     pub fn bitwise_and(self, rhs: impl Into<TypedValue>) -> Chain {
-        let head: TypedValue = self.head.into();
+        let head = self.head;
         self.extend_req(head.bitwise_and(rhs))
     }
 
-    /// Calls [`TypedValue::bitwise_xor`] on the head of the pending chain and returns the new [`Chain`].
+    /// Extends the pending chain with a bitwise xor operation.
     ///
     /// # Examples
     /// ```
@@ -463,7 +463,7 @@ impl<T: Into<TypedValue> + Copy> PendingChain<T> {
     /// assert_eq!(pending_chain.bitwise_xor(0), expected);
     /// ```
     pub fn bitwise_xor(self, rhs: impl Into<TypedValue>) -> Chain {
-        let head: TypedValue = self.head.into();
+        let head = self.head;
         self.extend_req(head.bitwise_xor(rhs))
     }
 }

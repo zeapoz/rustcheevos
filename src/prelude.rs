@@ -23,5 +23,5 @@ pub use crate::types::{
         format::FormatType,
         lookup::{Entry, EntryKey, LookupTable},
     },
-    value::TypedValue,
+    value::{TypedValue, TypedValueOps},
 };

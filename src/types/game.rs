@@ -306,7 +306,7 @@ impl Game {
     /// ```
     pub fn export_user_file(&self, dir: impl AsRef<Path>) -> io::Result<()> {
         let user_file = self.user_file();
-        let filename = format!("{}{USER_FILE_SUFFIX}{USER_FILE_EXTENSION}", self.id);
+        let filename = format!("{}{USER_FILE_SUFFIX}.{USER_FILE_EXTENSION}", self.id);
         let path = dir.as_ref().join(filename);
         fs::write(path, user_file.to_string())
     }
