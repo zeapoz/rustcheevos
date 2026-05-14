@@ -111,6 +111,7 @@ impl TypedValue {
     }
 
     /// Creates a new arithmetic [`ArithmeticRequirement`].
+    #[must_use]
     pub fn with_arithmetic_flag(self, flag: ArithmeticFlag) -> ArithmeticRequirement {
         ArithmeticRequirement::new(flag, self)
     }

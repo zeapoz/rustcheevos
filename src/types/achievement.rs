@@ -10,7 +10,7 @@ use super::chain::ChainGroup;
 /// An achievement definition.
 ///
 /// This type defines the core properties of an achievement and is used to populate
-/// an [AchievementSet][`crate::types::game::AchievementSet`].
+/// an [`AchievementSet`][`crate::types::game::AchievementSet`].
 ///
 /// # Examples
 ///
@@ -96,6 +96,7 @@ impl Achievement {
     /// )
     /// .with_id(600707);
     /// ```
+    #[must_use]
     pub fn with_id(mut self, id: u32) -> Self {
         self.id = id;
         self
@@ -118,6 +119,7 @@ impl Achievement {
     /// )
     /// .with_tag(Tag::Progression);
     /// ```
+    #[must_use]
     pub fn with_tag(mut self, tag: Tag) -> Self {
         self.tag = tag;
         self
@@ -127,7 +129,7 @@ impl Achievement {
 /// An achievement tag.
 ///
 /// This enum defines all the unique tags that can be applied to an [Achievement].
-/// Use with [Achievement::with_tag] to specify a tag.
+/// Use with [`Achievement::with_tag`] to specify a tag.
 ///
 /// # Examples
 /// ```

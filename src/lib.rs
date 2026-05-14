@@ -1,6 +1,6 @@
 //! # Rustcheevos
 //!
-//! A library for building achievement sets for [`RetroAchievements`](https://retroachievements.org/)
+//! A library for building achievement sets and more for [`RetroAchievements`](https://retroachievements.org/)
 //! programmatically using Rust.
 //!
 //! The core idea is to allow building achievements using small composable chains of conditions to reuse logic

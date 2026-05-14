@@ -183,7 +183,7 @@ impl fmt::Display for LeaderboardEntry {
             self.format,
             self.title,
             self.description,
-            if self.lower_is_better { 1 } else { 0 }
+            i32::from(self.lower_is_better)
         )
     }
 }
@@ -215,6 +215,6 @@ pub struct CodeNote {
 
 impl fmt::Display for CodeNote {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, r#"N0:0x{:x}:{}"#, self.address, self.note)
+        write!(f, "N0:0x{:x}:{}", self.address, self.note)
     }
 }

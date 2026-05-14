@@ -2,7 +2,7 @@
 
 use winnow::{Parser, Result, combinator::alt, token::one_of};
 
-use crate::types::flag::*;
+use crate::types::flag::{ArithmeticFlag, ComparisonFlag, Flag};
 
 /// Parses a comparison flag.
 pub fn parse_comparison_flag(input: &mut &str) -> Result<ComparisonFlag> {

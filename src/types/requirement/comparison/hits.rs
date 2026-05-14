@@ -12,6 +12,7 @@ pub struct HitCount(u32);
 
 impl HitCount {
     /// Creates a new hit count with the given hits.
+    #[must_use]
     pub fn new(hits: u32) -> Self {
         Self(hits)
     }

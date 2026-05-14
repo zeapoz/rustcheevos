@@ -65,6 +65,7 @@ impl ComparisonRequirement {
     /// let comparison = ComparisonRequirement::new(10, ComparisonOperator::Equals, 10);
     /// assert_eq!(comparison.flag(), None);
     /// ```
+    #[must_use]
     pub fn flag(&self) -> Option<ComparisonFlag> {
         self.flag
     }
@@ -79,6 +80,7 @@ impl ComparisonRequirement {
     /// let comparison = ComparisonRequirement::new(10, ComparisonOperator::Equals, 10);
     /// assert_eq!(comparison.lhs(), &TypedValue::from(10));
     /// ```
+    #[must_use]
     pub fn lhs(&self) -> &TypedValue {
         &self.lhs
     }
@@ -92,6 +94,7 @@ impl ComparisonRequirement {
     /// let comparison = ComparisonRequirement::new(10, ComparisonOperator::Equals, 10);
     /// assert_eq!(comparison.operator(), ComparisonOperator::Equals);
     /// ```
+    #[must_use]
     pub fn operator(&self) -> ComparisonOperator {
         self.operation.operator
     }
@@ -106,6 +109,7 @@ impl ComparisonRequirement {
     /// let comparison = ComparisonRequirement::new(10, ComparisonOperator::Equals, 10);
     /// assert_eq!(comparison.rhs(), &TypedValue::from(10));
     /// ```
+    #[must_use]
     pub fn rhs(&self) -> &TypedValue {
         &self.operation.rhs
     }
@@ -119,6 +123,7 @@ impl ComparisonRequirement {
     /// let comparison = ComparisonRequirement::new(10, ComparisonOperator::Equals, 10);
     /// assert_eq!(*comparison.hit_count(), 0);
     /// ```
+    #[must_use]
     pub fn hit_count(&self) -> HitCount {
         self.hit_count
     }
@@ -208,6 +213,7 @@ impl ComparisonRequirement {
     /// let comparison = comparison.with_flag(ComparisonFlag::AddHits);
     /// assert_eq!(comparison.flag(), Some(ComparisonFlag::AddHits));
     /// ```
+    #[must_use]
     pub fn with_flag(mut self, flag: ComparisonFlag) -> Self {
         self.flag = Some(flag);
         self
@@ -225,6 +231,7 @@ impl ComparisonRequirement {
     /// let comparison = comparison.with_hits(10);
     /// assert_eq!(*comparison.hit_count(), 10);
     /// ```
+    #[must_use]
     pub fn with_hits(mut self, hits: u32) -> Self {
         self.hit_count.set_hits(hits);
         self

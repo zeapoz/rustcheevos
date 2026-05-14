@@ -54,10 +54,10 @@ impl BuiltInMacro {
     /// let format = BuiltInMacro::Score.format_type();
     /// assert!(format.is_some());
     /// ```
+    #[must_use]
     pub fn format_type(&self) -> Option<FormatType> {
         match self {
-            Self::Number => Some(FormatType::Unsigned),
-            Self::Unsigned => Some(FormatType::Unsigned),
+            Self::Number | Self::Unsigned => Some(FormatType::Unsigned),
             Self::Score => Some(FormatType::Score),
             Self::Centiseconds => Some(FormatType::Milliseconds),
             Self::Seconds => Some(FormatType::Seconds),

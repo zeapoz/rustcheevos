@@ -2,7 +2,7 @@
 
 use winnow::{Parser, Result, ascii::digit1, stream::Stream, token::take_while};
 
-use crate::types::value::*;
+use crate::prelude::TypedValue;
 
 use super::parse_memory_ref;
 

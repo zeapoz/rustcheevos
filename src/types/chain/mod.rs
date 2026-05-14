@@ -103,6 +103,7 @@ impl ChainGroup {
     /// let mut chain_group = ChainGroup::new(core_condition);
     /// chain_group.with_alt_groups(vec![alt_group_a, alt_group_b]);
     /// ```
+    #[must_use]
     pub fn with_alt_groups(
         mut self,
         alt_groups: impl IntoIterator<Item = impl Into<Chain>>,
@@ -120,8 +121,11 @@ impl<T: Into<Chain>> From<T> for ChainGroup {
 
 impl fmt::Display for ChainGroup {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        let alts: String = self.alt_groups.iter().map(|g| format!("S{g}")).collect();
-        write!(f, "{}{}", self.core, alts)
+        write!(f, "{}", self.core)?;
+        for g in &self.alt_groups {
+            write!(f, "S{g}")?;
+        }
+        Ok(())
     }
 }
 
@@ -164,6 +168,7 @@ impl Chain {
     /// let requirement = delta!(bits8!(0x1234)).lt(10);
     /// chain.push(requirement);
     /// ```
+    #[must_use]
     pub fn new() -> Self {
         Self::default()
     }
@@ -237,6 +242,7 @@ impl Chain {
     /// let chain = chain!(requirement.clone());
     /// assert_eq!(chain.into_inner(), vec![requirement.into()]);
     /// ```
+    #[must_use]
     pub fn into_inner(self) -> Vec<Requirement> {
         self.0
     }
@@ -289,7 +295,7 @@ impl fmt::Display for Chain {
             "{}",
             self.0
                 .iter()
-                .map(|r| r.to_string())
+                .map(ToString::to_string)
                 .collect::<Vec<_>>()
                 .join("_")
         )

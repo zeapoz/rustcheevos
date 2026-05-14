@@ -119,6 +119,7 @@ impl MacroRef {
     /// let ref_ = MacroRef::builtin(BuiltInMacro::Score);
     /// assert_eq!(ref_.to_string(), "Score");
     /// ```
+    #[must_use]
     pub fn builtin(builtin: BuiltInMacro) -> Self {
         Self::Builtin(builtin)
     }
@@ -135,6 +136,7 @@ impl MacroRef {
     /// let ref_ = MacroRef::format(format);
     /// assert_eq!(ref_.to_string(), "Score");
     /// ```
+    #[must_use]
     pub fn format(format: Rc<Format>) -> Self {
         Self::Format(format)
     }
@@ -151,6 +153,7 @@ impl MacroRef {
     /// let ref_ = MacroRef::lookup(lookup);
     /// assert_eq!(ref_.to_string(), "Health");
     /// ```
+    #[must_use]
     pub fn lookup(lookup: Rc<LookupTable>) -> Self {
         Self::Lookup(lookup)
     }

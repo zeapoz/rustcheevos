@@ -51,6 +51,7 @@ impl ArithmeticRequirement {
     /// let arithmetic = ArithmeticRequirement::new(ArithmeticFlag::AddSource, 10);
     /// assert_eq!(arithmetic.flag(), ArithmeticFlag::AddSource);
     /// ```
+    #[must_use]
     pub fn flag(&self) -> ArithmeticFlag {
         self.flag
     }
@@ -65,6 +66,7 @@ impl ArithmeticRequirement {
     /// let arithmetic = ArithmeticRequirement::new(ArithmeticFlag::AddSource, 10);
     /// assert_eq!(arithmetic.lhs(), &TypedValue::from(10));
     /// ```
+    #[must_use]
     pub fn lhs(&self) -> &TypedValue {
         &self.lhs
     }
@@ -78,6 +80,7 @@ impl ArithmeticRequirement {
     /// let arithmetic = ArithmeticRequirement::new(ArithmeticFlag::AddSource, 10);
     /// assert_eq!(arithmetic.operator(), None);
     /// ```
+    #[must_use]
     pub fn operator(&self) -> Option<ArithmeticOperator> {
         self.operation.map(|o| o.operator)
     }
@@ -91,6 +94,7 @@ impl ArithmeticRequirement {
     /// let arithmetic = ArithmeticRequirement::new(ArithmeticFlag::AddSource, 10);
     /// assert_eq!(arithmetic.rhs(), None);
     /// ```
+    #[must_use]
     pub fn rhs(&self) -> Option<TypedValue> {
         self.operation.map(|o| o.rhs)
     }
@@ -106,6 +110,7 @@ impl ArithmeticRequirement {
     /// let arithmetic = arithmetic.with_flag(ArithmeticFlag::SubSource);
     /// assert_eq!(arithmetic.flag(), ArithmeticFlag::SubSource);
     /// ```
+    #[must_use]
     pub fn with_flag(mut self, flag: ArithmeticFlag) -> Self {
         self.flag = flag;
         self
@@ -126,6 +131,7 @@ impl ArithmeticRequirement {
     ///     .with_operation(ArithmeticOperation::add(5));
     /// assert_eq!(arithmetic.operator(), Some(ArithmeticOperator::Add));
     /// ```
+    #[must_use]
     pub fn with_operation(mut self, operation: ArithmeticOperation) -> Self {
         self.operation = Some(operation);
         self
@@ -149,6 +155,7 @@ impl ArithmeticRequirement {
         clippy::should_implement_trait,
         reason = "not using arithmetic in the traditional sense"
     )]
+    #[must_use]
     pub fn add(self, rhs: impl Into<TypedValue>) -> Self {
         self.with_operation(ArithmeticOperation::add(rhs))
     }
@@ -171,6 +178,7 @@ impl ArithmeticRequirement {
         clippy::should_implement_trait,
         reason = "not using arithmetic in the traditional sense"
     )]
+    #[must_use]
     pub fn sub(self, rhs: impl Into<TypedValue>) -> Self {
         self.with_operation(ArithmeticOperation::sub(rhs))
     }
@@ -193,6 +201,7 @@ impl ArithmeticRequirement {
         clippy::should_implement_trait,
         reason = "not using arithmetic in the traditional sense"
     )]
+    #[must_use]
     pub fn mul(self, rhs: impl Into<TypedValue>) -> Self {
         self.with_operation(ArithmeticOperation::mul(rhs))
     }
@@ -215,6 +224,7 @@ impl ArithmeticRequirement {
         clippy::should_implement_trait,
         reason = "not using arithmetic in the traditional sense"
     )]
+    #[must_use]
     pub fn div(self, rhs: impl Into<TypedValue>) -> Self {
         self.with_operation(ArithmeticOperation::div(rhs))
     }
@@ -233,6 +243,7 @@ impl ArithmeticRequirement {
     /// let arithmetic = ArithmeticRequirement::new(ArithmeticFlag::AddSource, 10).modulo(3);
     /// assert_eq!(arithmetic.operator(), Some(ArithmeticOperator::Modulo));
     /// ```
+    #[must_use]
     pub fn modulo(self, rhs: impl Into<TypedValue>) -> Self {
         self.with_operation(ArithmeticOperation::modulo(rhs))
     }
@@ -251,6 +262,7 @@ impl ArithmeticRequirement {
     /// let arithmetic = ArithmeticRequirement::new(ArithmeticFlag::AddSource, 10).bitwise_and(6);
     /// assert_eq!(arithmetic.operator(), Some(ArithmeticOperator::BitwiseAnd));
     /// ```
+    #[must_use]
     pub fn bitwise_and(self, rhs: impl Into<TypedValue>) -> Self {
         self.with_operation(ArithmeticOperation::bitwise_and(rhs))
     }
@@ -269,6 +281,7 @@ impl ArithmeticRequirement {
     /// let arithmetic = ArithmeticRequirement::new(ArithmeticFlag::AddSource, 10).bitwise_xor(6);
     /// assert_eq!(arithmetic.operator(), Some(ArithmeticOperator::BitwiseXor));
     /// ```
+    #[must_use]
     pub fn bitwise_xor(self, rhs: impl Into<TypedValue>) -> Self {
         self.with_operation(ArithmeticOperation::bitwise_xor(rhs))
     }

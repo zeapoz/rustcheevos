@@ -164,6 +164,7 @@ impl Leaderboard {
     /// )
     /// .with_id(600707);
     /// ```
+    #[must_use]
     pub fn with_id(mut self, id: u32) -> Self {
         self.id = id;
         self
@@ -213,6 +214,7 @@ impl LeaderboardFormat {
     /// # Returns
     ///
     /// The string representation.
+    #[must_use]
     pub fn as_str(&self) -> &'static str {
         match self {
             LeaderboardFormat::Score => "SCORE",

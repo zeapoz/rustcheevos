@@ -120,6 +120,7 @@ impl PendingChain<MemoryRef> {
     /// let pending_chain = PendingChain::new(bits8!(0x4321), chain).delta();
     /// assert_eq!(pending_chain.head(), &bits8!(0x4321).delta());
     /// ```
+    #[must_use]
     pub fn delta(self) -> Self {
         Self {
             head: self.head.delta(),
@@ -137,6 +138,7 @@ impl PendingChain<MemoryRef> {
     /// let pending_chain = PendingChain::new(bits8!(0x4321), chain).prior();
     /// assert_eq!(pending_chain.head(), &bits8!(0x4321).prior());
     /// ```
+    #[must_use]
     pub fn prior(self) -> Self {
         Self {
             head: self.head.prior(),
@@ -154,6 +156,7 @@ impl PendingChain<MemoryRef> {
     /// let pending_chain = PendingChain::new(bits8!(0x4321), chain).bcd();
     /// assert_eq!(pending_chain.head(), &bits8!(0x4321).bcd());
     /// ```
+    #[must_use]
     pub fn bcd(self) -> Self {
         Self {
             head: self.head.bcd(),
@@ -171,6 +174,7 @@ impl PendingChain<MemoryRef> {
     /// let pending_chain = PendingChain::new(bits8!(0x4321), chain).invert();
     /// assert_eq!(pending_chain.head(), &bits8!(0x4321).invert());
     /// ```
+    #[must_use]
     pub fn invert(self) -> Self {
         Self {
             head: self.head.invert(),

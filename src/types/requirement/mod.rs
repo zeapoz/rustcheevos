@@ -33,6 +33,7 @@ impl Requirement {
     /// let requirement = Requirement::always_true();
     /// assert_eq!(requirement, ComparisonRequirement::eq(1, 1).into());
     /// ```
+    #[must_use]
     pub fn always_true() -> Self {
         Requirement::Comparison(ComparisonRequirement::eq(1, 1))
     }
@@ -48,6 +49,7 @@ impl Requirement {
     /// let requirement = Requirement::always_false();
     /// assert_eq!(requirement, ComparisonRequirement::eq(0, 1).into());
     /// ```
+    #[must_use]
     pub fn always_false() -> Self {
         Requirement::Comparison(ComparisonRequirement::eq(0, 1))
     }

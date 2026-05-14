@@ -64,7 +64,7 @@ impl LookupTable {
     ) -> Self {
         Self {
             name: name.into(),
-            entries: entries.into_iter().map(|e| e.into()).collect(),
+            entries: entries.into_iter().map(Into::into).collect(),
             fallback: None,
         }
     }
@@ -198,7 +198,7 @@ impl fmt::Display for Entry {
         let keys = self
             .keys
             .iter()
-            .map(|k| k.to_string())
+            .map(ToString::to_string)
             .collect::<Vec<_>>()
             .join(",");
         write!(f, "{}={}", keys, self.value)

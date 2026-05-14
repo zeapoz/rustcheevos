@@ -65,6 +65,7 @@ impl MemoryRef {
     /// assert_eq!(memory_ref.address(), 0x1234);
     /// assert_eq!(memory_ref.access_mode(), AccessMode::Memory);
     /// ```
+    #[must_use]
     pub const fn new(size: MemorySize, address: usize) -> Self {
         Self {
             size,
@@ -82,6 +83,7 @@ impl MemoryRef {
     /// let memory_ref = MemoryRef::new(MemorySize::Bits8, 0x1234);
     /// assert_eq!(memory_ref.size(), MemorySize::Bits8);
     /// ```
+    #[must_use]
     pub fn size(&self) -> MemorySize {
         self.size
     }
@@ -95,6 +97,7 @@ impl MemoryRef {
     /// let memory_ref = MemoryRef::new(MemorySize::Bits8, 0x1234);
     /// assert_eq!(memory_ref.address(), 0x1234);
     /// ```
+    #[must_use]
     pub fn address(&self) -> usize {
         self.address
     }
@@ -107,6 +110,7 @@ impl MemoryRef {
     /// let memory_ref = MemoryRef::new(MemorySize::Bits8, 0x1234);
     /// assert_eq!(memory_ref.access_mode(), AccessMode::Memory);
     /// ```
+    #[must_use]
     pub fn access_mode(&self) -> AccessMode {
         self.access_mode
     }
@@ -126,6 +130,7 @@ impl MemoryRef {
     /// let memory_ref = MemoryRef::new(MemorySize::Bits8, 0x1234).memory();
     /// assert_eq!(memory_ref.access_mode(), AccessMode::Memory);
     /// ```
+    #[must_use]
     pub fn memory(self) -> Self {
         self.with_access_mode(AccessMode::Memory)
     }
@@ -139,6 +144,7 @@ impl MemoryRef {
     /// let memory_ref = MemoryRef::new(MemorySize::Bits8, 0x1234).delta();
     /// assert_eq!(memory_ref.access_mode(), AccessMode::Delta);
     /// ```
+    #[must_use]
     pub fn delta(self) -> Self {
         self.with_access_mode(AccessMode::Delta)
     }
@@ -152,6 +158,7 @@ impl MemoryRef {
     /// let memory_ref = MemoryRef::new(MemorySize::Bits8, 0x1234).prior();
     /// assert_eq!(memory_ref.access_mode(), AccessMode::Prior);
     /// ```
+    #[must_use]
     pub fn prior(self) -> Self {
         self.with_access_mode(AccessMode::Prior)
     }
@@ -165,6 +172,7 @@ impl MemoryRef {
     /// let memory_ref = MemoryRef::new(MemorySize::Bits8, 0x1234).bcd();
     /// assert_eq!(memory_ref.access_mode(), AccessMode::BCD);
     /// ```
+    #[must_use]
     pub fn bcd(self) -> Self {
         self.with_access_mode(AccessMode::BCD)
     }
@@ -178,6 +186,7 @@ impl MemoryRef {
     /// let memory_ref = MemoryRef::new(MemorySize::Bits8, 0x1234).invert();
     /// assert_eq!(memory_ref.access_mode(), AccessMode::Invert);
     /// ```
+    #[must_use]
     pub fn invert(self) -> Self {
         self.with_access_mode(AccessMode::Invert)
     }
@@ -420,6 +429,7 @@ impl MemoryRef {
     /// assert_eq!(*requirement.lhs(), TypedValue::Memory(memory_ref));
     /// assert_eq!(requirement.operator(), None);
     /// ```
+    #[must_use]
     pub fn with_flag(self, flag: ArithmeticFlag) -> ArithmeticRequirement {
         ArithmeticRequirement::new(flag, self)
     }
@@ -701,7 +711,7 @@ macro_rules! memory_ref_constructors {
         impl MemoryRef {
             $(
                     #[allow(missing_docs, clippy::missing_docs_in_private_items)]
-                    pub const fn $method(address: usize) -> Self {
+                    #[must_use] pub const fn $method(address: usize) -> Self {
                         Self::new(MemorySize::$variant($inner::$inner_variant), address)
                     }
             )*
@@ -711,7 +721,7 @@ macro_rules! memory_ref_constructors {
         impl MemoryRef {
             $(
                     #[allow(missing_docs, clippy::missing_docs_in_private_items)]
-                    pub const fn $method(address: usize) -> Self {
+                    #[must_use] pub const fn $method(address: usize) -> Self {
                         Self::new(MemorySize::$variant, address)
                     }
             )*

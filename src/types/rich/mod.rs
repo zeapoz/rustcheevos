@@ -53,11 +53,13 @@ pub struct RichPresence {
 
 impl RichPresence {
     /// Create a new rich presence.
+    #[must_use]
     pub fn new() -> Self {
         Self::default()
     }
 
     /// Returns a new [`MacroRef`] for a builtin macro.
+    #[must_use]
     pub fn builtin_macro(builtin: BuiltInMacro) -> MacroRef {
         MacroRef::builtin(builtin)
     }

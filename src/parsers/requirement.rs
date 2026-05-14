@@ -5,9 +5,13 @@ use winnow::{
     combinator::{alt, opt},
 };
 
-use crate::types::requirement::comparison::*;
-use crate::types::requirement::*;
-use crate::types::requirement::{arithmetic::*, comparison::hits::HitCount};
+use crate::{
+    prelude::{ArithmeticRequirement, ComparisonRequirement, Requirement},
+    types::requirement::{
+        arithmetic::ArithmeticOperation,
+        comparison::{ComparisonOperation, hits::HitCount},
+    },
+};
 
 use super::{
     parse_arithmetic_flag, parse_arithmetic_operator, parse_comparison_flag,

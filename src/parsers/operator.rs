@@ -2,7 +2,7 @@
 
 use winnow::{Parser, Result, combinator::alt};
 
-use crate::types::operator::*;
+use crate::types::operator::{ArithmeticOperator, ComparisonOperator};
 
 /// Parses an arithmetic operator.
 pub fn parse_arithmetic_operator(input: &mut &str) -> Result<ArithmeticOperator> {
@@ -22,6 +22,8 @@ pub fn parse_comparison_operator(input: &mut &str) -> Result<ComparisonOperator>
 
 #[cfg(test)]
 mod tests {
+    use crate::types::operator::ArithmeticOperator;
+
     use super::*;
 
     #[test]

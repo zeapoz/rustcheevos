@@ -121,7 +121,7 @@ impl Game {
             GameAsset::Achievement(achievement) => self.core_set.push(achievement),
             GameAsset::Leaderboard(leaderboard) => self.leaderboards.push(leaderboard),
             GameAsset::RichPresence(rich_presence) => self.rich_presence = rich_presence,
-        };
+        }
         self
     }
 
