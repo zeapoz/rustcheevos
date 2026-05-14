@@ -16,7 +16,7 @@ pub const USER_FILE_SUFFIX: &str = "-User";
 pub const USER_FILE_EXTENSION: &str = "txt";
 
 /// The author to use when none is specified.
-const DEFAULT_AUTHOR: &str = "Author";
+const DEFAULT_AUTHOR: &str = "rustcheevos";
 /// The timestamp to use when none is specified.
 const DEFAULT_TIMESTAMP: &str = "0";
 /// The badge ID to use when none is specified.

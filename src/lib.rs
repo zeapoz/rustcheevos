@@ -32,7 +32,7 @@
 //! }
 //!
 //! // Complex logic chains can be made simpler by returning pending chains that allow
-//! // for modiyfing the head of the condition chain.
+//! // for modiyfing the last condition in the chain.
 //! fn current_level() -> PendingChain<MemoryRef> {
 //!     chain!(
 //!         add_address!(bits8!(0x16).mul(2)),
@@ -40,8 +40,7 @@
 //!     )
 //! }
 //!
-//! // The chain! syntax allows you to define conditions, just like how you would in the
-//! // achievement editor.
+//! // Use flags like delta! fluidly like you would in the achievement editor.
 //! fn just_beat_level(level_id: u32) -> Chain {
 //!     chain!(
 //!         delta!(current_level()).eq(level_id),
@@ -73,7 +72,7 @@
 //!     table.add_entry(Entry::new(2..=3, "Level 2"));
 //!     table.set_fallback("Main Menu");
 //!
-//!     // This returns a macro call handle than can be used directly in format! strings.
+//!     // This returns a macro call handle that can be used directly in format! strings.
 //!     let stage = rich_presence.register_lookup(table, bits8!(0x1234));
 //!     rich_presence.add_static_display("Currently in {stage}");
 //!
