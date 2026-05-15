@@ -6,6 +6,7 @@ pub mod flag;
 pub mod game;
 pub mod leaderboard;
 pub mod memory;
+pub mod note;
 pub mod operator;
 pub mod requirement;
 pub mod rich;

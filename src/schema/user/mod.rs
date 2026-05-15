@@ -6,7 +6,7 @@ use thiserror::Error;
 
 use header::Header;
 
-use crate::prelude::{Achievement, Leaderboard};
+use crate::prelude::{Achievement, CodeNote, Leaderboard};
 
 mod header;
 
@@ -43,7 +43,7 @@ pub struct UserFile {
     /// The leaderboard entries of the user file.
     pub leaderboards: Vec<LeaderboardEntry>,
     /// The code note entries of the user file.
-    pub notes: Vec<CodeNote>,
+    pub notes: Vec<CodeNoteEntry>,
 }
 
 impl UserFile {
@@ -52,12 +52,13 @@ impl UserFile {
         game_title: impl Into<String>,
         achievements: impl IntoIterator<Item = impl Into<AchievementEntry>>,
         leaderboards: impl IntoIterator<Item = impl Into<LeaderboardEntry>>,
+        notes: impl IntoIterator<Item = impl Into<CodeNoteEntry>>,
     ) -> Self {
         Self {
             header: Header::new(game_title),
             achievements: achievements.into_iter().map(Into::into).collect(),
             leaderboards: leaderboards.into_iter().map(Into::into).collect(),
-            notes: Vec::new(),
+            notes: notes.into_iter().map(Into::into).collect(),
         }
     }
 }
@@ -178,7 +179,7 @@ impl fmt::Display for LeaderboardEntry {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(
             f,
-            r#"L{}:"{}":"{}":"{}":"{}":{}:{}:{}:{}"#,
+            r#"L{}:"{}":"{}":"{}":"{}":{}:"{}":"{}":{}"#,
             self.id,
             self.start,
             self.cancel,
@@ -208,17 +209,26 @@ impl From<&Leaderboard> for LeaderboardEntry {
     }
 }
 
-/// A code note in a user file.
+/// A code note entry in a user file.
 #[derive(Debug, Clone, PartialEq)]
-pub struct CodeNote {
+pub struct CodeNoteEntry {
     /// The address of the code note.
-    pub address: u32,
+    pub address: usize,
     /// The note.
     pub note: String,
 }
 
-impl fmt::Display for CodeNote {
+impl fmt::Display for CodeNoteEntry {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "N0:0x{:x}:{}", self.address, self.note)
+    }
+}
+
+impl From<&CodeNote> for CodeNoteEntry {
+    fn from(value: &CodeNote) -> Self {
+        Self {
+            address: value.address,
+            note: value.contents.clone(),
+        }
     }
 }

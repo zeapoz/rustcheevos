@@ -12,9 +12,10 @@ pub use crate::types::{
         AddAddress, AddHits, AddSource, AndNext, Measured, MeasuredIf, MeasuredPercentage, OrNext,
         PauseIf, Remember, ResetIf, ResetNextIf, SubHits, SubSource, Trigger,
     },
-    game::{AchievementSet, GameData, LeaderboardSet},
+    game::{AchievementSet, CodeNoteSet, GameData, LeaderboardSet},
     leaderboard::{Leaderboard, LeaderboardFormat},
     memory::{AccessMode, AccessModeModifier, MemoryRef, MemorySize},
+    note::CodeNote,
     requirement::{Arithmetic, Condition, Requirement},
     rich::{
         RichPresence,

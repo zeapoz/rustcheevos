@@ -3,7 +3,7 @@
 use std::{fs, io, path::Path};
 
 use crate::{
-    prelude::{Achievement, Leaderboard},
+    prelude::{Achievement, CodeNote, Leaderboard},
     schema::user::{USER_FILE_EXTENSION, USER_FILE_SUFFIX, UserFile},
 };
 
@@ -13,6 +13,8 @@ use super::rich::RichPresence;
 pub type AchievementSet = Vec<Achievement>;
 /// A set of leaderboards.
 pub type LeaderboardSet = Vec<Leaderboard>;
+/// A set of code notes.
+pub type CodeNoteSet = Vec<CodeNote>;
 
 /// The core game struct containing all the assets.
 ///
@@ -78,6 +80,8 @@ pub struct GameData {
     core_set: AchievementSet,
     /// The leaderboards.
     leaderboards: LeaderboardSet,
+    /// The code notes.
+    code_notes: CodeNoteSet,
     /// The rich presence.
     rich_presence: RichPresence,
 }
@@ -98,6 +102,7 @@ impl GameData {
             title: name.into(),
             core_set: AchievementSet::new(),
             leaderboards: LeaderboardSet::new(),
+            code_notes: CodeNoteSet::new(),
             rich_presence: RichPresence::new(),
         }
     }
@@ -120,6 +125,7 @@ impl GameData {
         match item.into() {
             GameAsset::Achievement(achievement) => self.core_set.push(achievement),
             GameAsset::Leaderboard(leaderboard) => self.leaderboards.push(leaderboard),
+            GameAsset::CodeNote(note) => self.code_notes.push(note),
             GameAsset::RichPresence(rich_presence) => self.rich_presence = rich_presence,
         }
         self
@@ -197,6 +203,24 @@ impl GameData {
         self
     }
 
+    /// Sets the code notes for this game.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use rustcheevos::prelude::*;
+    ///
+    /// let mut game_data = GameData::new("GAME001", "Super Adventure");
+    ///
+    /// let note = CodeNote::new(0x1234, "Player health");
+    /// game_data.set_code_notes(vec![note]);
+    /// assert_eq!(game_data.code_notes().count(), 1);
+    /// ```
+    pub fn set_code_notes(&mut self, code_notes: impl Into<CodeNoteSet>) -> &mut Self {
+        self.code_notes = code_notes.into();
+        self
+    }
+
     /// Sets the rich presence for this game.
     ///
     /// # Examples
@@ -247,9 +271,31 @@ impl GameData {
         self.leaderboards.iter()
     }
 
+    /// Returns an iterator over the code notes in this game.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use rustcheevos::prelude::*;
+    ///
+    /// let game_data = GameData::new("GAME001", "Test");
+    ///
+    /// for note in game_data.code_notes() {
+    ///     println!("{:x}: {}", note.address, note.contents);
+    /// }
+    /// ```
+    pub fn code_notes(&self) -> impl Iterator<Item = &CodeNote> {
+        self.code_notes.iter()
+    }
+
     /// Returns the user file representation of this game.
     fn user_file(&self) -> UserFile {
-        UserFile::new(self.title.clone(), self.achievements(), self.leaderboards())
+        UserFile::new(
+            self.title.clone(),
+            self.achievements(),
+            self.leaderboards(),
+            self.code_notes(),
+        )
     }
 
     /// Exports the assets of this game to the given directory.
@@ -332,6 +378,8 @@ pub enum GameAsset {
     Achievement(Achievement),
     /// A leaderboard.
     Leaderboard(Leaderboard),
+    /// A code note.
+    CodeNote(CodeNote),
     /// A rich presence.
     RichPresence(RichPresence),
 }
@@ -345,6 +393,12 @@ impl From<Achievement> for GameAsset {
 impl From<Leaderboard> for GameAsset {
     fn from(leaderboard: Leaderboard) -> Self {
         GameAsset::Leaderboard(leaderboard)
+    }
+}
+
+impl From<CodeNote> for GameAsset {
+    fn from(note: CodeNote) -> Self {
+        GameAsset::CodeNote(note)
     }
 }
 
