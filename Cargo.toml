@@ -2,6 +2,11 @@
 name = "rustcheevos"
 version = "0.1.0"
 edition = "2024"
+description = "A library for building RetroAchievements sets and more using Rust"
+license = "MIT"
+repository = "https://github.com/zeapoz/rustcheevos"
+keywords = ["retroachievements"]
+readme = "README.md"
 
 [dependencies]
 winnow = "1.0.2"

@@ -107,3 +107,7 @@ When reporting a bug, please include:
 When requesting a feature, please describe:
 - The use case or problem you're trying to solve
 - How you envision it working
+
+## License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
