@@ -5,10 +5,14 @@ use std::{fmt, str::FromStr};
 use winnow::Parser;
 
 use crate::{
-    prelude::AccessMode,
-    types::memory::AccessModeModifier,
+    impl_arithmetic_flag_traits, impl_comparison_flag_traits,
     parsers::ParseError,
     parsers::parse_requirement,
+    prelude::AccessMode,
+    types::{
+        flag::{ArithmeticFlag, ComparisonFlag},
+        memory::AccessModeModifier,
+    },
 };
 
 pub mod arithmetic;
@@ -66,3 +70,30 @@ impl AccessModeModifier for Requirement {
         self
     }
 }
+
+impl Requirement {
+    /// Sets the given comparison flag on this requirement if it is a [`Condition`].
+    ///
+    /// If the requirement is an [`Arithmetic`], returns self unchanged.
+    #[must_use]
+    pub fn with_comparison_flag(self, flag: ComparisonFlag) -> Self {
+        match self {
+            Requirement::Condition(c) => Requirement::Condition(c.with_flag(flag)),
+            Requirement::Arithmetic(a) => Requirement::Arithmetic(a),
+        }
+    }
+
+    /// Sets the given arithmetic flag on this requirement if it is an [`Arithmetic`].
+    ///
+    /// If the requirement is a [`Condition`], returns self unchanged.
+    #[must_use]
+    pub fn with_arithmetic_flag(self, flag: ArithmeticFlag) -> Self {
+        match self {
+            Requirement::Condition(c) => Requirement::Condition(c),
+            Requirement::Arithmetic(a) => Requirement::Arithmetic(a.with_flag(flag)),
+        }
+    }
+}
+
+impl_comparison_flag_traits!(Requirement, with_comparison_flag);
+impl_arithmetic_flag_traits!(Requirement, with_arithmetic_flag);

@@ -3,9 +3,13 @@
 use std::{fmt, str::FromStr};
 
 use crate::{
+    impl_arithmetic_flag_traits, impl_comparison_flag_traits,
     parsers::ParseError,
     prelude::{AccessMode, Requirement},
-    types::memory::AccessModeModifier,
+    types::{
+        flag::{ArithmeticFlag, ComparisonFlag},
+        memory::AccessModeModifier,
+    },
 };
 
 pub mod pending;
@@ -310,3 +314,34 @@ impl AccessModeModifier for Chain {
         self
     }
 }
+
+impl Chain {
+    /// Sets the given comparison flag on all [`Condition`] requirements in this chain.
+    ///
+    /// [`Arithmetic`] requirements are returned unchanged.
+    #[must_use]
+    pub fn with_comparison_flag(self, flag: ComparisonFlag) -> Self {
+        Self(
+            self.0
+                .into_iter()
+                .map(|req| req.with_comparison_flag(flag))
+                .collect(),
+        )
+    }
+
+    /// Sets the given arithmetic flag on all [`Arithmetic`] requirements in this chain.
+    ///
+    /// [`Condition`] requirements are returned unchanged.
+    #[must_use]
+    pub fn with_arithmetic_flag(self, flag: ArithmeticFlag) -> Self {
+        Self(
+            self.0
+                .into_iter()
+                .map(|req| req.with_arithmetic_flag(flag))
+                .collect(),
+        )
+    }
+}
+
+impl_comparison_flag_traits!(Chain, with_comparison_flag);
+impl_arithmetic_flag_traits!(Chain, with_arithmetic_flag);
