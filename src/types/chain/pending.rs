@@ -1,7 +1,7 @@
 //! Type definition for pending chains.
 
 use crate::{
-    prelude::{Arithmetic, Chain, Condition, MemoryRef, Requirement},
+    prelude::{AccessModeModifier, Arithmetic, Chain, Condition, MemoryRef, Requirement},
     types::value::{TypedValue, TypedValueOps},
 };
 

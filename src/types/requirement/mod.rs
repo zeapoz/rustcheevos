@@ -4,7 +4,12 @@ use std::{fmt, str::FromStr};
 
 use winnow::Parser;
 
-use crate::{parsers::ParseError, parsers::parse_requirement};
+use crate::{
+    prelude::AccessMode,
+    types::memory::AccessModeModifier,
+    parsers::ParseError,
+    parsers::parse_requirement,
+};
 
 pub mod arithmetic;
 pub mod condition;
@@ -49,5 +54,15 @@ impl fmt::Display for Requirement {
             Requirement::Condition(requirement) => write!(f, "{requirement}"),
             Requirement::Arithmetic(requirement) => write!(f, "{requirement}"),
         }
+    }
+}
+
+impl AccessModeModifier for Requirement {
+    fn with_access_mode(mut self, access_mode: AccessMode) -> Self {
+        self = match self {
+            Requirement::Condition(c) => Requirement::Condition(c.with_access_mode(access_mode)),
+            Requirement::Arithmetic(a) => Requirement::Arithmetic(a.with_access_mode(access_mode)),
+        };
+        self
     }
 }

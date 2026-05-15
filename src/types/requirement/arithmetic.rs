@@ -8,8 +8,12 @@ use crate::{
     impl_arithmetic_flag_traits,
     parsers::ParseError,
     parsers::parse_arithmetic,
-    types::{flag::ArithmeticFlag, operator::ArithmeticOperator, value::TypedValue},
+    types::{
+        flag::ArithmeticFlag, memory::AccessMode, operator::ArithmeticOperator, value::TypedValue,
+    },
 };
+
+use crate::types::memory::AccessModeModifier;
 
 /// An arithmetic operation between two values.
 #[derive(Debug, Clone, Copy, PartialEq)]
@@ -284,6 +288,17 @@ impl Arithmetic {
     #[must_use]
     pub fn bitwise_xor(self, rhs: impl Into<TypedValue>) -> Self {
         self.with_operation(ArithmeticOperation::bitwise_xor(rhs))
+    }
+}
+
+impl AccessModeModifier for Arithmetic {
+    fn with_access_mode(mut self, access_mode: AccessMode) -> Self {
+        self.lhs = self.lhs.with_access_mode(access_mode);
+        if let Some(op) = self.operation {
+            let rhs = op.rhs.with_access_mode(access_mode);
+            self.operation = Some(ArithmeticOperation { rhs, ..op });
+        }
+        self
     }
 }
 

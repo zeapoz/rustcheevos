@@ -2,7 +2,11 @@
 
 use std::{fmt, str::FromStr};
 
-use crate::{parsers::ParseError, prelude::Requirement};
+use crate::{
+    parsers::ParseError,
+    prelude::{AccessMode, Requirement},
+    types::memory::AccessModeModifier,
+};
 
 pub mod pending;
 
@@ -295,5 +299,14 @@ impl fmt::Display for Chain {
                 .collect::<Vec<_>>()
                 .join("_")
         )
+    }
+}
+
+impl AccessModeModifier for Chain {
+    fn with_access_mode(mut self, access_mode: AccessMode) -> Self {
+        for req in &mut self.0 {
+            *req = req.with_access_mode(access_mode);
+        }
+        self
     }
 }

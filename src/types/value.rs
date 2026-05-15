@@ -8,7 +8,7 @@ use crate::{impl_arithmetic_flag_traits, parsers::ParseError, parsers::parse_typ
 
 use super::{
     flag::ArithmeticFlag,
-    memory::MemoryRef,
+    memory::{AccessMode, MemoryRef},
     requirement::{arithmetic::Arithmetic, condition::Condition},
 };
 
@@ -30,6 +30,24 @@ impl TypedValue {
     #[must_use]
     pub fn with_arithmetic_flag(self, flag: ArithmeticFlag) -> Arithmetic {
         Arithmetic::new(flag, self)
+    }
+
+    /// Applies an access mode if this value contains a [`MemoryRef`].
+    ///
+    /// # Examples
+    /// ```
+    /// use rustcheevos::prelude::*;
+    ///
+    /// let value = MemoryRef::new(MemorySize::Bits8, 0x1234);
+    /// let typed = TypedValue::from(value).with_access_mode(AccessMode::Delta);
+    /// assert_eq!(typed, TypedValue::from(MemoryRef::new(MemorySize::Bits8, 0x1234).delta()));
+    /// ```
+    #[must_use]
+    pub fn with_access_mode(mut self, access_mode: AccessMode) -> Self {
+        if let TypedValue::Memory(ref mut mem) = self {
+            mem.access_mode = access_mode;
+        }
+        self
     }
 }
 

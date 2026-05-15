@@ -10,8 +10,12 @@ use crate::{
     impl_comparison_flag_traits,
     parsers::ParseError,
     parsers::parse_condition,
-    types::{flag::ComparisonFlag, operator::ComparisonOperator, value::TypedValue},
+    types::{
+        flag::ComparisonFlag, memory::AccessMode, operator::ComparisonOperator, value::TypedValue,
+    },
 };
+
+use crate::types::memory::AccessModeModifier;
 
 /// A comparison between two values.
 #[derive(Debug, Clone, Copy, PartialEq)]
@@ -264,6 +268,14 @@ impl Condition {
     #[must_use]
     pub fn always_false() -> Self {
         Self::eq(0, 1)
+    }
+}
+
+impl AccessModeModifier for Condition {
+    fn with_access_mode(mut self, access_mode: AccessMode) -> Self {
+        self.lhs = self.lhs.with_access_mode(access_mode);
+        self.operation.rhs = self.operation.rhs.with_access_mode(access_mode);
+        self
     }
 }
 

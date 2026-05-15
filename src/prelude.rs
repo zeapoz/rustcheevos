@@ -14,7 +14,7 @@ pub use crate::types::{
     },
     game::{AchievementSet, GameData, LeaderboardSet},
     leaderboard::{Leaderboard, LeaderboardFormat},
-    memory::{AccessMode, MemoryRef, MemorySize},
+    memory::{AccessMode, AccessModeModifier, MemoryRef, MemorySize},
     requirement::{Arithmetic, Condition, Requirement},
     rich::{
         RichPresence,

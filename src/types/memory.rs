@@ -46,7 +46,7 @@ pub struct MemoryRef {
     /// The address of the memory reference.
     address: usize,
     /// The access mode of the memory reference.
-    access_mode: AccessMode,
+    pub access_mode: AccessMode,
 }
 
 impl MemoryRef {
@@ -111,80 +111,20 @@ impl MemoryRef {
         self.access_mode
     }
 
-    /// Sets the access mode of the memory reference.
-    pub(crate) fn with_access_mode(mut self, access_mode: AccessMode) -> Self {
-        self.access_mode = access_mode;
-        self
-    }
-
-    /// Sets the access mode to [`AccessMode::Memory`].
+    /// Sets the access mode of this memory reference.
     ///
     /// # Examples
     /// ```
     /// use rustcheevos::prelude::*;
     ///
-    /// let memory_ref = MemoryRef::new(MemorySize::Bits8, 0x1234).memory();
-    /// assert_eq!(memory_ref.access_mode(), AccessMode::Memory);
-    /// ```
-    #[must_use]
-    pub fn memory(self) -> Self {
-        self.with_access_mode(AccessMode::Memory)
-    }
-
-    /// Sets the access mode to [`AccessMode::Delta`].
-    ///
-    /// # Examples
-    /// ```
-    /// use rustcheevos::prelude::*;
-    ///
-    /// let memory_ref = MemoryRef::new(MemorySize::Bits8, 0x1234).delta();
+    /// let memory_ref = MemoryRef::new(MemorySize::Bits8, 0x1234)
+    ///     .with_access_mode(AccessMode::Delta);
     /// assert_eq!(memory_ref.access_mode(), AccessMode::Delta);
     /// ```
     #[must_use]
-    pub fn delta(self) -> Self {
-        self.with_access_mode(AccessMode::Delta)
-    }
-
-    /// Sets the access mode to [`AccessMode::Prior`].
-    ///
-    /// # Examples
-    /// ```
-    /// use rustcheevos::prelude::*;
-    ///
-    /// let memory_ref = MemoryRef::new(MemorySize::Bits8, 0x1234).prior();
-    /// assert_eq!(memory_ref.access_mode(), AccessMode::Prior);
-    /// ```
-    #[must_use]
-    pub fn prior(self) -> Self {
-        self.with_access_mode(AccessMode::Prior)
-    }
-
-    /// Sets the access mode to [`AccessMode::BCD`].
-    ///
-    /// # Examples
-    /// ```
-    /// use rustcheevos::prelude::*;
-    ///
-    /// let memory_ref = MemoryRef::new(MemorySize::Bits8, 0x1234).bcd();
-    /// assert_eq!(memory_ref.access_mode(), AccessMode::BCD);
-    /// ```
-    #[must_use]
-    pub fn bcd(self) -> Self {
-        self.with_access_mode(AccessMode::BCD)
-    }
-
-    /// Sets the access mode to [`AccessMode::Invert`].
-    ///
-    /// # Examples
-    /// ```
-    /// use rustcheevos::prelude::*;
-    ///
-    /// let memory_ref = MemoryRef::new(MemorySize::Bits8, 0x1234).invert();
-    /// assert_eq!(memory_ref.access_mode(), AccessMode::Invert);
-    /// ```
-    #[must_use]
-    pub fn invert(self) -> Self {
-        self.with_access_mode(AccessMode::Invert)
+    pub fn with_access_mode(mut self, access_mode: AccessMode) -> Self {
+        self.access_mode = access_mode;
+        self
     }
 
     /// Creates a new equals [`Condition`].
@@ -475,6 +415,105 @@ impl fmt::Display for AccessMode {
             AccessMode::Invert => "~",
         };
         write!(f, "{s}")
+    }
+}
+
+/// A trait for types that can be modified with access modes (delta, prior, bcd, invert).
+pub trait AccessModeModifier {
+    /// Applies an access mode to this type.
+    #[must_use]
+    fn with_access_mode(self, access_mode: AccessMode) -> Self;
+
+    /// Sets the access mode to [`AccessMode::Memory`].
+    ///
+    /// # Examples
+    /// ```
+    /// use rustcheevos::prelude::*;
+    ///
+    /// let memory_ref = MemoryRef::new(MemorySize::Bits8, 0x1234).memory();
+    /// assert_eq!(memory_ref.access_mode(), AccessMode::Memory);
+    /// ```
+    #[must_use]
+    fn memory(self) -> Self
+    where
+        Self: Sized,
+    {
+        self.with_access_mode(AccessMode::Memory)
+    }
+
+    /// Sets the access mode to [`AccessMode::Delta`].
+    ///
+    /// # Examples
+    /// ```
+    /// use rustcheevos::prelude::*;
+    ///
+    /// let memory_ref = MemoryRef::new(MemorySize::Bits8, 0x1234).delta();
+    /// assert_eq!(memory_ref.access_mode(), AccessMode::Delta);
+    /// ```
+    #[must_use]
+    fn delta(self) -> Self
+    where
+        Self: Sized,
+    {
+        self.with_access_mode(AccessMode::Delta)
+    }
+
+    /// Sets the access mode to [`AccessMode::Prior`].
+    ///
+    /// # Examples
+    /// ```
+    /// use rustcheevos::prelude::*;
+    ///
+    /// let memory_ref = MemoryRef::new(MemorySize::Bits8, 0x1234).prior();
+    /// assert_eq!(memory_ref.access_mode(), AccessMode::Prior);
+    /// ```
+    #[must_use]
+    fn prior(self) -> Self
+    where
+        Self: Sized,
+    {
+        self.with_access_mode(AccessMode::Prior)
+    }
+
+    /// Sets the access mode to [`AccessMode::BCD`].
+    ///
+    /// # Examples
+    /// ```
+    /// use rustcheevos::prelude::*;
+    ///
+    /// let memory_ref = MemoryRef::new(MemorySize::Bits8, 0x1234).bcd();
+    /// assert_eq!(memory_ref.access_mode(), AccessMode::BCD);
+    /// ```
+    #[must_use]
+    fn bcd(self) -> Self
+    where
+        Self: Sized,
+    {
+        self.with_access_mode(AccessMode::BCD)
+    }
+
+    /// Sets the access mode to [`AccessMode::Invert`].
+    ///
+    /// # Examples
+    /// ```
+    /// use rustcheevos::prelude::*;
+    ///
+    /// let memory_ref = MemoryRef::new(MemorySize::Bits8, 0x1234).invert();
+    /// assert_eq!(memory_ref.access_mode(), AccessMode::Invert);
+    /// ```
+    #[must_use]
+    fn invert(self) -> Self
+    where
+        Self: Sized,
+    {
+        self.with_access_mode(AccessMode::Invert)
+    }
+}
+
+impl AccessModeModifier for MemoryRef {
+    fn with_access_mode(mut self, access_mode: AccessMode) -> Self {
+        self.access_mode = access_mode;
+        self
     }
 }
 

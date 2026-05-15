@@ -106,7 +106,6 @@ impl Leaderboard {
         }
     }
 
-    // TODO: Adjust docs.
     /// Creates a new instant submission leaderboard.
     ///
     /// # Examples
