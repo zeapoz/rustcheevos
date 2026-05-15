@@ -12,6 +12,8 @@ readme = "README.md"
 winnow = "1.0.2"
 thiserror = "1.0"
 rustcheevos-proc = { path = "rustcheevos-proc" }
+serde = { version = "1.0.228", features = ["derive"] }
+serde_json = "1.0.149"
 
 [lints.rust]
 missing_docs = "warn"
