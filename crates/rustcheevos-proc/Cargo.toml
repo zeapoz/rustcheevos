@@ -11,3 +11,6 @@ heck = "0.4"
 
 [lib]
 proc-macro = true
+
+[lints]
+workspace = true

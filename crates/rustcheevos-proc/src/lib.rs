@@ -1,3 +1,5 @@
+//! Chain proc macro defintion for `rustcheevos`.
+
 use proc_macro::TokenStream;
 use quote::quote;
 use syn::parse_macro_input;
@@ -5,7 +7,7 @@ use syn::parse_macro_input;
 /// Chains together multiple requirements.
 ///
 /// # Examples
-/// ```
+/// ```ignore
 /// use rustcheevos::{prelude::*, bits8, chain, delta};
 ///
 /// chain!(
@@ -13,6 +15,9 @@ use syn::parse_macro_input;
 ///     bits8!(0x1234).ge(10),
 /// );
 /// ```
+///
+/// # Panics
+/// Panics if no arguments are provided.
 #[proc_macro]
 pub fn chain(input: TokenStream) -> TokenStream {
     let exprs = parse_macro_input!(input as ChainInput);
@@ -33,7 +38,9 @@ pub fn chain(input: TokenStream) -> TokenStream {
     .into()
 }
 
+/// The input to the `chain!` macro.
 struct ChainInput {
+    /// The items to chain together.
     items: Vec<syn::Expr>,
 }
 

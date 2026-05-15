@@ -90,5 +90,5 @@ pub use rustcheevos_proc::chain;
 mod macros;
 pub(crate) mod parsers;
 pub mod prelude;
-pub(crate) mod schema;
+pub mod schema;
 pub mod types;
