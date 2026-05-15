@@ -1,5 +1,9 @@
 //! Code note type definitions.
 
+use std::num::ParseIntError;
+
+use crate::schema::notes;
+
 /// A code note definition.
 ///
 /// This type defines code notes for memory addresses and is used to populate
@@ -26,5 +30,17 @@ impl CodeNote {
             address,
             contents: contents.into(),
         }
+    }
+}
+
+impl TryFrom<notes::CodeNote> for CodeNote {
+    type Error = ParseIntError;
+
+    fn try_from(value: notes::CodeNote) -> Result<Self, Self::Error> {
+        let address = usize::from_str_radix(value.address.trim_start_matches("0x"), 16)?;
+        Ok(Self {
+            address,
+            contents: value.note,
+        })
     }
 }
