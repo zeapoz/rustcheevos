@@ -8,7 +8,7 @@ use std::path::PathBuf;
 use clap::{Parser, Subcommand};
 use eyre::Result;
 
-use crate::import::{NoteFilter, import};
+use crate::import::{NoteFilter, OutputFormat, import};
 
 mod import;
 
@@ -16,6 +16,7 @@ mod import;
 #[derive(Debug, Subcommand)]
 enum Command {
     /// Import code notes from a JSON file and generate Rust memory references.
+    #[command(arg_required_else_help(true))]
     Import {
         /// Path to the input JSON file containing code notes.
         #[arg(long, short)]
@@ -32,6 +33,9 @@ enum Command {
         /// Filter to a range of addresses (e.g. 0x1000..0x2000 or 0x1000..=0x2000).
         #[arg(long, group = "filter")]
         range: Option<String>,
+        /// Output format for generated code.
+        #[arg(long, value_enum, default_value_t)]
+        format: OutputFormat,
     },
 }
 
@@ -56,6 +60,7 @@ fn main() -> Result<()> {
             no_docs,
             address,
             range,
+            format,
         } => {
             let filter = if let Some(addr) = address {
                 Some(NoteFilter::address(addr.as_str())?)
@@ -65,7 +70,7 @@ fn main() -> Result<()> {
                 None
             };
 
-            import(input, output, !no_docs, filter)?;
+            import(input, output, !no_docs, filter, format.clone())?;
         }
     }
 

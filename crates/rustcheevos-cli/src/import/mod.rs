@@ -3,14 +3,59 @@
 mod generator;
 mod parsing;
 
+use std::fmt;
 use std::ops::{Range, RangeInclusive};
 use std::path::Path;
 
+use clap::ValueEnum;
 use color_eyre::eyre::{Context, Result, eyre};
 use rustcheevos::{prelude::CodeNote, schema, types::memory::MemorySize, util::parse_hex_address};
 
 use generator::OutputGenerator;
 use parsing::parse_notes;
+
+/// Output format for generated Rust code.
+#[derive(Debug, Clone, Default, ValueEnum)]
+pub enum OutputFormat {
+    /// Generate as `pub const fn` functions.
+    #[default]
+    Function,
+    /// Generate as `pub const` constants.
+    Const,
+}
+
+impl fmt::Display for OutputFormat {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            OutputFormat::Function => write!(f, "function"),
+            OutputFormat::Const => write!(f, "const"),
+        }
+    }
+}
+
+impl OutputFormat {
+    /// Transforms a note title into the appropriate identifier name.
+    pub fn transform_name(&self, title: &str) -> String {
+        match self {
+            OutputFormat::Function => heck::AsSnakeCase(title).to_string(),
+            OutputFormat::Const => heck::AsShoutySnakeCase(title).to_string(),
+        }
+    }
+
+    /// Formats a single code note item as Rust source code.
+    pub fn format_item(&self, name: &str, macro_name: &str, address: usize) -> String {
+        match self {
+            OutputFormat::Function => {
+                format!(
+                    "pub const fn {name}() -> MemoryRef {{\n    {macro_name}!(0x{address:x})\n}}"
+                )
+            }
+            OutputFormat::Const => {
+                format!("pub const {name}: MemoryRef = {macro_name}!(0x{address:x});")
+            }
+        }
+    }
+}
 
 /// Filter for selecting which code notes to process.
 pub enum NoteFilter {
@@ -70,6 +115,7 @@ pub fn import(
     output: &Path,
     add_doc_comments: bool,
     filter: Option<NoteFilter>,
+    format: OutputFormat,
 ) -> Result<()> {
     let notes = read_notes(input)?;
     let total_notes = notes.len();
@@ -84,22 +130,29 @@ pub fn import(
 
     let (parsed_notes, skipped) = parse_notes(&notes);
 
-    let generated = OutputGenerator::new(add_doc_comments).generate(&parsed_notes)?;
+    let item_type = match format {
+        OutputFormat::Function => "function(s)",
+        OutputFormat::Const => "constant(s)",
+    };
+
+    let generated = OutputGenerator::new(add_doc_comments, format).generate(&parsed_notes)?;
 
     std::fs::write(output, generated)
         .with_context(|| format!("Failed to write {}", output.display()))?;
 
     if total_notes == notes.len() {
         println!(
-            "Wrote {} function(s) to {} ({} skipped)",
+            "Wrote {} {} to {} ({} skipped)",
             parsed_notes.len(),
+            item_type,
             output.display(),
             skipped,
         );
     } else {
         println!(
-            "Wrote {} function(s) to {} ({} skipped, filtered from {} notes)",
+            "Wrote {} {} to {} ({} skipped, filtered from {} notes)",
             parsed_notes.len(),
+            item_type,
             output.display(),
             skipped,
             total_notes,

@@ -8,21 +8,27 @@ use color_eyre::eyre::Result;
 use rustcheevos::prelude::MemorySize;
 use rustcheevos::types::memory::BitIndex;
 
+use super::OutputFormat;
 use super::parsing::ParsedNote;
 
 /// Generates Rust code from parsed code notes.
 ///
 /// Produces a module containing `use` statements for required macros
-/// and one function per parsed note that returns a [`MemoryRef`].
+/// and one function or constant per parsed note that returns a [`MemoryRef`].
 pub struct OutputGenerator {
-    /// Whether to include doc comments in generated functions.
+    /// Whether to include doc comments in generated output.
     add_doc_comments: bool,
+    /// Output format (functions or constants).
+    format: OutputFormat,
 }
 
 impl OutputGenerator {
     /// Creates a new generator with the given configuration.
-    pub fn new(add_doc_comments: bool) -> Self {
-        Self { add_doc_comments }
+    pub fn new(add_doc_comments: bool, format: OutputFormat) -> Self {
+        Self {
+            add_doc_comments,
+            format,
+        }
     }
 
     /// Collects the set of macro names needed for the given notes.
@@ -49,34 +55,34 @@ impl OutputGenerator {
         Ok(output)
     }
 
-    /// Generates one function per parsed note.
-    pub fn generate_functions(&self, parsed_notes: &[ParsedNote]) -> Result<String> {
-        let mut output = String::new();
+    /// Generates one item per parsed note using the configured format.
+    pub fn generate_items(&self, parsed_notes: &[ParsedNote]) -> String {
         let mut seen_names = HashMap::new();
-        let mut name_counts: HashMap<String, usize> = HashMap::new();
+        let name_counts = Self::count_names(parsed_notes, &self.format);
 
+        let items: Vec<String> = parsed_notes
+            .iter()
+            .map(|parsed| {
+                let macro_name = memory_size_to_macro(parsed.size);
+                let base_name = self.format.transform_name(&parsed.title);
+                let name = Self::deduplicate_name(&mut seen_names, &name_counts, &base_name);
+                let doc_comments = self.generate_doc_comments(&parsed.contents);
+                let item = self.format.format_item(&name, macro_name, parsed.address);
+                format!("{doc_comments}{item}")
+            })
+            .collect();
+
+        items.join("\n\n") + "\n"
+    }
+
+    /// Counts occurrences of each base name for deduplication.
+    fn count_names(parsed_notes: &[ParsedNote], format: &OutputFormat) -> HashMap<String, usize> {
+        let mut name_counts = HashMap::new();
         for parsed in parsed_notes {
-            let base_name = heck::AsSnakeCase(&parsed.title).to_string();
+            let base_name = format.transform_name(&parsed.title);
             *name_counts.entry(base_name).or_insert(0) += 1;
         }
-
-        for parsed in parsed_notes {
-            let macro_name = memory_size_to_macro(parsed.size);
-            let base_name = heck::AsSnakeCase(&parsed.title).to_string();
-            let fn_name = Self::deduplicate_name(&mut seen_names, &name_counts, &base_name);
-            let doc_comments = self.generate_doc_comments(&parsed.contents);
-
-            writeln!(
-                output,
-                "{doc_comments}\
-                pub const fn {fn_name}() -> MemoryRef {{\n    \
-                    {macro_name}!(0x{:x})\n\
-                }}\n",
-                parsed.address
-            )?;
-        }
-
-        Ok(output)
+        name_counts
     }
 
     /// Formats note contents as Rust doc comments.
@@ -93,7 +99,7 @@ impl OutputGenerator {
         }
     }
 
-    /// Deduplicates function names by appending a numeric suffix when needed.
+    /// Deduplicates names by appending a numeric suffix when needed.
     fn deduplicate_name(
         seen_names: &mut HashMap<String, usize>,
         name_counts: &HashMap<String, usize>,
@@ -113,9 +119,9 @@ impl OutputGenerator {
     pub fn generate(&self, parsed_notes: &[ParsedNote]) -> Result<String> {
         let used_macros = Self::collect_used_macros(parsed_notes);
         let imports = Self::generate_imports(used_macros)?;
-        let functions = self.generate_functions(parsed_notes)?;
+        let body = self.generate_items(parsed_notes);
 
-        Ok(format!("{imports}{functions}"))
+        Ok(format!("{imports}{body}"))
     }
 }
 
