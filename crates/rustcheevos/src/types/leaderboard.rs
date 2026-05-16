@@ -30,7 +30,7 @@ use super::chain::ChainGroup;
 ///     .build();
 /// ```
 ///
-/// For simple cases, [`Leaderboard::new()`] provides a convenient shorthand.
+/// Use [`Leaderboard::builder()`] to construct a leaderboard.
 #[derive(Debug, Clone, PartialEq)]
 pub struct Leaderboard {
     /// The leaderboard ID.
@@ -54,90 +54,6 @@ pub struct Leaderboard {
 }
 
 impl Leaderboard {
-    /// Creates a new leaderboard with the given title, description, conditions, and format.
-    ///
-    /// # Examples
-    /// ```
-    /// # fn start_condition() -> Chain { Chain::default() }
-    /// # fn cancel_condition() -> Chain { Chain::default() }
-    /// # fn submit_condition() -> Chain { Chain::default() }
-    /// # use rustcheevos::bits8;
-    /// # fn value() -> MemoryRef { bits8!(0) }
-    /// use rustcheevos::{prelude::*, measured};
-    ///
-    /// let leaderboard = Leaderboard::new(
-    ///     "Speed Run",
-    ///     "Complete the level as fast as possible",
-    ///     start_condition(),
-    ///     cancel_condition(),
-    ///     submit_condition(),
-    ///     measured!(value()),
-    ///     LeaderboardFormat::Seconds,
-    ///     true,
-    /// );
-    /// ```
-    #[expect(clippy::too_many_arguments, reason = "all fields are required")]
-    pub fn new(
-        title: impl Into<String>,
-        description: impl Into<String>,
-        start: impl Into<ChainGroup>,
-        cancel: impl Into<ChainGroup>,
-        submit: impl Into<ChainGroup>,
-        value: impl Into<ChainGroup>,
-        format: LeaderboardFormat,
-        lower_is_better: bool,
-    ) -> Self {
-        Self {
-            id: 0,
-            title: title.into(),
-            description: description.into(),
-            start: start.into(),
-            cancel: cancel.into(),
-            submit: submit.into(),
-            value: value.into(),
-            format,
-            lower_is_better,
-        }
-    }
-
-    /// Creates a new instant submission leaderboard.
-    ///
-    /// # Examples
-    /// ```
-    /// # use rustcheevos::{bits8, measured};
-    /// # fn start_condition() -> Chain { Chain::default() }
-    /// # fn value() -> MemoryRef { bits8!(0) }
-    /// use rustcheevos::prelude::*;
-    ///
-    /// let leaderboard = Leaderboard::new_instant_submission(
-    ///     "Speed Run",
-    ///     "Complete the level as fast as possible",
-    ///     start_condition(),
-    ///     measured!(value()),
-    ///     LeaderboardFormat::Seconds,
-    ///     true,
-    /// );
-    /// ```
-    pub fn new_instant_submission(
-        title: impl Into<String>,
-        description: impl Into<String>,
-        start: impl Into<ChainGroup>,
-        value: impl Into<ChainGroup>,
-        format: LeaderboardFormat,
-        lower_is_better: bool,
-    ) -> Self {
-        Self::new(
-            title,
-            description,
-            start,
-            Condition::always_false(),
-            Condition::always_true(),
-            value,
-            format,
-            lower_is_better,
-        )
-    }
-
     /// Returns a builder for constructing a leaderboard.
     ///
     /// # Examples
@@ -276,16 +192,22 @@ impl LeaderboardBuilder {
     /// Builds the leaderboard.
     #[must_use]
     pub fn build(self) -> Leaderboard {
-        Leaderboard {
-            id: self.id,
-            title: self.title,
-            description: self.description,
-            start: self.start,
-            cancel: self.cancel,
-            submit: self.submit,
-            value: self.value,
-            format: self.format,
-            lower_is_better: self.lower_is_better,
+        self.into()
+    }
+}
+
+impl From<LeaderboardBuilder> for Leaderboard {
+    fn from(builder: LeaderboardBuilder) -> Self {
+        Self {
+            id: builder.id,
+            title: builder.title,
+            description: builder.description,
+            start: builder.start,
+            cancel: builder.cancel,
+            submit: builder.submit,
+            value: builder.value,
+            format: builder.format,
+            lower_is_better: builder.lower_is_better,
         }
     }
 }

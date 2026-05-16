@@ -36,7 +36,7 @@ use rustcheevos::prelude::*;
 use rustcheevos::{chain, add_address, delta, measured, bits8};
 
 // It's recommended to define the game ID and name as constants at the top of the file.
-const GAME_ID: &str = "20374";
+const GAME_ID: u32 = 20374;
 const GAME_NAME: &str = "Geometry Wars: Galaxies";
 
 // Logic chains can be defined as small composable and reusable functions.
@@ -65,15 +65,15 @@ fn main() {
     let mut game_data = GameData::new(GAME_ID, GAME_NAME);
 
     // Define an achievement by combining conditions.
-    let achievement = Achievement::new(
-        "First Step",
-        "Complete the tutorial level",
-        chain!(
+    let achievement = Achievement::builder("First Step")
+        .description("Complete the tutorial level")
+        .requirements(chain!(
             just_beat_level(1),
             in_game(),
-        ),
-        5,
-    );
+        ))
+        .badge_id(12345)
+        .points(5)
+        .build();
     game_data.add(achievement);
 
     // Create a simple rich presence.

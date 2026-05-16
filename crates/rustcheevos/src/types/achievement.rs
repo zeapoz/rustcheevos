@@ -26,7 +26,7 @@ use super::requirement::condition::Condition;
 ///     .build();
 /// ```
 ///
-/// For simple cases, [`Achievement::new()`] provides a convenient shorthand.
+/// Use [`Achievement::builder()`] to construct an achievement.
 #[derive(Debug, Clone, PartialEq)]
 pub struct Achievement {
     /// The achievement ID.
@@ -46,74 +46,6 @@ pub struct Achievement {
 }
 
 impl Achievement {
-    /// Creates a new achievement with the given title, description, conditions, and points.
-    ///
-    /// # Examples
-    /// ```
-    /// # enum Galaxy { Alpha }
-    /// # enum Medal { Bronze }
-    /// # fn galaxy_all_medals_condition(galaxy: Galaxy, medal: Medal) -> Chain { Chain::default() }
-    /// use rustcheevos::prelude::*;
-    ///
-    /// let achievement = Achievement::new(
-    ///     "Alpha Amateur",
-    ///     "Earn a Bronze medal or higher on every planet of the Alpha galaxy",
-    ///     galaxy_all_medals_condition(Galaxy::Alpha, Medal::Bronze),
-    ///     3,
-    /// );
-    /// ```
-    pub fn new(
-        title: impl Into<String>,
-        description: impl Into<String>,
-        requirements: impl Into<ChainGroup>,
-        points: u32,
-    ) -> Self {
-        Self {
-            id: 0,
-            title: title.into(),
-            description: description.into(),
-            requirements: requirements.into(),
-            tag: None,
-            points,
-            badge_id: 0,
-        }
-    }
-
-    /// Creates a new achievement with the given ID, title, description, conditions, and points.
-    ///
-    /// # Examples
-    /// ```
-    /// # enum Galaxy { Alpha }
-    /// # enum Medal { Bronze }
-    /// # fn galaxy_all_medals_condition(galaxy: Galaxy, medal: Medal) -> Chain { Chain::default() }
-    /// use rustcheevos::prelude::*;
-    ///
-    /// let achievement = Achievement::new_with_id(
-    ///     600707,
-    ///     "Alpha Amateur",
-    ///     "Earn a Bronze medal or higher on every planet of the Alpha galaxy",
-    ///     galaxy_all_medals_condition(Galaxy::Alpha, Medal::Bronze),
-    ///     3,
-    /// );
-    /// ```
-    pub fn new_with_id(
-        id: u32,
-        title: impl Into<String>,
-        description: impl Into<String>,
-        requirements: impl Into<ChainGroup>,
-        points: u32,
-    ) -> Self {
-        Self {
-            id,
-            title: title.into(),
-            description: description.into(),
-            requirements: requirements.into(),
-            tag: None,
-            points,
-            badge_id: 0,
-        }
-    }
-
     /// Returns a builder for constructing an achievement.
     ///
     /// # Examples
@@ -229,14 +161,20 @@ impl AchievementBuilder {
     /// Builds the achievement.
     #[must_use]
     pub fn build(self) -> Achievement {
-        Achievement {
-            id: self.id,
-            title: self.title,
-            description: self.description,
-            requirements: self.requirements,
-            tag: self.tag,
-            points: self.points,
-            badge_id: self.badge_id,
+        self.into()
+    }
+}
+
+impl From<AchievementBuilder> for Achievement {
+    fn from(builder: AchievementBuilder) -> Self {
+        Self {
+            id: builder.id,
+            title: builder.title,
+            description: builder.description,
+            requirements: builder.requirements,
+            tag: builder.tag,
+            points: builder.points,
+            badge_id: builder.badge_id,
         }
     }
 }

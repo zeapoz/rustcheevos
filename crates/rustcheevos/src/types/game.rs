@@ -31,28 +31,27 @@ pub type CodeNoteSet = Vec<CodeNote>;
 ///     bits8!(0x1234).eq(1),
 ///     bits8!(0x5678).ge(100),
 /// );
-/// let achievement = Achievement::new(
-///     "First Step",
-///     "Complete the tutorial level",
-///     achievement_condition,
-///     5,
-/// );
+/// let achievement = Achievement::builder("First Step")
+///     .description("Complete the tutorial level")
+///     .requirements(achievement_condition)
+///     .badge_id(12345)
+///     .points(5)
+///     .build();
 ///
 /// // Define a leaderboard with conditions.
 /// let start = chain!(bits8!(0x1234).eq(1));
 /// let cancel = chain!(bits8!(0x1234).eq(0));
 /// let submit = chain!(bits8!(0xABCD).eq(1));
 /// let value = measured!(bits8!(0xDEF0));
-/// let leaderboard = Leaderboard::new(
-///     "Speed Run",
-///     "Complete the game as fast as possible",
-///     start,
-///     cancel,
-///     submit,
-///     value,
-///     LeaderboardFormat::Seconds,
-///     true,
-/// );
+/// let leaderboard = Leaderboard::builder("Speed Run")
+///     .description("Complete the game as fast as possible")
+///     .start(start)
+///     .cancel(cancel)
+///     .submit(submit)
+///     .value(value)
+///     .format(LeaderboardFormat::Seconds)
+///     .lower_is_better(true)
+///     .build();
 ///
 /// // Define rich presence.
 /// let mut rich_presence = RichPresence::new();
@@ -116,7 +115,12 @@ impl GameData {
     /// let mut game_data = GameData::new(1, "Super Adventure");
     ///
     /// let condition = chain!(bits8!(0x1234).eq(1));
-    /// let achievement = Achievement::new("First Step", "Complete the tutorial", condition, 5);
+    /// let achievement = Achievement::builder("First Step")
+    ///     .description("Complete the tutorial")
+    ///     .requirements(condition)
+    ///     .badge_id(12345)
+    ///     .points(5)
+    ///     .build();
     ///
     /// game_data.add(achievement);
     /// assert_eq!(game_data.achievements().count(), 1);
@@ -140,8 +144,18 @@ impl GameData {
     /// let mut game_data = GameData::new(1, "Super Adventure");
     ///
     /// let condition = chain!(bits8!(0x1234).eq(1));
-    /// let achievement_a = Achievement::new("Step A", "Do A", condition.clone(), 5);
-    /// let achievement_b = Achievement::new("Step B", "Do B", condition, 10);
+    /// let achievement_a = Achievement::builder("Step A")
+    ///     .description("Do A")
+    ///     .requirements(condition.clone())
+    ///     .badge_id(12345)
+    ///     .points(5)
+    ///     .build();
+    /// let achievement_b = Achievement::builder("Step B")
+    ///     .description("Do B")
+    ///     .requirements(condition)
+    ///     .badge_id(12345)
+    ///     .points(10)
+    ///     .build();
     ///
     /// game_data.add_many([achievement_a, achievement_b]);
     /// assert_eq!(game_data.achievements().count(), 2);
@@ -162,7 +176,12 @@ impl GameData {
     /// let mut game_data = GameData::new(1, "Super Adventure");
     ///
     /// let condition = chain!(bits8!(0x1234).eq(1));
-    /// let achievement = Achievement::new("First Step", "Complete the tutorial", condition, 5);
+    /// let achievement = Achievement::builder("First Step")
+    ///     .description("Complete the tutorial")
+    ///     .requirements(condition)
+    ///     .badge_id(12345)
+    ///     .points(5)
+    ///     .build();
     ///
     /// game_data.set_core_set(vec![achievement]);
     /// assert_eq!(game_data.achievements().count(), 1);
@@ -184,16 +203,15 @@ impl GameData {
     /// let cancel = chain!(bits8!(0x1234).eq(0));
     /// let submit = chain!(bits8!(0xABCD).eq(1));
     /// let value = measured!(bits8!(0xDEF0));
-    /// let leaderboard = Leaderboard::new(
-    ///     "Speed Run",
-    ///     "Complete the game fast",
-    ///     start,
-    ///     cancel,
-    ///     submit,
-    ///     value,
-    ///     LeaderboardFormat::Seconds,
-    ///     true,
-    /// );
+    /// let leaderboard = Leaderboard::builder("Speed Run")
+    ///     .description("Complete the game fast")
+    ///     .start(start)
+    ///     .cancel(cancel)
+    ///     .submit(submit)
+    ///     .value(value)
+    ///     .format(LeaderboardFormat::Seconds)
+    ///     .lower_is_better(true)
+    ///     .build();
     ///
     /// game_data.set_leaderboards(vec![leaderboard]);
     /// assert_eq!(game_data.leaderboards().count(), 1);
@@ -342,7 +360,12 @@ impl GameData {
     /// let mut game_data = GameData::new(1, "Super Adventure");
     ///
     /// let condition = chain!(bits8!(0x1234).eq(1));
-    /// let achievement = Achievement::new("First Step", "Complete the tutorial", condition, 5);
+    /// let achievement = Achievement::builder("First Step")
+    ///     .description("Complete the tutorial")
+    ///     .requirements(condition)
+    ///     .badge_id(12345)
+    ///     .points(5)
+    ///     .build();
     /// game_data.add(achievement);
     ///
     /// let temp_dir = std::env::temp_dir().join("rustcheevos_user_file_test");
@@ -368,7 +391,12 @@ impl GameData {
 ///
 /// // GameAsset can be created from Achievement, Leaderboard, or RichPresence
 /// let condition = chain!(bits8!(0x1234).eq(1));
-/// let achievement = Achievement::new("First Step", "Complete the tutorial", condition, 5);
+/// let achievement = Achievement::builder("First Step")
+///     .description("Complete the tutorial")
+///     .requirements(condition)
+///     .badge_id(12345)
+///     .points(5)
+///     .build();
 ///
 /// let game_asset: GameAsset = achievement.into();
 /// ```

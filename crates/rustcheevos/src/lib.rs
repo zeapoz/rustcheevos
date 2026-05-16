@@ -52,15 +52,15 @@
 //!     let mut game_data = GameData::new(GAME_ID, GAME_NAME);
 //!
 //!     // Define an achievement by combining conditions.
-//!     let achievement = Achievement::new(
-//!         "First Step",
-//!         "Complete the tutorial level",
-//!         chain!(
+//!     let achievement = Achievement::builder("First Step")
+//!         .description("Complete the tutorial level")
+//!         .requirements(chain!(
 //!             just_beat_level(1),
 //!             in_game(),
-//!         ),
-//!         5,
-//!     );
+//!         ))
+//!         .badge_id(12345)
+//!         .points(5)
+//!         .build();
 //!     game_data.add(achievement);
 //!
 //!     // Create a simple rich presence.
