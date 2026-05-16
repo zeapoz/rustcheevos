@@ -147,7 +147,9 @@ impl From<&Achievement> for AchievementEntry {
             updated: DEFAULT_TIMESTAMP.to_string(),
             upvotes: 0,
             downvotes: 0,
-            badge: DEFAULT_BADGE_ID.to_string(),
+            badge: value
+                .badge_id
+                .map_or_else(|| DEFAULT_BADGE_ID.to_string(), |id| format!("{id:05}")),
         }
     }
 }

@@ -23,7 +23,7 @@
 //! use rustcheevos::prelude::*;
 //! use rustcheevos::{chain, add_address, delta, measured, bits8};
 //!
-//! const GAME_ID: &str = "20374";
+//! const GAME_ID: u32 = 20374;
 //! const GAME_NAME: &str = "Geometry Wars: Galaxies";
 //!
 //! // Logic chains can be defined as functions.

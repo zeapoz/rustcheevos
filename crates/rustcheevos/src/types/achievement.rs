@@ -43,6 +43,8 @@ pub struct Achievement {
     pub tag: Option<Tag>,
     /// The point value.
     pub points: u32,
+    /// The badge ID.
+    pub badge_id: Option<u32>,
 }
 
 impl Achievement {
@@ -75,6 +77,7 @@ impl Achievement {
             requirements: requirements.into(),
             tag: None,
             points,
+            badge_id: None,
         }
     }
 
@@ -109,6 +112,7 @@ impl Achievement {
             requirements: requirements.into(),
             tag: None,
             points,
+            badge_id: None,
         }
     }
 
@@ -155,6 +159,27 @@ impl Achievement {
     #[must_use]
     pub fn with_tag(mut self, tag: Tag) -> Self {
         self.tag = Some(tag);
+        self
+    }
+
+    /// Sets the achievement badge ID.
+    ///
+    /// # Examples
+    /// ```
+    /// use rustcheevos::prelude::*;
+    /// use rustcheevos::bits8;
+    ///
+    /// let achievement = Achievement::new(
+    ///     "Alpha Amateur",
+    ///     "Earn a Bronze medal or higher on every planet of the Alpha galaxy",
+    ///     bits8!(0x1234).eq(1),
+    ///     3,
+    /// )
+    /// .with_badge_id(12345);
+    /// ```
+    #[must_use]
+    pub fn with_badge_id(mut self, badge_id: u32) -> Self {
+        self.badge_id = Some(badge_id);
         self
     }
 }

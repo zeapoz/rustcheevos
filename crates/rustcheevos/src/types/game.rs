@@ -24,7 +24,7 @@ pub type CodeNoteSet = Vec<CodeNote>;
 /// use rustcheevos::{prelude::*, bits8, chain, measured};
 ///
 /// // Create a new game.
-/// let mut game_data = GameData::new("GAME123", "Super Adventure");
+/// let mut game_data = GameData::new(123, "Super Adventure");
 ///
 /// // Define an achievement with conditions.
 /// let achievement_condition = chain!(
@@ -73,7 +73,7 @@ pub type CodeNoteSet = Vec<CodeNote>;
 #[derive(Debug, Clone, PartialEq)]
 pub struct GameData {
     /// The game ID.
-    id: String,
+    id: u32,
     /// The game name.
     title: String,
     /// The core achievement set.
@@ -94,11 +94,11 @@ impl GameData {
     /// ```
     /// use rustcheevos::prelude::*;
     ///
-    /// let game_data = GameData::new("GAME001", "Super Adventure");
+    /// let game_data = GameData::new(1, "Super Adventure");
     /// ```
-    pub fn new(id: impl Into<String>, name: impl Into<String>) -> Self {
+    pub fn new(id: u32, name: impl Into<String>) -> Self {
         Self {
-            id: id.into(),
+            id,
             title: name.into(),
             core_set: AchievementSet::new(),
             leaderboards: LeaderboardSet::new(),
@@ -113,7 +113,7 @@ impl GameData {
     ///
     /// ```
     /// # use rustcheevos::{prelude::*, chain, bits8};
-    /// let mut game_data = GameData::new("GAME001", "Super Adventure");
+    /// let mut game_data = GameData::new(1, "Super Adventure");
     ///
     /// let condition = chain!(bits8!(0x1234).eq(1));
     /// let achievement = Achievement::new("First Step", "Complete the tutorial", condition, 5);
@@ -137,7 +137,7 @@ impl GameData {
     ///
     /// ```
     /// # use rustcheevos::{prelude::*, chain, bits8};
-    /// let mut game_data = GameData::new("GAME001", "Super Adventure");
+    /// let mut game_data = GameData::new(1, "Super Adventure");
     ///
     /// let condition = chain!(bits8!(0x1234).eq(1));
     /// let achievement_a = Achievement::new("Step A", "Do A", condition.clone(), 5);
@@ -159,7 +159,7 @@ impl GameData {
     ///
     /// ```
     /// # use rustcheevos::{prelude::*, chain, bits8};
-    /// let mut game_data = GameData::new("GAME001", "Super Adventure");
+    /// let mut game_data = GameData::new(1, "Super Adventure");
     ///
     /// let condition = chain!(bits8!(0x1234).eq(1));
     /// let achievement = Achievement::new("First Step", "Complete the tutorial", condition, 5);
@@ -178,7 +178,7 @@ impl GameData {
     ///
     /// ```
     /// # use rustcheevos::{prelude::*, chain, bits8, measured};
-    /// let mut game_data = GameData::new("GAME001", "Super Adventure");
+    /// let mut game_data = GameData::new(1, "Super Adventure");
     ///
     /// let start = chain!(bits8!(0x1234).eq(1));
     /// let cancel = chain!(bits8!(0x1234).eq(0));
@@ -210,7 +210,7 @@ impl GameData {
     /// ```
     /// use rustcheevos::prelude::*;
     ///
-    /// let mut game_data = GameData::new("GAME001", "Super Adventure");
+    /// let mut game_data = GameData::new(1, "Super Adventure");
     ///
     /// let note = CodeNote::new(0x1234, "Player health");
     /// game_data.set_code_notes(vec![note]);
@@ -227,7 +227,7 @@ impl GameData {
     ///
     /// ```
     /// # use rustcheevos::prelude::*;
-    /// let mut game_data = GameData::new("GAME001", "Super Adventure");
+    /// let mut game_data = GameData::new(1, "Super Adventure");
     ///
     /// let mut rich_presence = RichPresence::new();
     /// rich_presence.add_static_display("Playing Super Adventure");
@@ -245,7 +245,7 @@ impl GameData {
     ///
     /// ```
     /// # use rustcheevos::prelude::*;
-    /// let game_data = GameData::new("GAME001", "Test");
+    /// let game_data = GameData::new(1, "Test");
     ///
     /// for achievement in game_data.achievements() {
     ///     println!("{}", achievement.title);
@@ -261,7 +261,7 @@ impl GameData {
     ///
     /// ```
     /// # use rustcheevos::prelude::*;
-    /// let game_data = GameData::new("GAME001", "Test");
+    /// let game_data = GameData::new(1, "Test");
     ///
     /// for lb in game_data.leaderboards() {
     ///     println!("{}", lb.title);
@@ -278,7 +278,7 @@ impl GameData {
     /// ```
     /// use rustcheevos::prelude::*;
     ///
-    /// let game_data = GameData::new("GAME001", "Test");
+    /// let game_data = GameData::new(1, "Test");
     ///
     /// for note in game_data.code_notes() {
     ///     println!("{:x}: {}", note.address, note.contents);
@@ -311,7 +311,7 @@ impl GameData {
     /// ```no_run
     /// use rustcheevos::prelude::*;
     ///
-    /// let mut game_data = GameData::new("GAME001", "Super Adventure");
+    /// let mut game_data = GameData::new(1, "Super Adventure");
     ///
     /// let mut rich_presence = RichPresence::new();
     /// rich_presence.add_static_display("Playing Super Adventure");
@@ -325,7 +325,7 @@ impl GameData {
     pub fn export(&self, dir: impl AsRef<Path>) -> io::Result<()> {
         let dir = dir.as_ref();
         self.export_user_file(dir)?;
-        self.rich_presence.export(&self.id, dir)
+        self.rich_presence.export(self.id, dir)
     }
 
     /// Exports the user file for this game to the given directory.
@@ -339,7 +339,7 @@ impl GameData {
     /// ```no_run
     /// use rustcheevos::{prelude::*, chain, bits8};
     ///
-    /// let mut game_data = GameData::new("GAME001", "Super Adventure");
+    /// let mut game_data = GameData::new(1, "Super Adventure");
     ///
     /// let condition = chain!(bits8!(0x1234).eq(1));
     /// let achievement = Achievement::new("First Step", "Complete the tutorial", condition, 5);
