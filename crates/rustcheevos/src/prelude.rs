@@ -13,7 +13,7 @@ pub use crate::types::{
         PauseIf, Remember, ResetIf, ResetNextIf, SubHits, SubSource, Trigger,
     },
     game::{AchievementSet, CodeNoteSet, GameData, LeaderboardSet},
-    leaderboard::{Leaderboard, LeaderboardFormat},
+    leaderboard::{Leaderboard, LeaderboardBuilder, LeaderboardFormat},
     memory::{AccessMode, AccessModeModifier, MemoryRef, MemorySize},
     note::CodeNote,
     requirement::{Arithmetic, Condition, Requirement},

@@ -16,27 +16,21 @@ use super::chain::ChainGroup;
 /// # Examples
 ///
 /// ```
-/// # fn start_condition() -> Chain { Chain::default() }
-/// # fn cancel_condition() -> Chain { Chain::default() }
-/// # fn submit_condition() -> Chain { Chain::default() }
-/// # use rustcheevos::bits8;
-/// # fn value() -> MemoryRef { bits8!(0) }
-/// use rustcheevos::{prelude::*, measured};
+/// use rustcheevos::prelude::*;
+/// use rustcheevos::{bits8, measured};
 ///
-/// let leaderboard = Leaderboard::new(
-///     "Speed Run",
-///     "Complete the level as fast as possible",
-///     start_condition(),
-///     cancel_condition(),
-///     submit_condition(),
-///     measured!(value()),
-///     LeaderboardFormat::Seconds,
-///     true,
-/// );
+/// let leaderboard = Leaderboard::builder("Speed Run")
+///     .description("Complete the level as fast as possible")
+///     .start(bits8!(0x1234).eq(1))
+///     .cancel(bits8!(0x1234).eq(0))
+///     .submit(bits8!(0xABCD).eq(1))
+///     .value(measured!(bits8!(0xDEF0)))
+///     .format(LeaderboardFormat::Seconds)
+///     .lower_is_better(true)
+///     .build();
 /// ```
 ///
-/// [`Leaderboard::new()`] sets all of the required properties. To set ID, use
-/// [`Leaderboard::with_id()`].
+/// For simple cases, [`Leaderboard::new()`] provides a convenient shorthand.
 #[derive(Debug, Clone, PartialEq)]
 pub struct Leaderboard {
     /// The leaderboard ID.
@@ -144,33 +138,155 @@ impl Leaderboard {
         )
     }
 
-    /// Sets the leaderboard ID.
+    /// Returns a builder for constructing a leaderboard.
     ///
     /// # Examples
     /// ```
-    /// # fn start_condition() -> Chain { Chain::default() }
-    /// # fn cancel_condition() -> Chain { Chain::default() }
-    /// # fn submit_condition() -> Chain { Chain::default() }
-    /// # use rustcheevos::bits8;
-    /// # fn value() -> MemoryRef { bits8!(0) }
-    /// use rustcheevos::{prelude::*, measured};
+    /// use rustcheevos::prelude::*;
+    /// use rustcheevos::{bits8, measured};
     ///
-    /// let leaderboard = Leaderboard::new(
-    ///     "Speed Run",
-    ///     "Complete the game as fast as possible",
-    ///     start_condition(),
-    ///     cancel_condition(),
-    ///     submit_condition(),
-    ///     measured!(value()),
-    ///     LeaderboardFormat::Seconds,
-    ///     true,
-    /// )
-    /// .with_id(600707);
+    /// let leaderboard = Leaderboard::builder("Speed Run")
+    ///     .description("Complete the level as fast as possible")
+    ///     .start(bits8!(0x1234).eq(1))
+    ///     .cancel(bits8!(0x1234).eq(0))
+    ///     .submit(bits8!(0xABCD).eq(1))
+    ///     .value(measured!(bits8!(0xDEF0)))
+    ///     .format(LeaderboardFormat::Seconds)
+    ///     .lower_is_better(true)
+    ///     .id(600707)
+    ///     .build();
     /// ```
+    pub fn builder(title: impl Into<String>) -> LeaderboardBuilder {
+        LeaderboardBuilder::new(title)
+    }
+}
+
+/// A builder for constructing [`Leaderboard`] instances.
+///
+/// # Examples
+///
+/// ```
+/// use rustcheevos::prelude::*;
+/// use rustcheevos::{bits8, measured};
+///
+/// let leaderboard = Leaderboard::builder("Speed Run")
+///     .description("Complete the level as fast as possible")
+///     .start(bits8!(0x1234).eq(1))
+///     .cancel(bits8!(0x1234).eq(0))
+///     .submit(bits8!(0xABCD).eq(1))
+///     .value(measured!(bits8!(0xDEF0)))
+///     .format(LeaderboardFormat::Seconds)
+///     .lower_is_better(true)
+///     .build();
+/// ```
+#[derive(Debug)]
+pub struct LeaderboardBuilder {
+    /// The title of the leaderboard.
+    title: String,
+    /// The description of the leaderboard.
+    description: String,
+    /// The leaderboard start condition.
+    start: ChainGroup,
+    /// The leaderboard cancel condition.
+    cancel: ChainGroup,
+    /// The leaderboard submit condition.
+    submit: ChainGroup,
+    /// The leaderboard value condition.
+    value: ChainGroup,
+    /// The leaderboard format.
+    format: LeaderboardFormat,
+    /// Whether lower values are better.
+    lower_is_better: bool,
+    /// The leaderboard ID.
+    id: u32,
+}
+
+impl LeaderboardBuilder {
+    /// Creates a new builder with the given title.
+    pub fn new(title: impl Into<String>) -> Self {
+        Self {
+            title: title.into(),
+            description: String::new(),
+            start: ChainGroup::from(Condition::always_true()),
+            cancel: ChainGroup::from(Condition::always_false()),
+            submit: ChainGroup::from(Condition::always_true()),
+            value: ChainGroup::from(Condition::always_true()),
+            format: LeaderboardFormat::Value,
+            lower_is_better: false,
+            id: 0,
+        }
+    }
+
+    /// Sets the leaderboard description.
     #[must_use]
-    pub fn with_id(mut self, id: u32) -> Self {
+    pub fn description(mut self, description: impl Into<String>) -> Self {
+        self.description = description.into();
+        self
+    }
+
+    /// Sets the leaderboard start condition.
+    #[must_use]
+    pub fn start(mut self, start: impl Into<ChainGroup>) -> Self {
+        self.start = start.into();
+        self
+    }
+
+    /// Sets the leaderboard cancel condition.
+    #[must_use]
+    pub fn cancel(mut self, cancel: impl Into<ChainGroup>) -> Self {
+        self.cancel = cancel.into();
+        self
+    }
+
+    /// Sets the leaderboard submit condition.
+    #[must_use]
+    pub fn submit(mut self, submit: impl Into<ChainGroup>) -> Self {
+        self.submit = submit.into();
+        self
+    }
+
+    /// Sets the leaderboard value condition.
+    #[must_use]
+    pub fn value(mut self, value: impl Into<ChainGroup>) -> Self {
+        self.value = value.into();
+        self
+    }
+
+    /// Sets the leaderboard value format.
+    #[must_use]
+    pub fn format(mut self, format: LeaderboardFormat) -> Self {
+        self.format = format;
+        self
+    }
+
+    /// Sets whether lower values are better.
+    #[must_use]
+    pub fn lower_is_better(mut self, lower_is_better: bool) -> Self {
+        self.lower_is_better = lower_is_better;
+        self
+    }
+
+    /// Sets the leaderboard ID.
+    #[must_use]
+    pub fn id(mut self, id: u32) -> Self {
         self.id = id;
         self
+    }
+
+    /// Builds the leaderboard.
+    #[must_use]
+    pub fn build(self) -> Leaderboard {
+        Leaderboard {
+            id: self.id,
+            title: self.title,
+            description: self.description,
+            start: self.start,
+            cancel: self.cancel,
+            submit: self.submit,
+            value: self.value,
+            format: self.format,
+            lower_is_better: self.lower_is_better,
+        }
     }
 }
 
