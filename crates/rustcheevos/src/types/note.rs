@@ -3,6 +3,7 @@
 use std::num::ParseIntError;
 
 use crate::schema::notes;
+use crate::util::parse_hex_address;
 
 /// A code note definition.
 ///
@@ -37,7 +38,7 @@ impl TryFrom<notes::CodeNote> for CodeNote {
     type Error = ParseIntError;
 
     fn try_from(value: notes::CodeNote) -> Result<Self, Self::Error> {
-        let address = usize::from_str_radix(value.address.trim_start_matches("0x"), 16)?;
+        let address = parse_hex_address(&value.address)?;
         Ok(Self {
             address,
             contents: value.note,

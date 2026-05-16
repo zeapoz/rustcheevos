@@ -7,7 +7,7 @@ use std::ops::{Range, RangeInclusive};
 use std::path::Path;
 
 use color_eyre::eyre::{Context, Result, eyre};
-use rustcheevos::{prelude::CodeNote, schema, types::memory::MemorySize};
+use rustcheevos::{prelude::CodeNote, schema, types::memory::MemorySize, util::parse_hex_address};
 
 use generator::OutputGenerator;
 use parsing::parse_notes;
@@ -25,21 +25,32 @@ pub enum NoteFilter {
 impl NoteFilter {
     /// Creates a filter matching a single note by hex address.
     pub fn address(s: &str) -> Result<Self> {
-        Ok(NoteFilter::Address(parse_hex(s)?))
+        Ok(NoteFilter::Address(
+            parse_hex_address(s).with_context(|| format!("invalid hex address '{s}'"))?,
+        ))
     }
 
     /// Creates a filter matching notes within a hex address range.
     ///
     /// Supports `start..=end` (inclusive) and `start..end` (exclusive).
     pub fn range(s: &str) -> Result<Self> {
-        if let Some((start, end)) = s.split_once("..=") {
-            Ok(NoteFilter::RangeInclusive(
-                parse_hex(start)?..=parse_hex(end)?,
-            ))
+        let (start_str, end_str, inclusive) = if let Some((start, end)) = s.split_once("..=") {
+            (start, end, true)
         } else if let Some((start, end)) = s.split_once("..") {
-            Ok(NoteFilter::Range(parse_hex(start)?..parse_hex(end)?))
+            (start, end, false)
         } else {
-            Err(eyre!("invalid range format: {s}"))
+            return Err(eyre!("invalid range format: {s}"));
+        };
+
+        let start = parse_hex_address(start_str)
+            .with_context(|| format!("invalid hex address '{start_str}'"))?;
+        let end = parse_hex_address(end_str)
+            .with_context(|| format!("invalid hex address '{end_str}'"))?;
+
+        if inclusive {
+            Ok(NoteFilter::RangeInclusive(start..=end))
+        } else {
+            Ok(NoteFilter::Range(start..end))
         }
     }
 
@@ -51,13 +62,6 @@ impl NoteFilter {
             NoteFilter::Range(range) => range.contains(&address),
         }
     }
-}
-
-/// Parses a hex string (with optional 0x prefix) into a usize.
-fn parse_hex(s: &str) -> Result<usize> {
-    let s = s.trim();
-    let s = s.strip_prefix("0x").unwrap_or(s);
-    usize::from_str_radix(s, 16).map_err(|e| eyre!("invalid hex address '{s}': {e}"))
 }
 
 /// Imports code notes from the given JSON file and generates a Rust module.
