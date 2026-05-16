@@ -25,10 +25,10 @@ pub mod macros;
 /// let mut rich_presence = RichPresence::new();
 ///
 /// // Register lookup tables.
-/// let mut table = LookupTable::new("Stage");
-/// table.add_entry(Entry::new(1, "Level 1"));
-/// table.add_entry(Entry::new(2..=3, "Level 2"));
-/// table.set_fallback("Main Menu");
+/// let table = LookupTable::new("Stage")
+///     .with_entry(Entry::new(1, "Level 1"))
+///     .with_entry(Entry::new(2..=3, "Level 2"))
+///     .with_fallback("Main Menu");
 ///
 /// let level = rich_presence.register_lookup(table, bits8!(0x1234));
 ///
@@ -88,9 +88,9 @@ impl RichPresence {
     /// use rustcheevos::types::rich::lookup::Entry;
     ///
     /// let mut rich_presence = RichPresence::new();
-    /// let mut table = LookupTable::new("Stage");
-    /// table.add_entry(Entry::new(0, "Main Menu"));
-    /// table.add_entry(Entry::new(1, "Level 1"));
+    /// let table = LookupTable::new("Stage")
+    ///     .with_entry(Entry::new(0, "Main Menu"))
+    ///     .with_entry(Entry::new(1, "Level 1"));
     /// let stage = rich_presence.register_lookup(table, bits8!(0x1234));
     ///
     /// rich_presence.add_conditional_display(Condition::always_true(), "Currently in {stage}");

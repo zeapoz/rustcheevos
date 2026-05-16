@@ -80,10 +80,10 @@ fn main() {
     let mut rich_presence = RichPresence::new();
 
     // Register lookup tables.
-    let mut table = LookupTable::new("Level");
-    table.add_entry(Entry::new(1, "Level 1"));
-    table.add_entry(Entry::new(2..=3, "Level 2"));
-    table.set_fallback("Main Menu");
+    let table = LookupTable::new("Level")
+        .with_entry(Entry::new(1, "Level 1"))
+        .with_entry(Entry::new(2..=3, "Level 2"))
+        .with_fallback("Main Menu");
 
     // This returns a macro call handle that can be used directly in format! strings.
     let stage = rich_presence.register_lookup(table, bits8!(0x1234));
