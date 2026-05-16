@@ -3,7 +3,7 @@
 // TODO: Consider trimming down the prelude to just essential traits.
 #[doc(inline)]
 pub use crate::types::{
-    achievement::{Achievement, Tag},
+    achievement::{Achievement, AchievementBuilder, Tag},
     chain::{
         pending::{Chainable, PendingChain},
         {Chain, ChainGroup},

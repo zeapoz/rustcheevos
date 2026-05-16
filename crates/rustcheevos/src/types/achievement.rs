@@ -5,6 +5,7 @@ use std::{fmt, str::FromStr};
 use crate::parsers::ParseError;
 
 use super::chain::ChainGroup;
+use super::requirement::condition::Condition;
 
 /// An achievement definition.
 ///
@@ -14,21 +15,18 @@ use super::chain::ChainGroup;
 /// # Examples
 ///
 /// ```
-/// # enum Galaxy { Alpha }
-/// # enum Medal { Bronze }
-/// # fn galaxy_all_medals_condition(galaxy: Galaxy, medal: Medal) -> Chain { Chain::default() }
 /// use rustcheevos::prelude::*;
+/// use rustcheevos::bits8;
 ///
-/// let achievement = Achievement::new(
-///     "Alpha Amateur",
-///     "Earn a Bronze medal or higher on every planet of the Alpha galaxy",
-///     galaxy_all_medals_condition(Galaxy::Alpha, Medal::Bronze),
-///     3,
-/// );
+/// let achievement = Achievement::builder("Alpha Amateur")
+///     .description("Earn a Bronze medal or higher on every planet of the Alpha galaxy")
+///     .requirements(bits8!(0x1234).eq(1))
+///     .badge_id(12345)
+///     .points(3)
+///     .build();
 /// ```
 ///
-/// [`Achievement::new()`] sets all of the required properties and uses default values for optional
-/// ones. To set ID or tag, you can use [`Achievement::with_id()`] and [`Achievement::with_tag()`].
+/// For simple cases, [`Achievement::new()`] provides a convenient shorthand.
 #[derive(Debug, Clone, PartialEq)]
 pub struct Achievement {
     /// The achievement ID.
@@ -44,7 +42,7 @@ pub struct Achievement {
     /// The point value.
     pub points: u32,
     /// The badge ID.
-    pub badge_id: Option<u32>,
+    pub badge_id: u32,
 }
 
 impl Achievement {
@@ -77,7 +75,7 @@ impl Achievement {
             requirements: requirements.into(),
             tag: None,
             points,
-            badge_id: None,
+            badge_id: 0,
         }
     }
 
@@ -112,82 +110,141 @@ impl Achievement {
             requirements: requirements.into(),
             tag: None,
             points,
-            badge_id: None,
+            badge_id: 0,
         }
     }
 
-    /// Sets the achievement ID.
-    ///
-    /// # Examples
-    /// ```
-    /// # enum Galaxy { Alpha }
-    /// # enum Medal { Bronze }
-    /// # fn galaxy_all_medals_condition(galaxy: Galaxy, medal: Medal) -> Chain { Chain::default() }
-    /// use rustcheevos::prelude::*;
-    ///
-    /// let achievement = Achievement::new(
-    ///     "Alpha Amateur",
-    ///     "Earn a Bronze medal or higher on every planet of the Alpha galaxy",
-    ///     galaxy_all_medals_condition(Galaxy::Alpha, Medal::Bronze),
-    ///     3,
-    /// )
-    /// .with_id(600707);
-    /// ```
-    #[must_use]
-    pub fn with_id(mut self, id: u32) -> Self {
-        self.id = id;
-        self
-    }
-
-    /// Sets the achievement tag.
-    ///
-    /// # Examples
-    /// ```
-    /// # enum Galaxy { Alpha }
-    /// # enum Medal { Bronze }
-    /// # fn galaxy_all_medals_condition(galaxy: Galaxy, medal: Medal) -> Chain { Chain::default() }
-    /// use rustcheevos::prelude::*;
-    ///
-    /// let achievement = Achievement::new(
-    ///     "Alpha Amateur",
-    ///     "Earn a Bronze medal or higher on every planet of the Alpha galaxy",
-    ///     galaxy_all_medals_condition(Galaxy::Alpha, Medal::Bronze),
-    ///     3,
-    /// )
-    /// .with_tag(Tag::Progression);
-    /// ```
-    #[must_use]
-    pub fn with_tag(mut self, tag: Tag) -> Self {
-        self.tag = Some(tag);
-        self
-    }
-
-    /// Sets the achievement badge ID.
+    /// Returns a builder for constructing an achievement.
     ///
     /// # Examples
     /// ```
     /// use rustcheevos::prelude::*;
     /// use rustcheevos::bits8;
     ///
-    /// let achievement = Achievement::new(
-    ///     "Alpha Amateur",
-    ///     "Earn a Bronze medal or higher on every planet of the Alpha galaxy",
-    ///     bits8!(0x1234).eq(1),
-    ///     3,
-    /// )
-    /// .with_badge_id(12345);
+    /// let achievement = Achievement::builder("Alpha Amateur")
+    ///     .description("Earn a Bronze medal or higher on every planet of the Alpha galaxy")
+    ///     .requirements(bits8!(0x1234).eq(1))
+    ///     .badge_id(12345)
+    ///     .points(3)
+    ///     .id(600707)
+    ///     .tag(Tag::Progression)
+    ///     .build();
     /// ```
+    pub fn builder(title: impl Into<String>) -> AchievementBuilder {
+        AchievementBuilder::new(title)
+    }
+}
+
+/// A builder for constructing [`Achievement`] instances.
+///
+/// # Examples
+///
+/// ```
+/// use rustcheevos::prelude::*;
+/// use rustcheevos::bits8;
+///
+/// let achievement = Achievement::builder("Alpha Amateur")
+///     .description("Earn a Bronze medal or higher on every planet of the Alpha galaxy")
+///     .requirements(bits8!(0x1234).eq(1))
+///     .badge_id(12345)
+///     .points(3)
+///     .id(600707)
+///     .tag(Tag::Progression)
+///     .build();
+/// ```
+#[derive(Debug)]
+pub struct AchievementBuilder {
+    /// The achievement title.
+    title: String,
+    /// The achievement description.
+    description: String,
+    /// The achievement requirements.
+    requirements: ChainGroup,
+    /// The achievement points.
+    points: u32,
+    /// The achievement ID.
+    id: u32,
+    /// The achievement badge ID.
+    badge_id: u32,
+    /// The achievement tag.
+    tag: Option<Tag>,
+}
+
+impl AchievementBuilder {
+    /// Creates a new builder with the given title.
+    pub fn new(title: impl Into<String>) -> Self {
+        Self {
+            title: title.into(),
+            description: String::new(),
+            requirements: ChainGroup::from(Condition::always_true()),
+            points: 0,
+            badge_id: 0,
+            id: 0,
+            tag: None,
+        }
+    }
+
+    /// Sets the achievement description.
     #[must_use]
-    pub fn with_badge_id(mut self, badge_id: u32) -> Self {
-        self.badge_id = Some(badge_id);
+    pub fn description(mut self, description: impl Into<String>) -> Self {
+        self.description = description.into();
         self
+    }
+
+    /// Sets the achievement requirements.
+    #[must_use]
+    pub fn requirements(mut self, requirements: impl Into<ChainGroup>) -> Self {
+        self.requirements = requirements.into();
+        self
+    }
+
+    /// Sets the achievement point value.
+    #[must_use]
+    pub fn points(mut self, points: u32) -> Self {
+        self.points = points;
+        self
+    }
+
+    /// Sets the achievement ID.
+    #[must_use]
+    pub fn id(mut self, id: u32) -> Self {
+        self.id = id;
+        self
+    }
+
+    /// Sets the achievement badge ID.
+    #[must_use]
+    pub fn badge_id(mut self, badge_id: u32) -> Self {
+        self.badge_id = badge_id;
+        self
+    }
+
+    /// Sets the achievement tag.
+    #[must_use]
+    pub fn tag(mut self, tag: Tag) -> Self {
+        self.tag = Some(tag);
+        self
+    }
+
+    /// Builds the achievement.
+    #[must_use]
+    pub fn build(self) -> Achievement {
+        Achievement {
+            id: self.id,
+            title: self.title,
+            description: self.description,
+            requirements: self.requirements,
+            tag: self.tag,
+            points: self.points,
+            badge_id: self.badge_id,
+        }
     }
 }
 
 /// An achievement tag.
 ///
 /// This enum defines all the unique tags that can be applied to an [Achievement].
-/// Use with [`Achievement::with_tag`] to specify a tag.
+/// Use with [`AchievementBuilder::tag`] to specify a tag.
 ///
 /// # Examples
 /// ```
@@ -195,13 +252,12 @@ impl Achievement {
 /// # fn all_medals_condition(medal: Medal) -> Chain { Chain::default() }
 /// use rustcheevos::prelude::*;
 ///
-/// let achievement = Achievement::new(
-///     "Solar System Sentinel",
-///     "Earn a Bronze medal or higher on every planet in every galaxy excluding the Lambda galaxy",
-///     all_medals_condition(Medal::Bronze),
-///     3,
-/// )
-/// .with_tag(Tag::WinCondition);
+/// let achievement = Achievement::builder("Solar System Sentinel")
+///     .description("Earn a Bronze medal or higher on every planet in every galaxy excluding the Lambda galaxy")
+///     .requirements(all_medals_condition(Medal::Bronze))
+///     .badge_id(12345)
+///     .tag(Tag::WinCondition)
+///     .build();
 /// ```
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub enum Tag {

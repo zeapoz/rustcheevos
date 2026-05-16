@@ -19,8 +19,6 @@ pub const USER_FILE_EXTENSION: &str = "txt";
 const DEFAULT_AUTHOR: &str = "rustcheevos";
 /// The timestamp to use when none is specified.
 const DEFAULT_TIMESTAMP: &str = "0";
-/// The badge ID to use when none is specified.
-const DEFAULT_BADGE_ID: &str = "00000";
 
 /// The error type for user file parsing.
 #[derive(Error, Debug, Clone)]
@@ -147,9 +145,7 @@ impl From<&Achievement> for AchievementEntry {
             updated: DEFAULT_TIMESTAMP.to_string(),
             upvotes: 0,
             downvotes: 0,
-            badge: value
-                .badge_id
-                .map_or_else(|| DEFAULT_BADGE_ID.to_string(), |id| format!("{id:05}")),
+            badge: format!("{:05}", value.badge_id),
         }
     }
 }
