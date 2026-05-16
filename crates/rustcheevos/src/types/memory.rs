@@ -46,7 +46,7 @@ pub struct MemoryRef {
     /// The address of the memory reference.
     address: usize,
     /// The access mode of the memory reference.
-    pub access_mode: AccessMode,
+    access_mode: AccessMode,
 }
 
 impl MemoryRef {
@@ -127,24 +127,19 @@ impl MemoryRef {
         self
     }
 
-    /// Creates a new equals [`Condition`][crate::prelude::Condition].
     /// Sets the given flag on this requirement.
     ///
     /// # Examples
     /// ```
-    /// # use rustcheevos::types::operator::ArithmeticOperator;
-    /// # use rustcheevos::types::flag::ArithmeticFlag;
     /// use rustcheevos::prelude::*;
     ///
     /// let memory_ref = MemoryRef::new(MemorySize::Bits8, 0x1234);
-    /// let requirement = memory_ref.with_flag(ArithmeticFlag::AddSource);
-    /// assert_eq!(requirement.flag(), ArithmeticFlag::AddSource);
-    /// assert_eq!(*requirement.lhs(), TypedValue::Memory(memory_ref));
-    /// assert_eq!(requirement.operator(), None);
+    /// let arithmetic = memory_ref.with_flag(ArithmeticFlag::AddSource);
+    /// assert_eq!(arithmetic.flag(), ArithmeticFlag::AddSource);
     /// ```
     #[must_use]
     pub fn with_flag(self, flag: ArithmeticFlag) -> Arithmetic {
-        Arithmetic::new(flag, self)
+        Arithmetic::new(flag, self, None)
     }
 }
 
@@ -154,7 +149,7 @@ impl Measured for MemoryRef {
     type Output = Arithmetic;
 
     fn measured(self) -> Self::Output {
-        Arithmetic::new(ArithmeticFlag::Measured, self)
+        Arithmetic::new(ArithmeticFlag::Measured, self, None)
     }
 }
 

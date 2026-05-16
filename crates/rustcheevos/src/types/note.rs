@@ -12,12 +12,24 @@ use crate::util::parse_hex_address;
 #[derive(Debug, Clone, PartialEq)]
 pub struct CodeNote {
     /// The memory address.
-    pub address: usize,
+    address: usize,
     /// The note contents.
-    pub contents: String,
+    contents: String,
 }
 
 impl CodeNote {
+    /// Returns the memory address.
+    #[must_use]
+    pub fn address(&self) -> usize {
+        self.address
+    }
+
+    /// Returns the note contents.
+    #[must_use]
+    pub fn contents(&self) -> &str {
+        &self.contents
+    }
+
     /// Creates a new code note with the given address and contents.
     ///
     /// # Examples
@@ -25,6 +37,8 @@ impl CodeNote {
     /// use rustcheevos::prelude::*;
     ///
     /// let note = CodeNote::new(0x1234, "Player health");
+    /// assert_eq!(note.address(), 0x1234);
+    /// assert_eq!(note.contents(), "Player health");
     /// ```
     pub fn new(address: usize, contents: impl Into<String>) -> Self {
         Self {

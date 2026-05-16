@@ -2,13 +2,13 @@
 
 use winnow::{Parser, Result, combinator::alt, token::one_of};
 
-use crate::types::flag::{ArithmeticFlag, ComparisonFlag, Flag};
+use crate::types::flag::{ArithmeticFlag, ConditionFlag, Flag};
 
 /// Parses a comparison flag.
-pub fn parse_comparison_flag(input: &mut &str) -> Result<ComparisonFlag> {
+pub fn parse_condition_flag(input: &mut &str) -> Result<ConditionFlag> {
     let flags = one_of(['P', 'R', 'Z', 'C', 'D', 'N', 'O', 'M', 'G', 'Q', 'T']);
 
-    let flag = flags.try_map(ComparisonFlag::try_from).parse_next(input)?;
+    let flag = flags.try_map(ConditionFlag::try_from).parse_next(input)?;
     let _colon = ":".parse_next(input)?;
     Ok(flag)
 }
@@ -25,7 +25,7 @@ pub fn parse_arithmetic_flag(input: &mut &str) -> Result<ArithmeticFlag> {
 /// Parses a flag.
 pub fn parse_flag(input: &mut &str) -> Result<Flag> {
     let flag = alt((
-        parse_comparison_flag.map(Flag::from),
+        parse_condition_flag.map(Flag::from),
         parse_arithmetic_flag.map(Flag::from),
     ))
     .parse_next(input)?;

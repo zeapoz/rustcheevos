@@ -2,7 +2,7 @@
 
 use winnow::{Parser, Result, combinator::alt};
 
-use crate::types::operator::{ArithmeticOperator, ComparisonOperator};
+use crate::types::operator::{ArithmeticOperator, ConditionOperator};
 
 /// Parses an arithmetic operator.
 pub fn parse_arithmetic_operator(input: &mut &str) -> Result<ArithmeticOperator> {
@@ -13,10 +13,10 @@ pub fn parse_arithmetic_operator(input: &mut &str) -> Result<ArithmeticOperator>
 }
 
 /// Parses a comparison operator.
-pub fn parse_comparison_operator(input: &mut &str) -> Result<ComparisonOperator> {
+pub fn parse_condition_operator(input: &mut &str) -> Result<ConditionOperator> {
     let operators = alt(("<=", "<", ">=", ">", "!=", "="));
     operators
-        .try_map(ComparisonOperator::try_from)
+        .try_map(ConditionOperator::try_from)
         .parse_next(input)
 }
 
@@ -36,7 +36,7 @@ mod tests {
     #[test]
     fn test_parse_no_operator() {
         let input = "";
-        let operator_or_err = input.parse::<ComparisonOperator>();
+        let operator_or_err = input.parse::<ConditionOperator>();
         assert!(operator_or_err.is_err());
     }
 
@@ -50,7 +50,7 @@ mod tests {
     #[test]
     fn test_parse_valid_comparison_operator() {
         let input = "<=";
-        let operator = input.parse::<ComparisonOperator>().unwrap();
-        assert_eq!(operator, ComparisonOperator::LessThanOrEquals);
+        let operator = input.parse::<ConditionOperator>().unwrap();
+        assert_eq!(operator, ConditionOperator::LessThanOrEquals);
     }
 }

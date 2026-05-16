@@ -266,7 +266,7 @@ impl GameData {
     /// let game_data = GameData::new(1, "Test");
     ///
     /// for achievement in game_data.achievements() {
-    ///     println!("{}", achievement.title);
+    ///     println!("{}", achievement.title());
     /// }
     /// ```
     pub fn achievements(&self) -> impl Iterator<Item = &Achievement> {
@@ -282,7 +282,7 @@ impl GameData {
     /// let game_data = GameData::new(1, "Test");
     ///
     /// for lb in game_data.leaderboards() {
-    ///     println!("{}", lb.title);
+    ///     println!("{}", lb.title());
     /// }
     /// ```
     pub fn leaderboards(&self) -> impl Iterator<Item = &Leaderboard> {
@@ -299,7 +299,7 @@ impl GameData {
     /// let game_data = GameData::new(1, "Test");
     ///
     /// for note in game_data.code_notes() {
-    ///     println!("{:x}: {}", note.address, note.contents);
+    ///     println!("{:x}: {}", note.address(), note.contents());
     /// }
     /// ```
     pub fn code_notes(&self) -> impl Iterator<Item = &CodeNote> {

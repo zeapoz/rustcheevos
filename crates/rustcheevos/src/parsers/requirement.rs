@@ -9,13 +9,13 @@ use crate::{
     prelude::{Arithmetic, Condition, Requirement},
     types::requirement::{
         arithmetic::ArithmeticOperation,
-        condition::{ComparisonOperation, hits::HitCount},
+        condition::{ConditionOperation, hits::HitCount},
     },
 };
 
 use super::{
-    parse_arithmetic_flag, parse_arithmetic_operator, parse_comparison_flag,
-    parse_comparison_operator, parse_int_value, parse_typed_value,
+    parse_arithmetic_flag, parse_arithmetic_operator, parse_condition_flag,
+    parse_condition_operator, parse_int_value, parse_typed_value,
 };
 
 /// Parses a requirement.
@@ -30,23 +30,18 @@ pub fn parse_requirement(input: &mut &str) -> Result<Requirement> {
 
 /// Parses a comparison condition.
 pub fn parse_condition(input: &mut &str) -> Result<Condition> {
-    let flag = opt(parse_comparison_flag).parse_next(input)?;
+    let flag = opt(parse_condition_flag).parse_next(input)?;
     let lhs = parse_typed_value.parse_next(input)?;
     let operation = parse_comparison_operation.parse_next(input)?;
     let hit_count = opt(parse_hit_count).parse_next(input)?.unwrap_or_default();
-    Ok(Condition {
-        flag,
-        lhs,
-        operation,
-        hit_count,
-    })
+    Ok(Condition::new(flag, lhs, operation, hit_count))
 }
 
 /// Parses a comparison operation.
-fn parse_comparison_operation(input: &mut &str) -> Result<ComparisonOperation> {
-    let operator = parse_comparison_operator.parse_next(input)?;
+fn parse_comparison_operation(input: &mut &str) -> Result<ConditionOperation> {
+    let operator = parse_condition_operator.parse_next(input)?;
     let rhs = parse_typed_value.parse_next(input)?;
-    Ok(ComparisonOperation { operator, rhs })
+    Ok(ConditionOperation::new(operator, rhs))
 }
 
 /// Parses a hit count.
@@ -61,18 +56,14 @@ pub fn parse_arithmetic(input: &mut &str) -> Result<Arithmetic> {
     let flag = parse_arithmetic_flag.parse_next(input)?;
     let lhs = parse_typed_value.parse_next(input)?;
     let operation = opt(parse_arithmetic_operation).parse_next(input)?;
-    Ok(Arithmetic {
-        flag,
-        lhs,
-        operation,
-    })
+    Ok(Arithmetic::new(flag, lhs, operation))
 }
 
 /// Parses an arithmetic operation.
 fn parse_arithmetic_operation(input: &mut &str) -> Result<ArithmeticOperation> {
     let operator = parse_arithmetic_operator.parse_next(input)?;
     let rhs = parse_typed_value.parse_next(input)?;
-    Ok(ArithmeticOperation { operator, rhs })
+    Ok(ArithmeticOperation::new(operator, rhs))
 }
 
 #[cfg(test)]
@@ -80,8 +71,8 @@ mod tests {
     use crate::types::{
         flag::ArithmeticFlag,
         memory::{MemoryRef, MemorySize},
-        operator::{ArithmeticOperator, ComparisonOperator},
-        requirement::condition::{ComparisonOperation, Condition, hits::HitCount},
+        operator::{ArithmeticOperator, ConditionOperator},
+        requirement::condition::{Condition, ConditionOperation, hits::HitCount},
         value::TypedValue,
     };
 
@@ -93,15 +84,15 @@ mod tests {
         let requirement = input.parse::<Requirement>().unwrap();
         assert_eq!(
             requirement,
-            Requirement::Condition(Condition {
-                flag: None,
-                lhs: TypedValue::Memory(MemoryRef::new(MemorySize::Bits32, 0x1234)),
-                operation: ComparisonOperation {
-                    operator: ComparisonOperator::Equals,
-                    rhs: TypedValue::Memory(MemoryRef::new(MemorySize::Bits32, 0x5678))
-                },
-                hit_count: HitCount::new(0)
-            })
+            Requirement::Condition(Condition::new(
+                None,
+                TypedValue::Memory(MemoryRef::new(MemorySize::Bits32, 0x1234)),
+                ConditionOperation::new(
+                    ConditionOperator::Equals,
+                    TypedValue::Memory(MemoryRef::new(MemorySize::Bits32, 0x5678))
+                ),
+                HitCount::default()
+            ))
         );
     }
 
@@ -111,14 +102,14 @@ mod tests {
         let requirement = input.parse::<Requirement>().unwrap();
         assert_eq!(
             requirement,
-            Requirement::Arithmetic(Arithmetic {
-                flag: ArithmeticFlag::AddSource,
-                lhs: TypedValue::Memory(MemoryRef::new(MemorySize::Bits32, 0x1234)),
-                operation: Some(ArithmeticOperation {
-                    operator: ArithmeticOperator::Add,
-                    rhs: TypedValue::Memory(MemoryRef::new(MemorySize::Bits32, 0x5678))
-                })
-            })
+            Requirement::Arithmetic(Arithmetic::new(
+                ArithmeticFlag::AddSource,
+                TypedValue::Memory(MemoryRef::new(MemorySize::Bits32, 0x1234)),
+                Some(ArithmeticOperation::new(
+                    ArithmeticOperator::Add,
+                    TypedValue::Memory(MemoryRef::new(MemorySize::Bits32, 0x5678))
+                ))
+            ))
         );
     }
 
@@ -126,7 +117,7 @@ mod tests {
     fn test_parse_valid_hit_count() {
         let mut input = ".10.";
         let hit_count = parse_hit_count(&mut input).unwrap();
-        assert_eq!(hit_count, HitCount::new(10));
+        assert_eq!(hit_count, HitCount::from(10));
     }
 
     #[test]
@@ -147,17 +138,12 @@ mod tests {
     fn test_parse_valid_comparison_condition_direct() {
         let input = "0xX1234=0xX5678";
         let condition = input.parse::<Condition>().unwrap();
-        assert_eq!(condition.flag, None);
+        assert_eq!(condition.flag(), None);
         assert_eq!(
-            condition.lhs,
-            TypedValue::Memory(MemoryRef::new(MemorySize::Bits32, 0x1234))
+            condition.lhs(),
+            &TypedValue::Memory(MemoryRef::new(MemorySize::Bits32, 0x1234))
         );
-        assert_eq!(condition.operation.operator, ComparisonOperator::Equals);
-        assert_eq!(
-            condition.operation.rhs,
-            TypedValue::Memory(MemoryRef::new(MemorySize::Bits32, 0x5678))
-        );
-        assert_eq!(condition.hit_count, HitCount::new(0));
+        assert_eq!(condition.to_string(), "0xX1234=0xX5678");
     }
 
     #[test]
@@ -171,47 +157,35 @@ mod tests {
     fn test_parse_valid_arithmetic_condition() {
         let input = "A:0xX1234";
         let arithmetic = input.parse::<Arithmetic>().unwrap();
-        assert_eq!(arithmetic.flag, ArithmeticFlag::AddSource);
+        assert_eq!(arithmetic.flag(), ArithmeticFlag::AddSource);
         assert_eq!(
-            arithmetic.lhs,
-            TypedValue::Memory(MemoryRef::new(MemorySize::Bits32, 0x1234))
+            arithmetic.lhs(),
+            &TypedValue::Memory(MemoryRef::new(MemorySize::Bits32, 0x1234))
         );
-        assert_eq!(arithmetic.operation, None);
+        assert_eq!(arithmetic.rhs(), None);
     }
 
     #[test]
     fn test_parse_valid_arithmetic_condition_with_operation() {
         let input = "A:0xX1234+0xX5678";
         let arithmetic = input.parse::<Arithmetic>().unwrap();
-        assert_eq!(arithmetic.flag, ArithmeticFlag::AddSource);
+        assert_eq!(arithmetic.flag(), ArithmeticFlag::AddSource);
         assert_eq!(
-            arithmetic.lhs,
-            TypedValue::Memory(MemoryRef::new(MemorySize::Bits32, 0x1234))
+            arithmetic.lhs(),
+            &TypedValue::Memory(MemoryRef::new(MemorySize::Bits32, 0x1234))
         );
-        assert_eq!(
-            arithmetic.operation,
-            Some(ArithmeticOperation {
-                operator: ArithmeticOperator::Add,
-                rhs: TypedValue::Memory(MemoryRef::new(MemorySize::Bits32, 0x5678))
-            })
-        );
+        assert_eq!(arithmetic.to_string(), "A:0xX1234+0xX5678");
     }
 
     #[test]
     fn test_parse_valid_arithmetic_condition_with_measured_flag() {
         let input = "M:0xX1234+0xX5678";
         let arithmetic = input.parse::<Arithmetic>().unwrap();
-        assert_eq!(arithmetic.flag, ArithmeticFlag::Measured);
+        assert_eq!(arithmetic.flag(), ArithmeticFlag::Measured);
         assert_eq!(
-            arithmetic.lhs,
-            TypedValue::Memory(MemoryRef::new(MemorySize::Bits32, 0x1234))
+            arithmetic.lhs(),
+            &TypedValue::Memory(MemoryRef::new(MemorySize::Bits32, 0x1234))
         );
-        assert_eq!(
-            arithmetic.operation,
-            Some(ArithmeticOperation {
-                operator: ArithmeticOperator::Add,
-                rhs: TypedValue::Memory(MemoryRef::new(MemorySize::Bits32, 0x5678))
-            })
-        );
+        assert_eq!(arithmetic.to_string(), "M:0xX1234+0xX5678");
     }
 }

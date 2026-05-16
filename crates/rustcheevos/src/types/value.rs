@@ -29,7 +29,7 @@ impl TypedValue {
     /// Creates a new arithmetic [`Arithmetic`].
     #[must_use]
     pub fn with_arithmetic_flag(self, flag: ArithmeticFlag) -> Arithmetic {
-        Arithmetic::new(flag, self)
+        Arithmetic::new(flag, self, None)
     }
 
     /// Applies an access mode if this value contains a [`MemoryRef`].
@@ -45,7 +45,7 @@ impl TypedValue {
     #[must_use]
     pub fn with_access_mode(mut self, access_mode: AccessMode) -> Self {
         if let TypedValue::Memory(ref mut mem) = self {
-            mem.access_mode = access_mode;
+            *mem = mem.with_access_mode(access_mode);
         }
         self
     }
@@ -223,31 +223,31 @@ impl<T: Into<TypedValue>> TypedValueOps for T {
     }
 
     fn add(self, rhs: impl Into<TypedValue>) -> Arithmetic {
-        Arithmetic::new(ArithmeticFlag::default(), self).add(rhs)
+        Arithmetic::new(ArithmeticFlag::default(), self, None).add(rhs)
     }
 
     fn sub(self, rhs: impl Into<TypedValue>) -> Arithmetic {
-        Arithmetic::new(ArithmeticFlag::default(), self).sub(rhs)
+        Arithmetic::new(ArithmeticFlag::default(), self, None).sub(rhs)
     }
 
     fn mul(self, rhs: impl Into<TypedValue>) -> Arithmetic {
-        Arithmetic::new(ArithmeticFlag::default(), self).mul(rhs)
+        Arithmetic::new(ArithmeticFlag::default(), self, None).mul(rhs)
     }
 
     fn div(self, rhs: impl Into<TypedValue>) -> Arithmetic {
-        Arithmetic::new(ArithmeticFlag::default(), self).div(rhs)
+        Arithmetic::new(ArithmeticFlag::default(), self, None).div(rhs)
     }
 
     fn modulo(self, rhs: impl Into<TypedValue>) -> Arithmetic {
-        Arithmetic::new(ArithmeticFlag::default(), self).modulo(rhs)
+        Arithmetic::new(ArithmeticFlag::default(), self, None).modulo(rhs)
     }
 
     fn bitwise_and(self, rhs: impl Into<TypedValue>) -> Arithmetic {
-        Arithmetic::new(ArithmeticFlag::default(), self).bitwise_and(rhs)
+        Arithmetic::new(ArithmeticFlag::default(), self, None).bitwise_and(rhs)
     }
 
     fn bitwise_xor(self, rhs: impl Into<TypedValue>) -> Arithmetic {
-        Arithmetic::new(ArithmeticFlag::default(), self).bitwise_xor(rhs)
+        Arithmetic::new(ArithmeticFlag::default(), self, None).bitwise_xor(rhs)
     }
 }
 

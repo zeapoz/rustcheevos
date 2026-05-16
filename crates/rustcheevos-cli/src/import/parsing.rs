@@ -22,7 +22,7 @@ impl ParsedNote {
     /// Parses a [`CodeNote`] into a structured [`ParsedNote`].
     pub fn try_from_code_note(note: &CodeNote) -> Result<Self> {
         let first_line = note
-            .contents
+            .contents()
             .lines()
             .next()
             .ok_or_else(|| eyre!("empty note contents"))?;
@@ -34,10 +34,10 @@ impl ParsedNote {
         }
 
         Ok(Self {
-            address: note.address,
+            address: note.address(),
             size,
             title,
-            contents: note.contents.clone(),
+            contents: note.contents().to_string(),
         })
     }
 
@@ -91,7 +91,7 @@ pub fn parse_notes(notes: &[CodeNote]) -> (Vec<ParsedNote>, usize) {
             Ok(parsed) => parsed_notes.push(parsed),
             Err(e) => {
                 skipped += 1;
-                eprintln!("Skipping note at 0x{:x}: {e}", note.address);
+                eprintln!("Skipping note at 0x{:x}: {e}", note.address());
             }
         }
     }

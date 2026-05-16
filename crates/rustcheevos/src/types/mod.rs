@@ -7,7 +7,7 @@ pub mod game;
 pub mod leaderboard;
 pub mod memory;
 pub mod note;
-pub mod operator;
+pub(crate) mod operator;
 pub mod requirement;
 pub mod rich;
 pub mod value;

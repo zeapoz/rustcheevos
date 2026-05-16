@@ -2,7 +2,7 @@
 
 use std::fmt;
 
-use crate::types::rich::format::FormatType;
+use super::super::format::FormatType;
 
 /// Builtin macros for rich presence display formatting.
 #[derive(Debug, Clone, PartialEq)]
@@ -49,7 +49,7 @@ impl BuiltInMacro {
     /// # Examples
     ///
     /// ```
-    /// use rustcheevos::types::rich::macros::builtin::BuiltInMacro;
+    /// use rustcheevos::types::rich::BuiltInMacro;
     ///
     /// let format = BuiltInMacro::Score.format_type();
     /// assert!(format.is_some());

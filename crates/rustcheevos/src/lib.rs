@@ -15,7 +15,7 @@
 //! - [`MemoryRef`][`crate::types::memory::MemoryRef`] - Memory location references (address, size, access mode)
 //! - [`Requirement`][`crate::types::requirement::Requirement`] - Condition clauses (comparisons and arithmetic operations)
 //! - [`Chain`][`crate::types::chain::Chain`] - Ordered requirement sequences with chaining operators
-//! - [`PendingChain`][`crate::types::chain::pending::PendingChain`] - Builder type for constructing chains fluently
+//! - [`PendingChain`][`crate::types::chain::PendingChain`] - Builder type for constructing chains fluently
 //!
 //! ## Example
 //!

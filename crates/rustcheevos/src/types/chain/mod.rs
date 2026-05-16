@@ -3,16 +3,18 @@
 use std::{fmt, str::FromStr};
 
 use crate::{
-    impl_arithmetic_flag_traits, impl_comparison_flag_traits,
+    impl_arithmetic_flag_traits, impl_condition_flag_traits,
     parsers::ParseError,
     prelude::{AccessMode, Requirement},
     types::{
-        flag::{ArithmeticFlag, ComparisonFlag},
+        flag::{ArithmeticFlag, ConditionFlag},
         memory::AccessModeModifier,
     },
 };
 
-pub mod pending;
+pub(crate) mod pending;
+
+pub use pending::{Chainable, PendingChain};
 
 /// A holding struct for many groups of requirements.
 ///
@@ -320,11 +322,11 @@ impl Chain {
     ///
     /// [`Arithmetic`][crate::prelude::Arithmetic] requirements are returned unchanged.
     #[must_use]
-    pub fn with_comparison_flag(self, flag: ComparisonFlag) -> Self {
+    pub fn with_condition_flag(self, flag: ConditionFlag) -> Self {
         Self(
             self.0
                 .into_iter()
-                .map(|req| req.with_comparison_flag(flag))
+                .map(|req| req.with_condition_flag(flag))
                 .collect(),
         )
     }
@@ -343,5 +345,5 @@ impl Chain {
     }
 }
 
-impl_comparison_flag_traits!(Chain, with_comparison_flag);
+impl_condition_flag_traits!(Chain, with_condition_flag);
 impl_arithmetic_flag_traits!(Chain, with_arithmetic_flag);

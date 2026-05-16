@@ -6,12 +6,12 @@ use winnow::Parser;
 
 use crate::{
     parsers::ParseError,
-    parsers::{parse_arithmetic_operator, parse_comparison_operator},
+    parsers::{parse_arithmetic_operator, parse_condition_operator},
 };
 
 /// Operators that can be used in arithmetic.
 #[derive(Clone, Copy, Debug, PartialEq)]
-pub enum ArithmeticOperator {
+pub(crate) enum ArithmeticOperator {
     /// The addition operator.
     Add,
     /// The subtraction operator.
@@ -72,7 +72,7 @@ impl fmt::Display for ArithmeticOperator {
 
 /// Operators that can be used in comparisons.
 #[derive(Clone, Copy, Debug, PartialEq)]
-pub enum ComparisonOperator {
+pub(crate) enum ConditionOperator {
     /// The less than operator.
     LessThan,
     /// The less than or equals operator.
@@ -87,41 +87,41 @@ pub enum ComparisonOperator {
     NotEquals,
 }
 
-impl TryFrom<&str> for ComparisonOperator {
+impl TryFrom<&str> for ConditionOperator {
     type Error = ParseError;
 
     fn try_from(s: &str) -> Result<Self, Self::Error> {
         match s {
-            "<" => Ok(ComparisonOperator::LessThan),
-            "<=" => Ok(ComparisonOperator::LessThanOrEquals),
-            ">" => Ok(ComparisonOperator::GreaterThan),
-            ">=" => Ok(ComparisonOperator::GreaterThanOrEquals),
-            "=" => Ok(ComparisonOperator::Equals),
-            "!=" => Ok(ComparisonOperator::NotEquals),
+            "<" => Ok(ConditionOperator::LessThan),
+            "<=" => Ok(ConditionOperator::LessThanOrEquals),
+            ">" => Ok(ConditionOperator::GreaterThan),
+            ">=" => Ok(ConditionOperator::GreaterThanOrEquals),
+            "=" => Ok(ConditionOperator::Equals),
+            "!=" => Ok(ConditionOperator::NotEquals),
             _ => Err(ParseError::Operator(s.to_string())),
         }
     }
 }
 
-impl FromStr for ComparisonOperator {
+impl FromStr for ConditionOperator {
     type Err = ParseError;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
-        parse_comparison_operator
+        parse_condition_operator
             .parse(s)
             .map_err(|s| ParseError::Operator(s.to_string()))
     }
 }
 
-impl fmt::Display for ComparisonOperator {
+impl fmt::Display for ConditionOperator {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let s = match self {
-            ComparisonOperator::LessThan => "<",
-            ComparisonOperator::LessThanOrEquals => "<=",
-            ComparisonOperator::GreaterThan => ">",
-            ComparisonOperator::GreaterThanOrEquals => ">=",
-            ComparisonOperator::Equals => "=",
-            ComparisonOperator::NotEquals => "!=",
+            ConditionOperator::LessThan => "<",
+            ConditionOperator::LessThanOrEquals => "<=",
+            ConditionOperator::GreaterThan => ">",
+            ConditionOperator::GreaterThanOrEquals => ">=",
+            ConditionOperator::Equals => "=",
+            ConditionOperator::NotEquals => "!=",
         };
         write!(f, "{s}")
     }

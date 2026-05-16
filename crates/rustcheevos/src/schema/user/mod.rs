@@ -130,22 +130,18 @@ impl fmt::Display for AchievementEntry {
 impl From<&Achievement> for AchievementEntry {
     fn from(value: &Achievement) -> Self {
         Self {
-            id: value.id,
-            requirements: value.requirements.to_string(),
-            title: value.title.clone(),
-            description: value.description.clone(),
-            tag: value
-                .tag
-                .as_ref()
-                .map(ToString::to_string)
-                .unwrap_or_default(),
+            id: value.id(),
+            requirements: value.requirements().to_string(),
+            title: value.title().to_string(),
+            description: value.description().to_string(),
+            tag: value.tag().map(ToString::to_string).unwrap_or_default(),
             author: DEFAULT_AUTHOR.to_string(),
-            points: value.points,
+            points: value.points(),
             created: DEFAULT_TIMESTAMP.to_string(),
             updated: DEFAULT_TIMESTAMP.to_string(),
             upvotes: 0,
             downvotes: 0,
-            badge: format!("{:05}", value.badge_id),
+            badge: format!("{:05}", value.badge_id()),
         }
     }
 }
@@ -194,15 +190,15 @@ impl fmt::Display for LeaderboardEntry {
 impl From<&Leaderboard> for LeaderboardEntry {
     fn from(value: &Leaderboard) -> Self {
         Self {
-            id: value.id,
-            start: value.start.to_string(),
-            cancel: value.cancel.to_string(),
-            submit: value.submit.to_string(),
-            value: value.value.to_string(),
-            format: value.format.to_string(),
-            title: value.title.clone(),
-            description: value.description.clone(),
-            lower_is_better: value.lower_is_better,
+            id: value.id(),
+            start: value.start().to_string(),
+            cancel: value.cancel().to_string(),
+            submit: value.submit().to_string(),
+            value: value.value().to_string(),
+            format: value.format().to_string(),
+            title: value.title().to_string(),
+            description: value.description().to_string(),
+            lower_is_better: value.lower_is_better(),
         }
     }
 }
@@ -225,8 +221,8 @@ impl fmt::Display for CodeNoteEntry {
 impl From<&CodeNote> for CodeNoteEntry {
     fn from(value: &CodeNote) -> Self {
         Self {
-            address: value.address,
-            note: value.contents.clone(),
+            address: value.address(),
+            note: value.contents().to_string(),
         }
     }
 }

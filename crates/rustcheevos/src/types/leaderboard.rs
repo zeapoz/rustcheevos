@@ -34,26 +34,80 @@ use super::chain::ChainGroup;
 #[derive(Debug, Clone, PartialEq)]
 pub struct Leaderboard {
     /// The leaderboard ID.
-    pub id: u32,
+    id: u32,
     /// The leaderboard title.
-    pub title: String,
+    title: String,
     /// The leaderboard description.
-    pub description: String,
+    description: String,
     /// The leaderboard start condition.
-    pub start: ChainGroup,
+    start: ChainGroup,
     /// The leaderboard cancel condition.
-    pub cancel: ChainGroup,
+    cancel: ChainGroup,
     /// The leaderboard submit condition.
-    pub submit: ChainGroup,
+    submit: ChainGroup,
     /// The leaderboard value condition.
-    pub value: ChainGroup,
+    value: ChainGroup,
     /// The value format.
-    pub format: LeaderboardFormat,
+    format: LeaderboardFormat,
     /// Whether lower values are better.
-    pub lower_is_better: bool,
+    lower_is_better: bool,
 }
 
 impl Leaderboard {
+    /// Returns the leaderboard ID.
+    #[must_use]
+    pub fn id(&self) -> u32 {
+        self.id
+    }
+
+    /// Returns the leaderboard title.
+    #[must_use]
+    pub fn title(&self) -> &str {
+        &self.title
+    }
+
+    /// Returns the leaderboard description.
+    #[must_use]
+    pub fn description(&self) -> &str {
+        &self.description
+    }
+
+    /// Returns the start condition.
+    #[must_use]
+    pub fn start(&self) -> &ChainGroup {
+        &self.start
+    }
+
+    /// Returns the cancel condition.
+    #[must_use]
+    pub fn cancel(&self) -> &ChainGroup {
+        &self.cancel
+    }
+
+    /// Returns the submit condition.
+    #[must_use]
+    pub fn submit(&self) -> &ChainGroup {
+        &self.submit
+    }
+
+    /// Returns the value condition.
+    #[must_use]
+    pub fn value(&self) -> &ChainGroup {
+        &self.value
+    }
+
+    /// Returns the format.
+    #[must_use]
+    pub fn format(&self) -> LeaderboardFormat {
+        self.format
+    }
+
+    /// Returns whether lower values are better.
+    #[must_use]
+    pub fn lower_is_better(&self) -> bool {
+        self.lower_is_better
+    }
+
     /// Returns a builder for constructing a leaderboard.
     ///
     /// # Examples

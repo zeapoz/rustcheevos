@@ -123,7 +123,7 @@ pub fn import(
     let notes = match filter {
         Some(filter) => notes
             .into_iter()
-            .filter(|n| filter.matches(n.address))
+            .filter(|n| filter.matches(n.address()))
             .collect(),
         None => notes,
     };

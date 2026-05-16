@@ -2,17 +2,20 @@
 
 use std::{fmt, fs, io, path::Path, rc::Rc};
 
-use format::{Format, FormatType};
-use lookup::LookupTable;
-use macros::{MacroRef, MacroValue, builtin::BuiltInMacro};
+use format::Format;
 
 use crate::schema::rich::{RICH_PESENCE_FILE_EXTENSION, RICH_PESENCE_FILE_SUFFIX};
 
 use super::chain::ChainGroup;
 
-pub mod format;
-pub mod lookup;
-pub mod macros;
+mod format;
+mod lookup;
+mod macros;
+
+pub use format::FormatType;
+pub use lookup::{Entry, EntryKey, LookupTable};
+pub use macros::builtin::BuiltInMacro;
+pub use macros::{MacroRef, MacroValue};
 
 /// The rich presence core type.
 ///
@@ -20,7 +23,7 @@ pub mod macros;
 ///
 /// ```
 /// use rustcheevos::{prelude::*, chain, bits8};
-/// use rustcheevos::types::rich::lookup::Entry;
+/// use rustcheevos::types::rich::Entry;
 ///
 /// let mut rich_presence = RichPresence::new();
 ///
@@ -64,7 +67,7 @@ impl RichPresence {
     ///
     /// ```
     /// use rustcheevos::{prelude::*, bits8};
-    /// use rustcheevos::types::rich::macros::builtin::BuiltInMacro;
+    /// use rustcheevos::types::rich::BuiltInMacro;
     ///
     /// let mut rich_presence = RichPresence::new();
     /// let score = rich_presence.builtin_macro(BuiltInMacro::Score, bits8!(0x1234));
@@ -85,7 +88,7 @@ impl RichPresence {
     ///
     /// ```
     /// use rustcheevos::{prelude::*, bits8};
-    /// use rustcheevos::types::rich::lookup::Entry;
+    /// use rustcheevos::types::rich::Entry;
     ///
     /// let mut rich_presence = RichPresence::new();
     /// let table = LookupTable::new("Stage")
@@ -226,22 +229,12 @@ impl fmt::Display for RichPresence {
 }
 
 /// A conditional rich presence display definition.
-///
-/// # Examples
-///
-/// ```
-/// use rustcheevos::{prelude::*, chain, bits8};
-/// use rustcheevos::types::rich::ConditionalDisplay;
-///
-/// let condition = chain!(bits8!(0x1234).ge(1));
-/// let display = ConditionalDisplay::new(condition, "Playing a level");
-/// ```
 #[derive(Debug, Clone, PartialEq)]
-pub struct ConditionalDisplay {
+struct ConditionalDisplay {
     /// The condition for displaying this display.
-    pub condition: ChainGroup,
+    condition: ChainGroup,
     /// The display to show when the condition is met.
-    pub display: String,
+    display: String,
 }
 
 impl ConditionalDisplay {

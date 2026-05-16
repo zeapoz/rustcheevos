@@ -7,7 +7,7 @@ use std::{fmt, ops::RangeInclusive};
 /// # Examples
 ///
 /// ```
-/// use rustcheevos::types::rich::lookup::{LookupTable, Entry, EntryKey};
+/// use rustcheevos::types::rich::{LookupTable, Entry, EntryKey};
 ///
 /// let table = LookupTable::new("Health")
 ///     .with_entry(Entry::new(EntryKey::Value(0), "Dead"))
@@ -17,24 +17,41 @@ use std::{fmt, ops::RangeInclusive};
 #[derive(Debug, Clone, PartialEq)]
 pub struct LookupTable {
     /// The name of the lookup table.
-    pub name: String,
+    name: String,
     /// The entries in the lookup table.
-    pub entries: Vec<Entry>,
+    entries: Vec<Entry>,
     /// The fallback value when no entry matches.
-    pub fallback: Option<String>,
+    fallback: Option<String>,
 }
 
 impl LookupTable {
+    /// Returns the name of the lookup table.
+    #[must_use]
+    pub fn name(&self) -> &str {
+        &self.name
+    }
+
+    /// Returns the entries in the lookup table.
+    pub fn entries(&self) -> impl Iterator<Item = &Entry> {
+        self.entries.iter()
+    }
+
+    /// Returns the fallback value.
+    #[must_use]
+    pub fn fallback(&self) -> Option<&str> {
+        self.fallback.as_deref()
+    }
+
     /// Creates a new empty lookup table with the given name.
     ///
     /// # Examples
     ///
     /// ```
-    /// use rustcheevos::types::rich::lookup::LookupTable;
+    /// use rustcheevos::types::rich::LookupTable;
     ///
     /// let table = LookupTable::new("Health");
-    /// assert_eq!(table.name, "Health");
-    /// assert!(table.entries.is_empty());
+    /// assert_eq!(table.name(), "Health");
+    /// assert_eq!(table.entries().count(), 0);
     /// ```
     #[must_use]
     pub fn new(name: impl Into<String>) -> Self {
@@ -50,11 +67,11 @@ impl LookupTable {
     /// # Examples
     ///
     /// ```
-    /// use rustcheevos::types::rich::lookup::LookupTable;
+    /// use rustcheevos::types::rich::LookupTable;
     ///
     /// let table = LookupTable::new("Health")
     ///     .with_entries([(1, "Full"), (2, "Empty")]);
-    /// assert_eq!(table.entries.len(), 2);
+    /// assert_eq!(table.entries().count(), 2);
     /// ```
     #[must_use]
     pub fn with_entries(mut self, entries: impl IntoIterator<Item = impl Into<Entry>>) -> Self {
@@ -67,11 +84,11 @@ impl LookupTable {
     /// # Examples
     ///
     /// ```
-    /// use rustcheevos::types::rich::lookup::{LookupTable, Entry};
+    /// use rustcheevos::types::rich::{LookupTable, Entry};
     ///
     /// let table = LookupTable::new("Health")
     ///     .with_entry(Entry::new(0, "Dead"));
-    /// assert_eq!(table.entries.len(), 1);
+    /// assert_eq!(table.entries().count(), 1);
     /// ```
     #[must_use]
     pub fn with_entry(mut self, entry: impl Into<Entry>) -> Self {
@@ -84,11 +101,11 @@ impl LookupTable {
     /// # Examples
     ///
     /// ```
-    /// use rustcheevos::types::rich::lookup::LookupTable;
+    /// use rustcheevos::types::rich::LookupTable;
     ///
     /// let table = LookupTable::new("Health")
     ///     .with_fallback("Unknown");
-    /// assert_eq!(table.fallback, Some("Unknown".to_string()));
+    /// assert_eq!(table.fallback(), Some("Unknown"));
     /// ```
     #[must_use]
     pub fn with_fallback(mut self, fallback: impl Into<String>) -> Self {
@@ -114,24 +131,36 @@ impl fmt::Display for LookupTable {
 #[derive(Debug, Clone, PartialEq)]
 pub struct Entry {
     /// The keys that map to this entry.
-    pub keys: Vec<EntryKey>,
+    keys: Vec<EntryKey>,
     /// The display value for this entry.
-    pub value: String,
+    value: String,
 }
 
 impl Entry {
+    /// Returns the keys for this entry.
+    #[must_use]
+    pub fn keys(&self) -> &[EntryKey] {
+        &self.keys
+    }
+
+    /// Returns the display value.
+    #[must_use]
+    pub fn value(&self) -> &str {
+        &self.value
+    }
+
     /// Creates a new entry with a given key and value.
     ///
     /// # Examples
     ///
     /// ```
-    /// use rustcheevos::types::rich::lookup::{Entry, EntryKey};
+    /// use rustcheevos::types::rich::{Entry, EntryKey};
     ///
     /// let entry = Entry::new(1, "Full Health");
-    /// assert_eq!(entry.value, "Full Health");
+    /// assert_eq!(entry.value(), "Full Health");
     ///
     /// let range_entry = Entry::new(EntryKey::Range(1..=100), "Health Range");
-    /// assert_eq!(range_entry.value, "Health Range");
+    /// assert_eq!(range_entry.value(), "Health Range");
     /// ```
     pub fn new(key: impl Into<EntryKey>, value: impl Into<String>) -> Self {
         Self {
@@ -145,10 +174,10 @@ impl Entry {
     /// # Examples
     ///
     /// ```
-    /// use rustcheevos::types::rich::lookup::Entry;
+    /// use rustcheevos::types::rich::Entry;
     ///
     /// let entry = Entry::new(1, "Full Health").with_key(100);
-    /// assert_eq!(entry.keys.len(), 2);
+    /// assert_eq!(entry.keys().len(), 2);
     /// ```
     #[must_use]
     pub fn with_key(mut self, key: impl Into<EntryKey>) -> Self {

@@ -6,20 +6,25 @@ use winnow::Parser;
 
 use crate::{parsers::ParseError, parsers::parse_flag};
 
-pub mod traits;
+pub(crate) mod traits;
+
+pub use traits::{
+    AddAddress, AddHits, AddSource, AndNext, Measured, MeasuredIf, MeasuredPercentage, OrNext,
+    PauseIf, Remember, ResetIf, ResetNextIf, SubHits, SubSource, Trigger,
+};
 
 /// A flag that modifies behavior.
 #[derive(Debug, Clone, Copy, PartialEq)]
-pub enum Flag {
+pub(crate) enum Flag {
     /// A flag used in comparisons.
-    Comparison(ComparisonFlag),
+    Condition(ConditionFlag),
     /// A flag in an arithmetic expression.
     Arithmetic(ArithmeticFlag),
 }
 
-impl From<ComparisonFlag> for Flag {
-    fn from(flag: ComparisonFlag) -> Self {
-        Flag::Comparison(flag)
+impl From<ConditionFlag> for Flag {
+    fn from(flag: ConditionFlag) -> Self {
+        Flag::Condition(flag)
     }
 }
 
@@ -42,7 +47,7 @@ impl FromStr for Flag {
 impl fmt::Display for Flag {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
-            Flag::Comparison(flag) => write!(f, "{flag}"),
+            Flag::Condition(flag) => write!(f, "{flag}"),
             Flag::Arithmetic(flag) => write!(f, "{flag}"),
         }
     }
@@ -50,7 +55,7 @@ impl fmt::Display for Flag {
 
 /// A flag used in comparisons.
 #[derive(Debug, Clone, Copy, PartialEq)]
-pub enum ComparisonFlag {
+pub enum ConditionFlag {
     /// Pause if the condition is met.
     PauseIf,
     /// Reset if the condition is met.
@@ -75,41 +80,41 @@ pub enum ComparisonFlag {
     Trigger,
 }
 
-impl TryFrom<char> for ComparisonFlag {
+impl TryFrom<char> for ConditionFlag {
     type Error = ParseError;
 
     fn try_from(c: char) -> Result<Self, Self::Error> {
         match c {
-            'P' => Ok(ComparisonFlag::PauseIf),
-            'R' => Ok(ComparisonFlag::ResetIf),
-            'Z' => Ok(ComparisonFlag::ResetNextIf),
-            'C' => Ok(ComparisonFlag::AddHits),
-            'D' => Ok(ComparisonFlag::SubHits),
-            'N' => Ok(ComparisonFlag::AndNext),
-            'O' => Ok(ComparisonFlag::OrNext),
-            'M' => Ok(ComparisonFlag::Measured),
-            'G' => Ok(ComparisonFlag::MeasuredPercentage),
-            'Q' => Ok(ComparisonFlag::MeasuredIf),
-            'T' => Ok(ComparisonFlag::Trigger),
+            'P' => Ok(ConditionFlag::PauseIf),
+            'R' => Ok(ConditionFlag::ResetIf),
+            'Z' => Ok(ConditionFlag::ResetNextIf),
+            'C' => Ok(ConditionFlag::AddHits),
+            'D' => Ok(ConditionFlag::SubHits),
+            'N' => Ok(ConditionFlag::AndNext),
+            'O' => Ok(ConditionFlag::OrNext),
+            'M' => Ok(ConditionFlag::Measured),
+            'G' => Ok(ConditionFlag::MeasuredPercentage),
+            'Q' => Ok(ConditionFlag::MeasuredIf),
+            'T' => Ok(ConditionFlag::Trigger),
             _ => Err(ParseError::Flag(c.to_string())),
         }
     }
 }
 
-impl fmt::Display for ComparisonFlag {
+impl fmt::Display for ConditionFlag {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let s = match self {
-            ComparisonFlag::PauseIf => "P",
-            ComparisonFlag::ResetIf => "R",
-            ComparisonFlag::ResetNextIf => "Z",
-            ComparisonFlag::AddHits => "C",
-            ComparisonFlag::SubHits => "D",
-            ComparisonFlag::AndNext => "N",
-            ComparisonFlag::OrNext => "O",
-            ComparisonFlag::Measured => "M",
-            ComparisonFlag::MeasuredPercentage => "G",
-            ComparisonFlag::MeasuredIf => "Q",
-            ComparisonFlag::Trigger => "T",
+            ConditionFlag::PauseIf => "P",
+            ConditionFlag::ResetIf => "R",
+            ConditionFlag::ResetNextIf => "Z",
+            ConditionFlag::AddHits => "C",
+            ConditionFlag::SubHits => "D",
+            ConditionFlag::AndNext => "N",
+            ConditionFlag::OrNext => "O",
+            ConditionFlag::Measured => "M",
+            ConditionFlag::MeasuredPercentage => "G",
+            ConditionFlag::MeasuredIf => "Q",
+            ConditionFlag::Trigger => "T",
         };
         write!(f, "{s}:")
     }

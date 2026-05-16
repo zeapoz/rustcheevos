@@ -1,6 +1,6 @@
 //! Traits for types that can be modified with flags.
 
-use crate::types::requirement::arithmetic::Arithmetic;
+use crate::types::requirement::Arithmetic;
 
 use super::ArithmeticFlag;
 
@@ -9,7 +9,7 @@ pub trait PauseIf {
     /// The output type.
     type Output;
 
-    /// Sets the [`PauseIf`][`super::ComparisonFlag::PauseIf`] flag on this type.
+    /// Sets the [`PauseIf`][`super::ConditionFlag::PauseIf`] flag on this type.
     fn pause_if(self) -> Self::Output;
 }
 
@@ -18,7 +18,7 @@ pub trait ResetIf {
     /// The output type.
     type Output;
 
-    /// Sets the [`ResetIf`][`super::ComparisonFlag::ResetIf`] flag on this type.
+    /// Sets the [`ResetIf`][`super::ConditionFlag::ResetIf`] flag on this type.
     fn reset_if(self) -> Self::Output;
 }
 
@@ -27,7 +27,7 @@ pub trait ResetNextIf {
     /// The output type.
     type Output;
 
-    /// Sets the [`ResetNextIf`][`super::ComparisonFlag::ResetNextIf`] flag on this type.
+    /// Sets the [`ResetNextIf`][`super::ConditionFlag::ResetNextIf`] flag on this type.
     fn reset_next_if(self) -> Self::Output;
 }
 
@@ -46,7 +46,7 @@ impl AddSource for u32 {
 
     /// Sets the [`AddSource`][`super::ArithmeticFlag::AddSource`] flag on this type.
     fn add_source(self) -> Self::Output {
-        Arithmetic::new(ArithmeticFlag::AddSource, self)
+        Arithmetic::new(ArithmeticFlag::AddSource, self, None)
     }
 }
 
@@ -63,7 +63,7 @@ impl SubSource for u32 {
     type Output = Arithmetic;
 
     fn sub_source(self) -> Self::Output {
-        Arithmetic::new(ArithmeticFlag::SubSource, self)
+        Arithmetic::new(ArithmeticFlag::SubSource, self, None)
     }
 }
 
@@ -72,7 +72,7 @@ pub trait AddHits {
     /// The output type.
     type Output;
 
-    /// Sets the [`AddHits`][`super::ComparisonFlag::AddHits`] flag on this type.
+    /// Sets the [`AddHits`][`super::ConditionFlag::AddHits`] flag on this type.
     fn add_hits(self) -> Self::Output;
 }
 
@@ -81,7 +81,7 @@ pub trait SubHits {
     /// The output type.
     type Output;
 
-    /// Sets teh [`SubHits`][`super::ComparisonFlag::SubHits`] flag on this type.
+    /// Sets teh [`SubHits`][`super::ConditionFlag::SubHits`] flag on this type.
     fn sub_hits(self) -> Self::Output;
 }
 
@@ -99,7 +99,7 @@ pub trait AndNext {
     /// The output type.
     type Output;
 
-    /// Sets the [`AndNext`][`super::ComparisonFlag::AndNext`] flag on this type.
+    /// Sets the [`AndNext`][`super::ConditionFlag::AndNext`] flag on this type.
     fn and_next(self) -> Self::Output;
 }
 
@@ -108,7 +108,7 @@ pub trait OrNext {
     /// The output type.
     type Output;
 
-    /// Sets the [`OrNext`][`super::ComparisonFlag::OrNext`] flag on this type.
+    /// Sets the [`OrNext`][`super::ConditionFlag::OrNext`] flag on this type.
     fn or_next(self) -> Self::Output;
 }
 
@@ -117,7 +117,7 @@ pub trait Measured {
     /// The output type.
     type Output;
 
-    /// Sets the [`Measured`][`super::ComparisonFlag::Measured`] flag on this type.
+    /// Sets the [`Measured`][`super::ConditionFlag::Measured`] flag on this type.
     fn measured(self) -> Self::Output;
 }
 
@@ -126,7 +126,7 @@ pub trait MeasuredPercentage {
     /// The output type.
     type Output;
 
-    /// Sets the [`MeasuredPercentage`][`super::ComparisonFlag::MeasuredPercentage`] flag on this type.
+    /// Sets the [`MeasuredPercentage`][`super::ConditionFlag::MeasuredPercentage`] flag on this type.
     fn measured_pct(self) -> Self::Output;
 }
 
@@ -135,7 +135,7 @@ pub trait MeasuredIf {
     /// The output type.
     type Output;
 
-    /// Sets the [`MeasuredIf`][`super::ComparisonFlag::MeasuredIf`] flag on this type.
+    /// Sets the [`MeasuredIf`][`super::ConditionFlag::MeasuredIf`] flag on this type.
     fn measured_if(self) -> Self::Output;
 }
 
@@ -144,7 +144,7 @@ pub trait Trigger {
     /// The output type.
     type Output;
 
-    /// Sets the [`Trigger`][`super::ComparisonFlag::Trigger`] flag on this type.
+    /// Sets the [`Trigger`][`super::ConditionFlag::Trigger`] flag on this type.
     fn trigger(self) -> Self::Output;
 }
 
@@ -177,82 +177,82 @@ pub trait Remember {
 /// - `Trigger`
 #[doc(hidden)]
 #[macro_export]
-macro_rules! impl_comparison_flag_traits {
+macro_rules! impl_condition_flag_traits {
     ($struct:ident, $method:ident) => {
-        impl $crate::types::flag::traits::PauseIf for $struct {
+        impl $crate::types::flag::PauseIf for $struct {
             type Output = Self;
             fn pause_if(self) -> Self::Output {
-                self.$method($crate::types::flag::ComparisonFlag::PauseIf)
+                self.$method($crate::types::flag::ConditionFlag::PauseIf)
             }
         }
 
-        impl $crate::types::flag::traits::ResetIf for $struct {
+        impl $crate::types::flag::ResetIf for $struct {
             type Output = Self;
             fn reset_if(self) -> Self::Output {
-                self.$method($crate::types::flag::ComparisonFlag::ResetIf)
+                self.$method($crate::types::flag::ConditionFlag::ResetIf)
             }
         }
 
-        impl $crate::types::flag::traits::ResetNextIf for $struct {
+        impl $crate::types::flag::ResetNextIf for $struct {
             type Output = Self;
             fn reset_next_if(self) -> Self::Output {
-                self.$method($crate::types::flag::ComparisonFlag::ResetNextIf)
+                self.$method($crate::types::flag::ConditionFlag::ResetNextIf)
             }
         }
 
-        impl $crate::types::flag::traits::AddHits for $struct {
+        impl $crate::types::flag::AddHits for $struct {
             type Output = Self;
             fn add_hits(self) -> Self::Output {
-                self.$method($crate::types::flag::ComparisonFlag::AddHits)
+                self.$method($crate::types::flag::ConditionFlag::AddHits)
             }
         }
 
-        impl $crate::types::flag::traits::SubHits for $struct {
+        impl $crate::types::flag::SubHits for $struct {
             type Output = Self;
             fn sub_hits(self) -> Self::Output {
-                self.$method($crate::types::flag::ComparisonFlag::SubHits)
+                self.$method($crate::types::flag::ConditionFlag::SubHits)
             }
         }
 
-        impl $crate::types::flag::traits::AndNext for $struct {
+        impl $crate::types::flag::AndNext for $struct {
             type Output = Self;
             fn and_next(self) -> Self::Output {
-                self.$method($crate::types::flag::ComparisonFlag::AndNext)
+                self.$method($crate::types::flag::ConditionFlag::AndNext)
             }
         }
 
-        impl $crate::types::flag::traits::OrNext for $struct {
+        impl $crate::types::flag::OrNext for $struct {
             type Output = Self;
             fn or_next(self) -> Self::Output {
-                self.$method($crate::types::flag::ComparisonFlag::OrNext)
+                self.$method($crate::types::flag::ConditionFlag::OrNext)
             }
         }
 
-        impl $crate::types::flag::traits::Measured for $struct {
+        impl $crate::types::flag::Measured for $struct {
             type Output = Self;
             fn measured(self) -> Self::Output {
-                self.$method($crate::types::flag::ComparisonFlag::Measured)
+                self.$method($crate::types::flag::ConditionFlag::Measured)
             }
         }
 
-        impl $crate::types::flag::traits::MeasuredPercentage for $struct {
+        impl $crate::types::flag::MeasuredPercentage for $struct {
             type Output = Self;
             fn measured_pct(self) -> Self::Output {
-                self.$method($crate::types::flag::ComparisonFlag::MeasuredPercentage)
+                self.$method($crate::types::flag::ConditionFlag::MeasuredPercentage)
             }
         }
 
-        impl $crate::types::flag::traits::MeasuredIf for $struct {
+        impl $crate::types::flag::MeasuredIf for $struct {
             type Output = Self;
             fn measured_if(self) -> Self::Output {
-                self.$method($crate::types::flag::ComparisonFlag::MeasuredIf)
+                self.$method($crate::types::flag::ConditionFlag::MeasuredIf)
             }
         }
 
-        impl $crate::types::flag::traits::Trigger for $struct {
+        impl $crate::types::flag::Trigger for $struct {
             type Output = Self;
             fn trigger(self) -> Self::Output {
-                self.$method($crate::types::flag::ComparisonFlag::Trigger)
+                self.$method($crate::types::flag::ConditionFlag::Trigger)
             }
         }
     };
@@ -277,28 +277,28 @@ macro_rules! impl_arithmetic_flag_traits {
         impl_arithmetic_flag_traits!($struct, $method, Self);
     };
     ($struct:ident, $method:ident, $output:ty) => {
-        impl $crate::types::flag::traits::AddSource for $struct {
+        impl $crate::types::flag::AddSource for $struct {
             type Output = $output;
             fn add_source(self) -> Self::Output {
                 self.$method($crate::types::flag::ArithmeticFlag::AddSource)
             }
         }
 
-        impl $crate::types::flag::traits::SubSource for $struct {
+        impl $crate::types::flag::SubSource for $struct {
             type Output = $output;
             fn sub_source(self) -> Self::Output {
                 self.$method($crate::types::flag::ArithmeticFlag::SubSource)
             }
         }
 
-        impl $crate::types::flag::traits::AddAddress for $struct {
+        impl $crate::types::flag::AddAddress for $struct {
             type Output = $output;
             fn add_address(self) -> Self::Output {
                 self.$method($crate::types::flag::ArithmeticFlag::AddAddress)
             }
         }
 
-        impl $crate::types::flag::traits::Remember for $struct {
+        impl $crate::types::flag::Remember for $struct {
             type Output = $output;
             fn remember(self) -> Self::Output {
                 self.$method($crate::types::flag::ArithmeticFlag::Remember)

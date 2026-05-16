@@ -3,32 +3,16 @@
 use std::fmt;
 
 /// A rich presence format definition.
-///
-/// # Examples
-///
-/// ```
-/// use rustcheevos::types::rich::format::{Format, FormatType};
-///
-/// let format = Format::new("Score", FormatType::Score);
-/// ```
 #[derive(Debug, Clone, PartialEq)]
-pub struct Format {
+pub(crate) struct Format {
     /// The name of the format.
-    pub name: String,
+    name: String,
     /// The format type.
-    pub format_type: FormatType,
+    format_type: FormatType,
 }
 
 impl Format {
     /// Creates a new rich presence format definition.
-    ///
-    /// # Examples
-    ///
-    /// ```
-    /// use rustcheevos::types::rich::format::{Format, FormatType};
-    ///
-    /// let format = Format::new("Score", FormatType::Score);
-    /// ```
     pub fn new(name: impl Into<String>, format_type: FormatType) -> Self {
         Self {
             name: name.into(),
@@ -49,7 +33,7 @@ impl fmt::Display for Format {
 /// # Examples
 ///
 /// ```
-/// use rustcheevos::types::rich::format::FormatType;
+/// use rustcheevos::prelude::FormatType;
 ///
 /// let format_type = FormatType::Seconds;
 /// ```

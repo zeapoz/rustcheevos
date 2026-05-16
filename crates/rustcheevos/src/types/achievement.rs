@@ -30,22 +30,64 @@ use super::requirement::condition::Condition;
 #[derive(Debug, Clone, PartialEq)]
 pub struct Achievement {
     /// The achievement ID.
-    pub id: u32,
+    id: u32,
     /// The achievement title.
-    pub title: String,
+    title: String,
     /// The achievement description.
-    pub description: String,
+    description: String,
     /// The conditions that must be met for the achievement.
-    pub requirements: ChainGroup,
+    requirements: ChainGroup,
     /// The achievement tag.
-    pub tag: Option<Tag>,
+    tag: Option<Tag>,
     /// The point value.
-    pub points: u32,
+    points: u32,
     /// The badge ID.
-    pub badge_id: u32,
+    badge_id: u32,
 }
 
 impl Achievement {
+    /// Returns the achievement ID.
+    #[must_use]
+    pub fn id(&self) -> u32 {
+        self.id
+    }
+
+    /// Returns the achievement title.
+    #[must_use]
+    pub fn title(&self) -> &str {
+        &self.title
+    }
+
+    /// Returns the achievement description.
+    #[must_use]
+    pub fn description(&self) -> &str {
+        &self.description
+    }
+
+    /// Returns the achievement requirements.
+    #[must_use]
+    pub fn requirements(&self) -> &ChainGroup {
+        &self.requirements
+    }
+
+    /// Returns the achievement tag.
+    #[must_use]
+    pub fn tag(&self) -> Option<&Tag> {
+        self.tag.as_ref()
+    }
+
+    /// Returns the point value.
+    #[must_use]
+    pub fn points(&self) -> u32 {
+        self.points
+    }
+
+    /// Returns the badge ID.
+    #[must_use]
+    pub fn badge_id(&self) -> u32 {
+        self.badge_id
+    }
+
     /// Returns a builder for constructing an achievement.
     ///
     /// # Examples

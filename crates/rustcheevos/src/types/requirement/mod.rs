@@ -5,18 +5,18 @@ use std::{fmt, str::FromStr};
 use winnow::Parser;
 
 use crate::{
-    impl_arithmetic_flag_traits, impl_comparison_flag_traits,
+    impl_arithmetic_flag_traits, impl_condition_flag_traits,
     parsers::ParseError,
     parsers::parse_requirement,
     prelude::AccessMode,
     types::{
-        flag::{ArithmeticFlag, ComparisonFlag},
+        flag::{ArithmeticFlag, ConditionFlag},
         memory::AccessModeModifier,
     },
 };
 
-pub mod arithmetic;
-pub mod condition;
+pub(crate) mod arithmetic;
+pub(crate) mod condition;
 
 pub use arithmetic::Arithmetic;
 pub use condition::Condition;
@@ -76,7 +76,7 @@ impl Requirement {
     ///
     /// If the requirement is an [`Arithmetic`], returns self unchanged.
     #[must_use]
-    pub fn with_comparison_flag(self, flag: ComparisonFlag) -> Self {
+    pub fn with_condition_flag(self, flag: ConditionFlag) -> Self {
         match self {
             Requirement::Condition(c) => Requirement::Condition(c.with_flag(flag)),
             Requirement::Arithmetic(a) => Requirement::Arithmetic(a),
@@ -95,5 +95,5 @@ impl Requirement {
     }
 }
 
-impl_comparison_flag_traits!(Requirement, with_comparison_flag);
+impl_condition_flag_traits!(Requirement, with_condition_flag);
 impl_arithmetic_flag_traits!(Requirement, with_arithmetic_flag);
