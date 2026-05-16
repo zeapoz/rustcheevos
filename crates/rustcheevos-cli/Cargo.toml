@@ -7,7 +7,7 @@ edition = "2024"
 clap = { version = "4.6.1", features = ["derive"] }
 color-eyre = "0.6.5"
 eyre = "0.6.12"
-heck = "0.5.0"
+heck.workspace = true
 rustcheevos = { version = "0.1.0", path = "../rustcheevos" }
 serde_json.workspace = true
 
