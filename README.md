@@ -85,7 +85,7 @@ fn main() {
     table.add_entry(Entry::new(2..=3, "Level 2"));
     table.set_fallback("Main Menu");
 
-    // This returns a macro call handle than can be used directly in format! strings.
+    // This returns a macro call handle that can be used directly in format! strings.
     let stage = rich_presence.register_lookup(table, bits8!(0x1234));
     rich_presence.add_static_display("Currently in {stage}");
 

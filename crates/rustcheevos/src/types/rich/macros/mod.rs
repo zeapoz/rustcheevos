@@ -112,7 +112,7 @@ impl MacroRef {
     /// let lookup = Rc::new(LookupTable::new("LookupTable"));
     /// let macro_ref = MacroRef::lookup(lookup, bits8!(0x1234));
     /// assert_eq!(macro_ref.to_string(), "@LookupTable(0xH1234)");
-    /// ``
+    /// ```
     pub fn lookup(lookup: Rc<LookupTable>, value: impl Into<MacroValue>) -> MacroRef {
         Self::new(MacroType::Lookup(lookup), value)
     }

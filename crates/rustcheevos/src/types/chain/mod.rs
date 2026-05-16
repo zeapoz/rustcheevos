@@ -316,9 +316,9 @@ impl AccessModeModifier for Chain {
 }
 
 impl Chain {
-    /// Sets the given comparison flag on all [`Condition`] requirements in this chain.
+    /// Sets the given comparison flag on all [`Condition`][crate::prelude::Condition] requirements in this chain.
     ///
-    /// [`Arithmetic`] requirements are returned unchanged.
+    /// [`Arithmetic`][crate::prelude::Arithmetic] requirements are returned unchanged.
     #[must_use]
     pub fn with_comparison_flag(self, flag: ComparisonFlag) -> Self {
         Self(
@@ -329,9 +329,9 @@ impl Chain {
         )
     }
 
-    /// Sets the given arithmetic flag on all [`Arithmetic`] requirements in this chain.
+    /// Sets the given arithmetic flag on all [`Arithmetic`][crate::prelude::Arithmetic] requirements in this chain.
     ///
-    /// [`Condition`] requirements are returned unchanged.
+    /// [`Condition`][crate::prelude::Condition] requirements are returned unchanged.
     #[must_use]
     pub fn with_arithmetic_flag(self, flag: ArithmeticFlag) -> Self {
         Self(

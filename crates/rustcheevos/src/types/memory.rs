@@ -127,7 +127,7 @@ impl MemoryRef {
         self
     }
 
-    /// Creates a new equals [`Condition`].
+    /// Creates a new equals [`Condition`][crate::prelude::Condition].
     /// Sets the given flag on this requirement.
     ///
     /// # Examples

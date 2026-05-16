@@ -30,6 +30,7 @@ The `import` subcommand supports the following options:
 - `--no-docs`: Omit doc comments from generated functions.
 - `--address <ADDRESS>`: Filter to a single note by address (hex, e.g. 0x1234).
 - `--range <RANGE>`: Filter to a range of addresses (e.g. 0x1000..0x2000 or 0x1000..=0x2000).
+- `--format <FORMAT>`: Output format for generated code. Options are `function` (default, generates `pub const fn` functions) or `const` (generates `pub const` constants).
 
 # License
 

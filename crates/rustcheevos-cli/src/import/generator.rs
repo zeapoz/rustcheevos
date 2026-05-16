@@ -14,7 +14,7 @@ use super::parsing::ParsedNote;
 /// Generates Rust code from parsed code notes.
 ///
 /// Produces a module containing `use` statements for required macros
-/// and one function or constant per parsed note that returns a [`MemoryRef`].
+/// and one function or constant per parsed note that returns a [`MemoryRef`][rustcheevos::prelude::MemoryRef].
 pub struct OutputGenerator {
     /// Whether to include doc comments in generated output.
     add_doc_comments: bool,
