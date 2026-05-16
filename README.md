@@ -16,6 +16,19 @@ rustcheevos = { git = "https://github.com/zeapoz/rustcheevos.git" }
 
 ## Usage
 
+### Rustcheevos CLI
+
+To make the process of starting a new set easier, a separate `rustcheevos-cli` tool exists that
+provides a command-line interface for scafollding new Rustcheevos sets.
+
+To install, run:
+
+```sh
+cargo install --git https://github.com/zeapoz/rustcheevos.git --bin rustcheevos-cli
+```
+
+For more information and usage, see the [rustcheevos-cli README](https://github.com/zeapoz/rustcheevos/tree/main/crates/rustcheevos-cli).
+
 ### Example Program
 
 ```rust
