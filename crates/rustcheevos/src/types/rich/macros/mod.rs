@@ -24,7 +24,7 @@ impl fmt::Display for MacroType {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let s = match self {
             Self::Builtin(builtin) => builtin.to_string(),
-            Self::Format(format) => format.to_string(),
+            Self::Format(format) => format.name().to_string(),
             Self::Lookup(lookup) => lookup.name().to_string(),
         };
         write!(f, "{s}")

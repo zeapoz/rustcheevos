@@ -19,6 +19,11 @@ impl Format {
             format_type,
         }
     }
+
+    /// Returns the name of the format.
+    pub fn name(&self) -> &str {
+        &self.name
+    }
 }
 
 impl fmt::Display for Format {
