@@ -97,7 +97,13 @@ fn main() {
 }
 ```
 
+## Community Sets
 
+The best way to learn how to create sets using Rustcheevos is to look at how other people are using it.
+
+- [zeapoz/rustcheevos-sets](https://github.com/zeapoz/rustcheevos-sets)
+
+*If you've created sets using Rustcheevos and would like to share them here, feel free to open a PR to add them to this list.*
 
 ## Documentation
 
