@@ -74,45 +74,19 @@ impl MemoryRef {
         }
     }
 
-    /// Returns the access mode of the memory reference.
-    ///
-    /// # Examples
-    /// ```
-    /// use rustcheevos::prelude::*;
-    /// use rustcheevos::types::memory::{MemoryRef, MemorySize};
-    ///
-    /// let memory_ref = MemoryRef::new(MemorySize::Bits8, 0x1234);
-    /// assert_eq!(memory_ref.size(), MemorySize::Bits8);
-    /// ```
+    /// Returns the size of the memory reference.
     #[must_use]
     pub fn size(&self) -> MemorySize {
         self.size
     }
 
     /// Returns the address of the memory reference.
-    ///
-    /// # Examples
-    /// ```
-    /// use rustcheevos::prelude::*;
-    /// use rustcheevos::types::memory::{MemoryRef, MemorySize};
-    ///
-    /// let memory_ref = MemoryRef::new(MemorySize::Bits8, 0x1234);
-    /// assert_eq!(memory_ref.address(), 0x1234);
-    /// ```
     #[must_use]
     pub fn address(&self) -> usize {
         self.address
     }
 
     /// Returns the access mode of the memory reference.
-    /// # Examples
-    /// ```
-    /// use rustcheevos::prelude::*;
-    /// use rustcheevos::types::memory::{MemoryRef, MemorySize, AccessMode};
-    ///
-    /// let memory_ref = MemoryRef::new(MemorySize::Bits8, 0x1234);
-    /// assert_eq!(memory_ref.access_mode(), AccessMode::Memory);
-    /// ```
     #[must_use]
     pub fn access_mode(&self) -> AccessMode {
         self.access_mode

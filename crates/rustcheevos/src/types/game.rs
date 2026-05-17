@@ -35,31 +35,29 @@ pub type CodeNoteSet = Vec<CodeNote>;
 /// let mut game_data = GameData::new(123, "Super Adventure");
 ///
 /// // Define an achievement with conditions.
-/// let achievement_condition = chain!(
-///     bits8!(0x1234).eq(1),
-///     bits8!(0x5678).ge(100),
-/// );
 /// let achievement = Achievement::builder("First Step")
 ///     .description("Complete the tutorial level")
-///     .requirements(achievement_condition)
+///     .requirements(chain!(
+///         bits8!(0x1234).eq(1),
+///         bits8!(0x5678).ge(100),
+///     ))
 ///     .badge_id(12345)
 ///     .points(5)
 ///     .build();
 ///
 /// // Define a leaderboard with conditions.
-/// let start = chain!(bits8!(0x1234).eq(1));
-/// let cancel = chain!(bits8!(0x1234).eq(0));
-/// let submit = chain!(bits8!(0xABCD).eq(1));
-/// let value = measured!(bits8!(0xDEF0));
 /// let leaderboard = Leaderboard::builder("Speed Run")
 ///     .description("Complete the game as fast as possible")
-///     .start(start)
-///     .cancel(cancel)
-///     .submit(submit)
-///     .value(value)
+///     .start(chain!(bits8!(0x1234).eq(1)))
+///     .cancel(chain!(bits8!(0x1234).eq(0)))
+///     .submit(chain!(bits8!(0xABCD).eq(1)))
+///     .value(measured!(bits8!(0xDEF0)))
 ///     .format(LeaderboardFormat::Seconds)
 ///     .lower_is_better(true)
 ///     .build();
+///
+/// // Define a code note.
+/// let note = CodeNote::new(0x1234, "Player health");
 ///
 /// // Define rich presence.
 /// let mut rich_presence = RichPresence::new();
@@ -68,13 +66,14 @@ pub type CodeNoteSet = Vec<CodeNote>;
 /// rich_presence.add_static_display("Super Adventure");
 ///
 /// // Add all assets to the game.
-/// game_data.add(achievement)
+/// game_data
+///     .add(achievement)
 ///     .add(leaderboard)
+///     .add(note)
 ///     .set_rich_presence(rich_presence);
 ///
 /// // Export to a directory.
 /// let directory = std::env::temp_dir().join("rustcheevos_example");
-/// std::fs::create_dir_all(&directory).unwrap();
 /// game_data.export(&directory).unwrap();
 /// ```
 #[derive(Debug, Clone, PartialEq)]
@@ -83,8 +82,8 @@ pub struct GameData {
     id: u32,
     /// The game name.
     title: String,
-    /// The core achievement set.
-    core_set: AchievementSet,
+    /// The achievements.
+    achievements: AchievementSet,
     /// The leaderboards.
     leaderboards: LeaderboardSet,
     /// The code notes.
@@ -104,15 +103,28 @@ impl GameData {
     ///
     /// let game_data = GameData::new(1, "Super Adventure");
     /// ```
+    #[must_use]
     pub fn new(id: u32, name: impl Into<String>) -> Self {
         Self {
             id,
             title: name.into(),
-            core_set: AchievementSet::new(),
+            achievements: AchievementSet::new(),
             leaderboards: LeaderboardSet::new(),
             code_notes: CodeNoteSet::new(),
             rich_presence: RichPresence::new(),
         }
+    }
+
+    /// Returns the game ID.
+    #[must_use]
+    pub fn id(&self) -> u32 {
+        self.id
+    }
+
+    /// Returns the game title.
+    #[must_use]
+    pub fn title(&self) -> &str {
+        &self.title
     }
 
     /// Adds an asset to this game.
@@ -138,10 +150,9 @@ impl GameData {
     /// ```
     pub fn add(&mut self, item: impl Into<GameAsset>) -> &mut Self {
         match item.into() {
-            GameAsset::Achievement(achievement) => self.core_set.push(achievement),
+            GameAsset::Achievement(achievement) => self.achievements.push(achievement),
             GameAsset::Leaderboard(leaderboard) => self.leaderboards.push(leaderboard),
             GameAsset::CodeNote(note) => self.code_notes.push(note),
-            GameAsset::RichPresence(rich_presence) => self.rich_presence = rich_presence,
         }
         self
     }
@@ -180,7 +191,7 @@ impl GameData {
         self
     }
 
-    /// Sets the core achievement set for this game.
+    /// Sets the achievements for this game.
     ///
     /// # Examples
     ///
@@ -190,19 +201,18 @@ impl GameData {
     /// # use rustcheevos::{chain, bits8};
     /// let mut game_data = GameData::new(1, "Super Adventure");
     ///
-    /// let condition = chain!(bits8!(0x1234).eq(1));
     /// let achievement = Achievement::builder("First Step")
     ///     .description("Complete the tutorial")
-    ///     .requirements(condition)
+    ///     .requirements(chain!(bits8!(0x1234).eq(1)))
     ///     .badge_id(12345)
     ///     .points(5)
     ///     .build();
     ///
-    /// game_data.set_core_set(vec![achievement]);
+    /// game_data.set_achievements(vec![achievement]);
     /// assert_eq!(game_data.achievements().count(), 1);
     /// ```
-    pub fn set_core_set(&mut self, core_set: impl Into<AchievementSet>) -> &mut Self {
-        self.core_set = core_set.into();
+    pub fn set_achievements(&mut self, achievements: impl Into<AchievementSet>) -> &mut Self {
+        self.achievements = achievements.into();
         self
     }
 
@@ -216,16 +226,12 @@ impl GameData {
     /// # use rustcheevos::{chain, bits8, measured};
     /// let mut game_data = GameData::new(1, "Super Adventure");
     ///
-    /// let start = chain!(bits8!(0x1234).eq(1));
-    /// let cancel = chain!(bits8!(0x1234).eq(0));
-    /// let submit = chain!(bits8!(0xABCD).eq(1));
-    /// let value = measured!(bits8!(0xDEF0));
     /// let leaderboard = Leaderboard::builder("Speed Run")
     ///     .description("Complete the game fast")
-    ///     .start(start)
-    ///     .cancel(cancel)
-    ///     .submit(submit)
-    ///     .value(value)
+    ///     .start(chain!(bits8!(0x1234).eq(1)))
+    ///     .cancel(chain!(bits8!(0x1234).eq(0)))
+    ///     .submit(chain!(bits8!(0xABCD).eq(1)))
+    ///     .value(measured!(bits8!(0xDEF0)))
     ///     .format(LeaderboardFormat::Seconds)
     ///     .lower_is_better(true)
     ///     .build();
@@ -290,7 +296,7 @@ impl GameData {
     /// }
     /// ```
     pub fn achievements(&self) -> impl Iterator<Item = &Achievement> {
-        self.core_set.iter()
+        self.achievements.iter()
     }
 
     /// Returns an iterator over the leaderboards in this game.
@@ -328,6 +334,12 @@ impl GameData {
         self.code_notes.iter()
     }
 
+    /// Returns the rich presence for this game.
+    #[must_use]
+    pub fn rich_presence(&self) -> &RichPresence {
+        &self.rich_presence
+    }
+
     /// Returns the user file representation of this game.
     fn user_file(&self) -> UserFile {
         UserFile::new(
@@ -359,12 +371,12 @@ impl GameData {
     /// game_data.set_rich_presence(rich_presence);
     ///
     /// let temp_dir = std::env::temp_dir().join("rustcheevos_export_test");
-    /// std::fs::create_dir_all(&temp_dir).unwrap();
     ///
     /// game_data.export(&temp_dir).unwrap();
     /// ```
     pub fn export(&self, dir: impl AsRef<Path>) -> io::Result<()> {
         let dir = dir.as_ref();
+        fs::create_dir_all(dir)?;
         self.export_user_file(dir)?;
         self.rich_presence.export(self.id, dir)
     }
@@ -415,7 +427,7 @@ impl GameData {
 /// use rustcheevos::types::{achievement::Achievement, game::GameAsset};
 /// use rustcheevos::{chain, bits8};
 ///
-/// // GameAsset can be created from Achievement, Leaderboard, or RichPresence
+/// // GameAsset can be created from Achievement, Leaderboard, or CodeNote
 /// let condition = chain!(bits8!(0x1234).eq(1));
 /// let achievement = Achievement::builder("First Step")
 ///     .description("Complete the tutorial")
@@ -434,8 +446,6 @@ pub enum GameAsset {
     Leaderboard(Leaderboard),
     /// A code note.
     CodeNote(CodeNote),
-    /// A rich presence.
-    RichPresence(RichPresence),
 }
 
 impl From<Achievement> for GameAsset {
@@ -453,11 +463,5 @@ impl From<Leaderboard> for GameAsset {
 impl From<CodeNote> for GameAsset {
     fn from(note: CodeNote) -> Self {
         GameAsset::CodeNote(note)
-    }
-}
-
-impl From<RichPresence> for GameAsset {
-    fn from(rich_presence: RichPresence) -> Self {
-        GameAsset::RichPresence(rich_presence)
     }
 }

@@ -87,7 +87,6 @@
 //!
 //!     // Export to a directory.
 //!     let directory = std::env::temp_dir().join("rustcheevos_example");
-//!     std::fs::create_dir_all(&directory).unwrap();
 //!     game_data.export(&directory).unwrap();
 //! }
 //! ```
