@@ -16,6 +16,7 @@ use super::requirement::condition::Condition;
 ///
 /// ```
 /// use rustcheevos::prelude::*;
+/// use rustcheevos::types::achievement::Achievement;
 /// use rustcheevos::bits8;
 ///
 /// let achievement = Achievement::builder("Alpha Amateur")
@@ -93,6 +94,7 @@ impl Achievement {
     /// # Examples
     /// ```
     /// use rustcheevos::prelude::*;
+    /// use rustcheevos::types::achievement::{Achievement, Tag};
     /// use rustcheevos::bits8;
     ///
     /// let achievement = Achievement::builder("Alpha Amateur")
@@ -115,6 +117,7 @@ impl Achievement {
 ///
 /// ```
 /// use rustcheevos::prelude::*;
+/// use rustcheevos::types::achievement::{Achievement, Tag};
 /// use rustcheevos::bits8;
 ///
 /// let achievement = Achievement::builder("Alpha Amateur")
@@ -230,7 +233,8 @@ impl From<AchievementBuilder> for Achievement {
 /// ```
 /// # enum Medal { Bronze }
 /// # fn all_medals_condition(medal: Medal) -> Chain { Chain::default() }
-/// use rustcheevos::prelude::*;
+/// use rustcheevos::types::achievement::{Achievement, Tag};
+/// use rustcheevos::types::chain::Chain;
 ///
 /// let achievement = Achievement::builder("Solar System Sentinel")
 ///     .description("Earn a Bronze medal or higher on every planet in every galaxy excluding the Lambda galaxy")

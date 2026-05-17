@@ -8,10 +8,9 @@ use crate::{
     impl_arithmetic_flag_traits, impl_condition_flag_traits,
     parsers::ParseError,
     parsers::parse_requirement,
-    prelude::AccessMode,
     types::{
         flag::{ArithmeticFlag, ConditionFlag},
-        memory::AccessModeModifier,
+        memory::{AccessMode, AccessModeModifier},
     },
 };
 

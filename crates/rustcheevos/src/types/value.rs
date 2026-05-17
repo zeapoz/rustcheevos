@@ -37,6 +37,8 @@ impl TypedValue {
     /// # Examples
     /// ```
     /// use rustcheevos::prelude::*;
+    /// use rustcheevos::types::memory::{MemoryRef, MemorySize, AccessMode};
+    /// use rustcheevos::types::value::TypedValue;
     ///
     /// let value = MemoryRef::new(MemorySize::Bits8, 0x1234);
     /// let typed = TypedValue::from(value).with_access_mode(AccessMode::Delta);
@@ -58,6 +60,7 @@ pub trait TypedValueOps: Into<TypedValue> {
     /// # Examples
     /// ```
     /// use rustcheevos::prelude::*;
+    /// use rustcheevos::types::memory::{MemoryRef, MemorySize};
     ///
     /// let memory_ref = MemoryRef::new(MemorySize::Bits8, 0x1234);
     /// let requirement = memory_ref.eq(50);
@@ -69,6 +72,7 @@ pub trait TypedValueOps: Into<TypedValue> {
     /// # Examples
     /// ```
     /// use rustcheevos::prelude::*;
+    /// use rustcheevos::types::memory::{MemoryRef, MemorySize};
     ///
     /// let memory_ref = MemoryRef::new(MemorySize::Bits8, 0x1234);
     /// let requirement = memory_ref.ne(50);
@@ -80,6 +84,7 @@ pub trait TypedValueOps: Into<TypedValue> {
     /// # Examples
     /// ```
     /// use rustcheevos::prelude::*;
+    /// use rustcheevos::types::memory::{MemoryRef, MemorySize};
     ///
     /// let memory_ref = MemoryRef::new(MemorySize::Bits8, 0x1234);
     /// let requirement = memory_ref.lt(50);
@@ -91,6 +96,7 @@ pub trait TypedValueOps: Into<TypedValue> {
     /// # Examples
     /// ```
     /// use rustcheevos::prelude::*;
+    /// use rustcheevos::types::memory::{MemoryRef, MemorySize};
     ///
     /// let memory_ref = MemoryRef::new(MemorySize::Bits8, 0x1234);
     /// let requirement = memory_ref.le(50);
@@ -102,6 +108,7 @@ pub trait TypedValueOps: Into<TypedValue> {
     /// # Examples
     /// ```
     /// use rustcheevos::prelude::*;
+    /// use rustcheevos::types::memory::{MemoryRef, MemorySize};
     ///
     /// let memory_ref = MemoryRef::new(MemorySize::Bits8, 0x1234);
     /// let requirement = memory_ref.gt(50);
@@ -113,6 +120,7 @@ pub trait TypedValueOps: Into<TypedValue> {
     /// # Examples
     /// ```
     /// use rustcheevos::prelude::*;
+    /// use rustcheevos::types::memory::{MemoryRef, MemorySize};
     ///
     /// let memory_ref = MemoryRef::new(MemorySize::Bits8, 0x1234);
     /// let requirement = memory_ref.ge(50);
@@ -124,6 +132,7 @@ pub trait TypedValueOps: Into<TypedValue> {
     /// # Examples
     /// ```
     /// use rustcheevos::prelude::*;
+    /// use rustcheevos::types::memory::{MemoryRef, MemorySize};
     ///
     /// let memory_ref = MemoryRef::new(MemorySize::Bits8, 0x1234);
     /// let requirement = memory_ref.add(50);
@@ -135,6 +144,7 @@ pub trait TypedValueOps: Into<TypedValue> {
     /// # Examples
     /// ```
     /// use rustcheevos::prelude::*;
+    /// use rustcheevos::types::memory::{MemoryRef, MemorySize};
     ///
     /// let memory_ref = MemoryRef::new(MemorySize::Bits8, 0x1234);
     /// let requirement = memory_ref.sub(50);
@@ -146,6 +156,7 @@ pub trait TypedValueOps: Into<TypedValue> {
     /// # Examples
     /// ```
     /// use rustcheevos::prelude::*;
+    /// use rustcheevos::types::memory::{MemoryRef, MemorySize};
     ///
     /// let memory_ref = MemoryRef::new(MemorySize::Bits8, 0x1234);
     /// let requirement = memory_ref.mul(50);
@@ -157,6 +168,7 @@ pub trait TypedValueOps: Into<TypedValue> {
     /// # Examples
     /// ```
     /// use rustcheevos::prelude::*;
+    /// use rustcheevos::types::memory::{MemoryRef, MemorySize};
     ///
     /// let memory_ref = MemoryRef::new(MemorySize::Bits8, 0x1234);
     /// let requirement = memory_ref.div(50);
@@ -168,6 +180,7 @@ pub trait TypedValueOps: Into<TypedValue> {
     /// # Examples
     /// ```
     /// use rustcheevos::prelude::*;
+    /// use rustcheevos::types::memory::{MemoryRef, MemorySize};
     ///
     /// let memory_ref = MemoryRef::new(MemorySize::Bits8, 0x1234);
     /// let requirement = memory_ref.modulo(50);
@@ -179,6 +192,7 @@ pub trait TypedValueOps: Into<TypedValue> {
     /// # Examples
     /// ```
     /// use rustcheevos::prelude::*;
+    /// use rustcheevos::types::memory::{MemoryRef, MemorySize};
     ///
     /// let memory_ref = MemoryRef::new(MemorySize::Bits8, 0x1234);
     /// let requirement = memory_ref.bitwise_and(50);
@@ -190,6 +204,7 @@ pub trait TypedValueOps: Into<TypedValue> {
     /// # Examples
     /// ```
     /// use rustcheevos::prelude::*;
+    /// use rustcheevos::types::memory::{MemoryRef, MemorySize};
     ///
     /// let memory_ref = MemoryRef::new(MemorySize::Bits8, 0x1234);
     /// let requirement = memory_ref.bitwise_xor(50);

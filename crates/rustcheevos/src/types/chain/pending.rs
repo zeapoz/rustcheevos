@@ -1,8 +1,10 @@
 //! Type definition for pending chains.
 
-use crate::{
-    prelude::{AccessModeModifier, Arithmetic, Chain, Condition, MemoryRef, Requirement},
-    types::value::{TypedValue, TypedValueOps},
+use crate::types::{
+    chain::Chain,
+    memory::{AccessModeModifier, MemoryRef},
+    requirement::{Requirement, arithmetic::Arithmetic, condition::Condition},
+    value::{TypedValue, TypedValueOps},
 };
 
 /// A trait for types that can be chained in a [`Chain`].
@@ -26,7 +28,9 @@ pub trait Chainable {
 /// # #[derive(Clone, Copy)]
 /// # enum Addr { Zero = 0 }
 /// # fn current_profile() -> MemoryRef { bits8!(0x0) }
-/// use rustcheevos::{prelude::*, add_address, bits32, chain};
+/// use rustcheevos::prelude::*;
+/// use rustcheevos::types::{chain::{Chain, PendingChain}, memory::MemoryRef};
+/// use rustcheevos::{add_address, bits32, chain};
 /// # impl Addr {
 ///
 /// // Define a pending chain, with the head being a memory reference.
@@ -57,7 +61,9 @@ impl<T> PendingChain<T> {
     /// # Exampless
     ///
     /// ```
-    /// use rustcheevos::{prelude::*, add_address, bits32, chain};
+    /// use rustcheevos::prelude::*;
+    /// use rustcheevos::types::chain::PendingChain;
+    /// use rustcheevos::{add_address, bits32, chain};
     ///
     /// let chain = chain!(
     ///     add_address!(bits32!(0x1234)),
@@ -76,7 +82,9 @@ impl<T> PendingChain<T> {
     ///
     /// # Examples
     /// ```
-    /// use rustcheevos::{prelude::*, add_address, bits32, chain};
+    /// use rustcheevos::prelude::*;
+    /// use rustcheevos::types::chain::PendingChain;
+    /// use rustcheevos::{add_address, bits32, chain};
     ///
     /// let chain = chain!(
     ///     add_address!(bits32!(0x1234)),
@@ -94,7 +102,9 @@ impl<T> PendingChain<T> {
     ///
     /// # Examples
     /// ```
-    /// use rustcheevos::{prelude::*, add_address, bits32, chain};
+    /// use rustcheevos::prelude::*;
+    /// use rustcheevos::types::chain::PendingChain;
+    /// use rustcheevos::{add_address, bits32, chain};
     ///
     /// let chain = chain!(bits32!(0x5432).eq(0));
     ///
@@ -111,7 +121,9 @@ impl PendingChain<MemoryRef> {
     ///
     /// # Examples
     /// ```
-    /// use rustcheevos::{prelude::*, bits8, chain};
+    /// use rustcheevos::prelude::*;
+    /// use rustcheevos::types::chain::PendingChain;
+    /// use rustcheevos::{bits8, chain};
     ///
     /// let chain = chain!(bits8!(0x1234).eq(0));
     /// let pending_chain = PendingChain::new(bits8!(0x4321), chain).delta();
@@ -129,7 +141,9 @@ impl PendingChain<MemoryRef> {
     ///
     /// # Examples
     /// ```
-    /// use rustcheevos::{prelude::*, bits8, chain};
+    /// use rustcheevos::prelude::*;
+    /// use rustcheevos::types::chain::PendingChain;
+    /// use rustcheevos::{bits8, chain};
     ///
     /// let chain = chain!(bits8!(0x1234).eq(0));
     /// let pending_chain = PendingChain::new(bits8!(0x4321), chain).prior();
@@ -147,7 +161,9 @@ impl PendingChain<MemoryRef> {
     ///
     /// # Examples
     /// ```
-    /// use rustcheevos::{prelude::*, bits8, chain};
+    /// use rustcheevos::prelude::*;
+    /// use rustcheevos::types::chain::PendingChain;
+    /// use rustcheevos::{bits8, chain};
     ///
     /// let chain = chain!(bits8!(0x1234).eq(0));
     /// let pending_chain = PendingChain::new(bits8!(0x4321), chain).bcd();
@@ -165,7 +181,9 @@ impl PendingChain<MemoryRef> {
     ///
     /// # Examples
     /// ```
-    /// use rustcheevos::{prelude::*, bits8, chain};
+    /// use rustcheevos::prelude::*;
+    /// use rustcheevos::types::chain::PendingChain;
+    /// use rustcheevos::{bits8, chain};
     ///
     /// let chain = chain!(bits8!(0x1234).eq(0));
     /// let pending_chain = PendingChain::new(bits8!(0x4321), chain).invert();
@@ -192,7 +210,9 @@ impl<T: Into<TypedValue> + Copy> PendingChain<T> {
     ///
     /// # Examples
     /// ```
-    /// use rustcheevos::{prelude::*, bits8, chain};
+    /// use rustcheevos::prelude::*;
+    /// use rustcheevos::types::chain::PendingChain;
+    /// use rustcheevos::{bits8, chain};
     ///
     /// let chain = chain!(bits8!(0x1234).eq(0));
     /// let pending_chain = PendingChain::new(bits8!(0x4321), chain);
@@ -212,7 +232,9 @@ impl<T: Into<TypedValue> + Copy> PendingChain<T> {
     ///
     /// # Examples
     /// ```
-    /// use rustcheevos::{prelude::*, bits8, chain};
+    /// use rustcheevos::prelude::*;
+    /// use rustcheevos::types::chain::PendingChain;
+    /// use rustcheevos::{bits8, chain};
     ///
     /// let chain = chain!(bits8!(0x1234).eq(0));
     /// let pending_chain = PendingChain::new(bits8!(0x4321), chain);
@@ -232,7 +254,9 @@ impl<T: Into<TypedValue> + Copy> PendingChain<T> {
     ///
     /// # Examples
     /// ```
-    /// use rustcheevos::{prelude::*, bits8, chain};
+    /// use rustcheevos::prelude::*;
+    /// use rustcheevos::types::chain::PendingChain;
+    /// use rustcheevos::{bits8, chain};
     ///
     /// let chain = chain!(bits8!(0x1234).eq(0));
     /// let pending_chain = PendingChain::new(bits8!(0x4321), chain);
@@ -252,7 +276,9 @@ impl<T: Into<TypedValue> + Copy> PendingChain<T> {
     ///
     /// # Examples
     /// ```
-    /// use rustcheevos::{prelude::*, bits8, chain};
+    /// use rustcheevos::prelude::*;
+    /// use rustcheevos::types::chain::PendingChain;
+    /// use rustcheevos::{bits8, chain};
     ///
     /// let chain = chain!(bits8!(0x1234).eq(0));
     /// let pending_chain = PendingChain::new(bits8!(0x4321), chain);
@@ -272,7 +298,9 @@ impl<T: Into<TypedValue> + Copy> PendingChain<T> {
     ///
     /// # Examples
     /// ```
-    /// use rustcheevos::{prelude::*, bits8, chain};
+    /// use rustcheevos::prelude::*;
+    /// use rustcheevos::types::chain::PendingChain;
+    /// use rustcheevos::{bits8, chain};
     ///
     /// let chain = chain!(bits8!(0x1234).eq(0));
     /// let pending_chain = PendingChain::new(bits8!(0x4321), chain);
@@ -292,7 +320,9 @@ impl<T: Into<TypedValue> + Copy> PendingChain<T> {
     ///
     /// # Examples
     /// ```
-    /// use rustcheevos::{prelude::*, bits8, chain};
+    /// use rustcheevos::prelude::*;
+    /// use rustcheevos::types::chain::PendingChain;
+    /// use rustcheevos::{bits8, chain};
     ///
     /// let chain = chain!(bits8!(0x1234).eq(0));
     /// let pending_chain = PendingChain::new(bits8!(0x4321), chain);
@@ -312,7 +342,9 @@ impl<T: Into<TypedValue> + Copy> PendingChain<T> {
     ///
     /// # Examples
     /// ```
-    /// use rustcheevos::{prelude::*, bits8, chain};
+    /// use rustcheevos::prelude::*;
+    /// use rustcheevos::types::chain::PendingChain;
+    /// use rustcheevos::{bits8, chain};
     ///
     /// let chain = chain!(bits8!(0x1234).eq(0));
     /// let pending_chain = PendingChain::new(bits8!(0x4321), chain);
@@ -336,7 +368,9 @@ impl<T: Into<TypedValue> + Copy> PendingChain<T> {
     ///
     /// # Examples
     /// ```
-    /// use rustcheevos::{prelude::*, bits8, chain};
+    /// use rustcheevos::prelude::*;
+    /// use rustcheevos::types::chain::PendingChain;
+    /// use rustcheevos::{bits8, chain};
     ///
     /// let chain = chain!(bits8!(0x1234).eq(0));
     /// let pending_chain = PendingChain::new(bits8!(0x4321), chain);
@@ -360,7 +394,9 @@ impl<T: Into<TypedValue> + Copy> PendingChain<T> {
     ///
     /// # Examples
     /// ```
-    /// use rustcheevos::{prelude::*, bits8, chain};
+    /// use rustcheevos::prelude::*;
+    /// use rustcheevos::types::chain::PendingChain;
+    /// use rustcheevos::{bits8, chain};
     ///
     /// let chain = chain!(bits8!(0x1234).eq(0));
     /// let pending_chain = PendingChain::new(bits8!(0x4321), chain);
@@ -384,7 +420,9 @@ impl<T: Into<TypedValue> + Copy> PendingChain<T> {
     ///
     /// # Examples
     /// ```
-    /// use rustcheevos::{prelude::*, bits8, chain};
+    /// use rustcheevos::prelude::*;
+    /// use rustcheevos::types::chain::PendingChain;
+    /// use rustcheevos::{bits8, chain};
     ///
     /// let chain = chain!(bits8!(0x1234).eq(0));
     /// let pending_chain = PendingChain::new(bits8!(0x4321), chain);
@@ -408,7 +446,9 @@ impl<T: Into<TypedValue> + Copy> PendingChain<T> {
     ///
     /// # Examples
     /// ```
-    /// use rustcheevos::{prelude::*, bits8, chain};
+    /// use rustcheevos::prelude::*;
+    /// use rustcheevos::types::chain::PendingChain;
+    /// use rustcheevos::{bits8, chain};
     ///
     /// let chain = chain!(bits8!(0x1234).eq(0));
     /// let pending_chain = PendingChain::new(bits8!(0x4321), chain);
@@ -428,7 +468,9 @@ impl<T: Into<TypedValue> + Copy> PendingChain<T> {
     ///
     /// # Examples
     /// ```
-    /// use rustcheevos::{prelude::*, bits8, chain};
+    /// use rustcheevos::prelude::*;
+    /// use rustcheevos::types::chain::PendingChain;
+    /// use rustcheevos::{bits8, chain};
     ///
     /// let chain = chain!(bits8!(0x1234).eq(0));
     /// let pending_chain = PendingChain::new(bits8!(0x4321), chain);
@@ -448,7 +490,9 @@ impl<T: Into<TypedValue> + Copy> PendingChain<T> {
     ///
     /// # Examples
     /// ```
-    /// use rustcheevos::{prelude::*, bits8, chain};
+    /// use rustcheevos::prelude::*;
+    /// use rustcheevos::types::chain::PendingChain;
+    /// use rustcheevos::{bits8, chain};
     ///
     /// let chain = chain!(bits8!(0x1234).eq(0));
     /// let pending_chain = PendingChain::new(bits8!(0x4321), chain);

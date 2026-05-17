@@ -4,7 +4,7 @@ use std::{fmt, rc::Rc};
 
 use builtin::BuiltInMacro;
 
-use crate::prelude::{Chain, MemoryRef};
+use crate::types::{chain::Chain, memory::MemoryRef};
 
 use super::{format::Format, lookup::LookupTable};
 

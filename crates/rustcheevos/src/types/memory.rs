@@ -21,6 +21,7 @@ use super::{flag::ArithmeticFlag, requirement::arithmetic::Arithmetic};
 ///
 /// ```
 /// use rustcheevos::prelude::*;
+/// use rustcheevos::types::memory::{MemoryRef, MemorySize, AccessMode};
 ///
 /// let memory_ref = MemoryRef::new(MemorySize::Bits8, 0x1234).delta();
 /// assert_eq!(memory_ref.size(), MemorySize::Bits8);
@@ -33,7 +34,9 @@ use super::{flag::ArithmeticFlag, requirement::arithmetic::Arithmetic};
 /// setting [`AccessMode`]s too.
 ///
 /// ```
-/// use rustcheevos::{prelude::*, bits8, delta};
+/// use rustcheevos::prelude::*;
+/// use rustcheevos::types::memory::{MemoryRef, MemorySize, AccessMode};
+/// use rustcheevos::{bits8, delta};
 ///
 /// let memory_a = MemoryRef::new(MemorySize::Bits8, 0x1234).delta();
 /// let memory_b = delta!(bits8!(0x1234));
@@ -55,6 +58,7 @@ impl MemoryRef {
     /// # Examples
     /// ```
     /// use rustcheevos::prelude::*;
+    /// use rustcheevos::types::memory::{MemoryRef, MemorySize, AccessMode};
     ///
     /// let memory_ref = MemoryRef::new(MemorySize::Bits8, 0x1234);
     /// assert_eq!(memory_ref.size(), MemorySize::Bits8);
@@ -75,6 +79,7 @@ impl MemoryRef {
     /// # Examples
     /// ```
     /// use rustcheevos::prelude::*;
+    /// use rustcheevos::types::memory::{MemoryRef, MemorySize};
     ///
     /// let memory_ref = MemoryRef::new(MemorySize::Bits8, 0x1234);
     /// assert_eq!(memory_ref.size(), MemorySize::Bits8);
@@ -89,6 +94,7 @@ impl MemoryRef {
     /// # Examples
     /// ```
     /// use rustcheevos::prelude::*;
+    /// use rustcheevos::types::memory::{MemoryRef, MemorySize};
     ///
     /// let memory_ref = MemoryRef::new(MemorySize::Bits8, 0x1234);
     /// assert_eq!(memory_ref.address(), 0x1234);
@@ -102,6 +108,7 @@ impl MemoryRef {
     /// # Examples
     /// ```
     /// use rustcheevos::prelude::*;
+    /// use rustcheevos::types::memory::{MemoryRef, MemorySize, AccessMode};
     ///
     /// let memory_ref = MemoryRef::new(MemorySize::Bits8, 0x1234);
     /// assert_eq!(memory_ref.access_mode(), AccessMode::Memory);
@@ -116,6 +123,7 @@ impl MemoryRef {
     /// # Examples
     /// ```
     /// use rustcheevos::prelude::*;
+    /// use rustcheevos::types::memory::{MemoryRef, MemorySize, AccessMode};
     ///
     /// let memory_ref = MemoryRef::new(MemorySize::Bits8, 0x1234)
     ///     .with_access_mode(AccessMode::Delta);
@@ -132,6 +140,7 @@ impl MemoryRef {
     /// # Examples
     /// ```
     /// use rustcheevos::prelude::*;
+    /// use rustcheevos::types::{flag::ArithmeticFlag, memory::{MemoryRef, MemorySize}};
     ///
     /// let memory_ref = MemoryRef::new(MemorySize::Bits8, 0x1234);
     /// let arithmetic = memory_ref.with_flag(ArithmeticFlag::AddSource);
@@ -239,6 +248,7 @@ impl MemorySize {
     /// # Examples
     /// ```
     /// use rustcheevos::prelude::*;
+    /// use rustcheevos::types::memory::MemorySize;
     ///
     /// let memory_size = MemorySize::parse_bit_size('H').unwrap();
     /// assert_eq!(memory_size, MemorySize::Bits8);
@@ -275,6 +285,7 @@ impl MemorySize {
     /// # Examples
     /// ```
     /// use rustcheevos::prelude::*;
+    /// use rustcheevos::types::memory::MemorySize;
     ///
     /// let memory_size = MemorySize::parse_float_size('F').unwrap();
     /// assert_eq!(memory_size, MemorySize::Float);
@@ -424,6 +435,7 @@ pub trait AccessModeModifier {
     /// # Examples
     /// ```
     /// use rustcheevos::prelude::*;
+    /// use rustcheevos::types::memory::{MemoryRef, MemorySize, AccessMode};
     ///
     /// let memory_ref = MemoryRef::new(MemorySize::Bits8, 0x1234).memory();
     /// assert_eq!(memory_ref.access_mode(), AccessMode::Memory);
@@ -441,6 +453,7 @@ pub trait AccessModeModifier {
     /// # Examples
     /// ```
     /// use rustcheevos::prelude::*;
+    /// use rustcheevos::types::memory::{MemoryRef, MemorySize, AccessMode};
     ///
     /// let memory_ref = MemoryRef::new(MemorySize::Bits8, 0x1234).delta();
     /// assert_eq!(memory_ref.access_mode(), AccessMode::Delta);
@@ -458,6 +471,7 @@ pub trait AccessModeModifier {
     /// # Examples
     /// ```
     /// use rustcheevos::prelude::*;
+    /// use rustcheevos::types::memory::{MemoryRef, MemorySize, AccessMode};
     ///
     /// let memory_ref = MemoryRef::new(MemorySize::Bits8, 0x1234).prior();
     /// assert_eq!(memory_ref.access_mode(), AccessMode::Prior);
@@ -475,6 +489,7 @@ pub trait AccessModeModifier {
     /// # Examples
     /// ```
     /// use rustcheevos::prelude::*;
+    /// use rustcheevos::types::memory::{MemoryRef, MemorySize, AccessMode};
     ///
     /// let memory_ref = MemoryRef::new(MemorySize::Bits8, 0x1234).bcd();
     /// assert_eq!(memory_ref.access_mode(), AccessMode::BCD);
@@ -492,6 +507,7 @@ pub trait AccessModeModifier {
     /// # Examples
     /// ```
     /// use rustcheevos::prelude::*;
+    /// use rustcheevos::types::memory::{MemoryRef, MemorySize, AccessMode};
     ///
     /// let memory_ref = MemoryRef::new(MemorySize::Bits8, 0x1234).invert();
     /// assert_eq!(memory_ref.access_mode(), AccessMode::Invert);

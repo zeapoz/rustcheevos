@@ -7,7 +7,7 @@ use winnow::{
     token::one_of,
 };
 
-use crate::prelude::{AccessMode, MemoryRef, MemorySize};
+use crate::types::memory::{AccessMode, MemoryRef, MemorySize};
 
 /// Parses a memory access mode.
 pub fn parse_memory_access_mode(input: &mut &str) -> Result<AccessMode> {

@@ -34,7 +34,7 @@ impl CodeNote {
     ///
     /// # Examples
     /// ```
-    /// use rustcheevos::prelude::*;
+    /// use rustcheevos::types::note::CodeNote;
     ///
     /// let note = CodeNote::new(0x1234, "Player health");
     /// assert_eq!(note.address(), 0x1234);

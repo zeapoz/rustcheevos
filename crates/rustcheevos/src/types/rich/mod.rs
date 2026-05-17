@@ -22,8 +22,9 @@ pub use macros::{MacroRef, MacroValue};
 /// # Examples
 ///
 /// ```
-/// use rustcheevos::{prelude::*, chain, bits8};
-/// use rustcheevos::types::rich::Entry;
+/// use rustcheevos::prelude::*;
+/// use rustcheevos::types::rich::{LookupTable, Entry, RichPresence};
+/// use rustcheevos::{chain, bits8};
 ///
 /// let mut rich_presence = RichPresence::new();
 ///
@@ -66,8 +67,10 @@ impl RichPresence {
     /// # Examples
     ///
     /// ```
-    /// use rustcheevos::{prelude::*, bits8};
-    /// use rustcheevos::types::rich::BuiltInMacro;
+    /// use rustcheevos::prelude::*;
+    /// use rustcheevos::types::rich::{BuiltInMacro, RichPresence};
+    /// use rustcheevos::types::requirement::Condition;
+    /// use rustcheevos::bits8;
     ///
     /// let mut rich_presence = RichPresence::new();
     /// let score = rich_presence.builtin_macro(BuiltInMacro::Score, bits8!(0x1234));
@@ -87,8 +90,10 @@ impl RichPresence {
     /// # Examples
     ///
     /// ```
-    /// use rustcheevos::{prelude::*, bits8};
-    /// use rustcheevos::types::rich::Entry;
+    /// use rustcheevos::prelude::*;
+    /// use rustcheevos::types::rich::{LookupTable, Entry, RichPresence};
+    /// use rustcheevos::types::requirement::Condition;
+    /// use rustcheevos::bits8;
     ///
     /// let mut rich_presence = RichPresence::new();
     /// let table = LookupTable::new("Stage")
@@ -113,7 +118,10 @@ impl RichPresence {
     /// # Examples
     ///
     /// ```
-    /// use rustcheevos::{prelude::*, bits8};
+    /// use rustcheevos::prelude::*;
+    /// use rustcheevos::types::rich::{FormatType, RichPresence};
+    /// use rustcheevos::types::requirement::Condition;
+    /// use rustcheevos::bits8;
     ///
     /// let mut rich_presence = RichPresence::new();
     /// let score = rich_presence.register_format("Score", FormatType::Score, bits8!(0x1234));
@@ -137,7 +145,9 @@ impl RichPresence {
     /// # Examples
     ///
     /// ```
-    /// use rustcheevos::{prelude::*, chain, bits8};
+    /// use rustcheevos::prelude::*;
+    /// use rustcheevos::types::rich::RichPresence;
+    /// use rustcheevos::{chain, bits8};
     ///
     /// let mut rich_presence = RichPresence::new();
     /// let condition = chain!(bits8!(0x1234).ge(1));
@@ -157,7 +167,7 @@ impl RichPresence {
     /// # Examples
     ///
     /// ```
-    /// use rustcheevos::prelude::*;
+    /// use rustcheevos::types::rich::RichPresence;
     ///
     /// let mut rich_presence = RichPresence::new();
     /// rich_presence.add_static_display("Super Adventure - Main Menu");
@@ -175,7 +185,7 @@ impl RichPresence {
     /// # Examples
     ///
     /// ```no_run
-    /// use rustcheevos::prelude::*;
+    /// use rustcheevos::types::rich::RichPresence;
     ///
     /// let mut rich_presence = RichPresence::new();
     /// rich_presence.add_static_display("Super Adventure");
@@ -199,7 +209,7 @@ impl RichPresence {
     /// # Examples
     ///
     /// ```no_run
-    /// use rustcheevos::prelude::*;
+    /// use rustcheevos::types::rich::RichPresence;
     ///
     /// let mut rich_presence = RichPresence::new();
     /// rich_presence.add_static_display("Super Adventure");

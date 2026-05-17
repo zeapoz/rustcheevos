@@ -6,7 +6,7 @@ use winnow::{
 };
 
 use crate::{
-    prelude::{Arithmetic, Condition, Requirement},
+    types::requirement::{Arithmetic, Condition, Requirement},
     types::requirement::{
         arithmetic::ArithmeticOperation,
         condition::{ConditionOperation, hits::HitCount},

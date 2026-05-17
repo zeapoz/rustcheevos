@@ -33,7 +33,7 @@ impl fmt::Display for Format {
 /// # Examples
 ///
 /// ```
-/// use rustcheevos::prelude::FormatType;
+/// use rustcheevos::types::rich::FormatType;
 ///
 /// let format_type = FormatType::Seconds;
 /// ```

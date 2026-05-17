@@ -5,11 +5,11 @@ use std::{fmt, str::FromStr};
 use crate::{
     impl_arithmetic_flag_traits, impl_condition_flag_traits,
     parsers::ParseError,
-    prelude::{AccessMode, Requirement},
     types::{
         flag::{ArithmeticFlag, ConditionFlag},
         memory::AccessModeModifier,
     },
+    types::{memory::AccessMode, requirement::Requirement},
 };
 
 pub(crate) mod pending;
@@ -24,7 +24,9 @@ pub use pending::{Chainable, PendingChain};
 /// # Examples
 ///
 /// ```
-/// use rustcheevos::{prelude::*, bits8, chain, delta};
+/// use rustcheevos::prelude::*;
+/// use rustcheevos::types::chain::ChainGroup;
+/// use rustcheevos::{bits8, chain, delta};
 ///
 /// let core_condition = chain!(
 ///     delta!(bits8!(0x1234)).lt(10),
@@ -58,7 +60,9 @@ impl ChainGroup {
     ///
     /// # Examples
     /// ```
-    /// use rustcheevos::{prelude::*, bits8, chain, delta};
+    /// use rustcheevos::prelude::*;
+    /// use rustcheevos::types::chain::ChainGroup;
+    /// use rustcheevos::{bits8, chain, delta};
     ///
     /// let core_condition = chain!(
     ///     delta!(bits8!(0x1234)).lt(10),
@@ -78,8 +82,10 @@ impl ChainGroup {
     ///
     /// # Examples
     /// ```
+    /// # use rustcheevos::types::chain::{Chain, ChainGroup};
     /// # let core_condition = Chain::default();
-    /// use rustcheevos::{prelude::*, bits8, chain, delta};
+    /// use rustcheevos::prelude::*;
+    /// use rustcheevos::{bits8, chain, delta};
     ///
     /// let alt_group = chain!(
     ///     delta!(bits8!(0x1234)).lt(10),
@@ -97,8 +103,10 @@ impl ChainGroup {
     ///
     /// # Examples
     /// ```
+    /// # use rustcheevos::types::chain::{Chain, ChainGroup};
     /// # let core_condition = Chain::default();
-    /// use rustcheevos::{prelude::*, bits8, chain, delta};
+    /// use rustcheevos::prelude::*;
+    /// use rustcheevos::{bits8, chain, delta};
     ///
     /// let alt_group_a = chain!(
     ///     delta!(bits8!(0x1234)).lt(10),
@@ -145,7 +153,9 @@ impl fmt::Display for ChainGroup {
 /// # Examples
 ///
 /// ```
-/// use rustcheevos::{prelude::*, bits8, chain, delta};
+/// use rustcheevos::prelude::*;
+/// use rustcheevos::types::chain::Chain;
+/// use rustcheevos::{bits8, chain, delta};
 ///
 /// let chain_a = chain!(
 ///     delta!(bits8!(0x1234)).lt(10),
@@ -166,7 +176,9 @@ impl Chain {
     ///
     /// # Examples
     /// ```
-    /// use rustcheevos::{prelude::*, bits8, chain, delta};
+    /// use rustcheevos::prelude::*;
+    /// use rustcheevos::types::chain::Chain;
+    /// use rustcheevos::{bits8, chain, delta};
     ///
     /// let mut chain = Chain::new();
     ///
@@ -182,7 +194,9 @@ impl Chain {
     ///
     /// # Examples
     /// ```
-    /// use rustcheevos::{prelude::*, bits8, chain, delta};
+    /// use rustcheevos::prelude::*;
+    /// use rustcheevos::types::chain::Chain;
+    /// use rustcheevos::{bits8, chain, delta};
     ///
     /// let requirement = delta!(bits8!(0x1234)).lt(10);
     ///
@@ -197,7 +211,9 @@ impl Chain {
     ///
     /// # Examples
     /// ```
-    /// use rustcheevos::{prelude::*, bits8, chain, delta};
+    /// use rustcheevos::prelude::*;
+    /// use rustcheevos::types::chain::Chain;
+    /// use rustcheevos::{bits8, chain, delta};
     ///
     /// let mut chain_a = chain!(
     ///     delta!(bits8!(0x1234)).lt(10),
@@ -221,7 +237,9 @@ impl Chain {
     ///
     /// # Examples
     /// ```
-    /// use rustcheevos::{prelude::*, bits8, chain, delta};
+    /// use rustcheevos::prelude::*;
+    /// use rustcheevos::types::chain::Chain;
+    /// use rustcheevos::{bits8, chain, delta};
     ///
     /// let chain = chain!(
     ///     delta!(bits8!(0x1234)).lt(10),
@@ -240,7 +258,9 @@ impl Chain {
     ///
     /// # Examples
     /// ```
-    /// use rustcheevos::{prelude::*, bits8, chain, delta};
+    /// use rustcheevos::prelude::*;
+    /// use rustcheevos::types::chain::Chain;
+    /// use rustcheevos::{bits8, chain, delta};
     ///
     /// let requirement = delta!(bits8!(0x1234)).lt(10);
     ///
@@ -318,9 +338,9 @@ impl AccessModeModifier for Chain {
 }
 
 impl Chain {
-    /// Sets the given comparison flag on all [`Condition`][crate::prelude::Condition] requirements in this chain.
+    /// Sets the given comparison flag on all [`Condition`](crate::types::requirement::Condition) requirements in this chain.
     ///
-    /// [`Arithmetic`][crate::prelude::Arithmetic] requirements are returned unchanged.
+    /// [`Arithmetic`](crate::types::requirement::Arithmetic) requirements are returned unchanged.
     #[must_use]
     pub fn with_condition_flag(self, flag: ConditionFlag) -> Self {
         Self(
@@ -331,9 +351,9 @@ impl Chain {
         )
     }
 
-    /// Sets the given arithmetic flag on all [`Arithmetic`][crate::prelude::Arithmetic] requirements in this chain.
+    /// Sets the given arithmetic flag on all [`Arithmetic`](crate::types::requirement::Arithmetic) requirements in this chain.
     ///
-    /// [`Condition`][crate::prelude::Condition] requirements are returned unchanged.
+    /// [`Condition`](crate::types::requirement::Condition) requirements are returned unchanged.
     #[must_use]
     pub fn with_arithmetic_flag(self, flag: ArithmeticFlag) -> Self {
         Self(

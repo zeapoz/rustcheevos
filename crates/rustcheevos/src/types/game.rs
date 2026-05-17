@@ -3,11 +3,11 @@
 use std::{fs, io, path::Path};
 
 use crate::{
-    prelude::{Achievement, CodeNote, Leaderboard},
     schema::user::{USER_FILE_EXTENSION, USER_FILE_SUFFIX, UserFile},
+    types::{
+        achievement::Achievement, leaderboard::Leaderboard, note::CodeNote, rich::RichPresence,
+    },
 };
-
-use super::rich::RichPresence;
 
 /// A set of achievements.
 pub type AchievementSet = Vec<Achievement>;
@@ -21,7 +21,15 @@ pub type CodeNoteSet = Vec<CodeNote>;
 /// # Examples
 ///
 /// ```no_run
-/// use rustcheevos::{prelude::*, bits8, chain, measured};
+/// use rustcheevos::prelude::*;
+/// use rustcheevos::types::{
+///     achievement::Achievement,
+///     game::GameData,
+///     leaderboard::{Leaderboard, LeaderboardFormat},
+///     note::CodeNote,
+///     rich::RichPresence,
+/// };
+/// use rustcheevos::{bits8, chain, measured};
 ///
 /// // Create a new game.
 /// let mut game_data = GameData::new(123, "Super Adventure");
@@ -92,6 +100,7 @@ impl GameData {
     ///
     /// ```
     /// use rustcheevos::prelude::*;
+    /// use rustcheevos::types::game::GameData;
     ///
     /// let game_data = GameData::new(1, "Super Adventure");
     /// ```
@@ -111,7 +120,9 @@ impl GameData {
     /// # Examples
     ///
     /// ```
-    /// # use rustcheevos::{prelude::*, chain, bits8};
+    /// # use rustcheevos::prelude::*;
+    /// # use rustcheevos::types::{achievement::Achievement, game::GameData};
+    /// # use rustcheevos::{chain, bits8};
     /// let mut game_data = GameData::new(1, "Super Adventure");
     ///
     /// let condition = chain!(bits8!(0x1234).eq(1));
@@ -140,7 +151,9 @@ impl GameData {
     /// # Examples
     ///
     /// ```
-    /// # use rustcheevos::{prelude::*, chain, bits8};
+    /// # use rustcheevos::prelude::*;
+    /// # use rustcheevos::types::{achievement::Achievement, game::GameData};
+    /// # use rustcheevos::{chain, bits8};
     /// let mut game_data = GameData::new(1, "Super Adventure");
     ///
     /// let condition = chain!(bits8!(0x1234).eq(1));
@@ -172,7 +185,9 @@ impl GameData {
     /// # Examples
     ///
     /// ```
-    /// # use rustcheevos::{prelude::*, chain, bits8};
+    /// # use rustcheevos::prelude::*;
+    /// # use rustcheevos::types::{achievement::Achievement, game::GameData};
+    /// # use rustcheevos::{chain, bits8};
     /// let mut game_data = GameData::new(1, "Super Adventure");
     ///
     /// let condition = chain!(bits8!(0x1234).eq(1));
@@ -196,7 +211,9 @@ impl GameData {
     /// # Examples
     ///
     /// ```
-    /// # use rustcheevos::{prelude::*, chain, bits8, measured};
+    /// # use rustcheevos::prelude::*;
+    /// # use rustcheevos::types::{game::GameData, leaderboard::{Leaderboard, LeaderboardFormat}};
+    /// # use rustcheevos::{chain, bits8, measured};
     /// let mut game_data = GameData::new(1, "Super Adventure");
     ///
     /// let start = chain!(bits8!(0x1234).eq(1));
@@ -227,6 +244,7 @@ impl GameData {
     ///
     /// ```
     /// use rustcheevos::prelude::*;
+    /// use rustcheevos::types::{game::GameData, note::CodeNote};
     ///
     /// let mut game_data = GameData::new(1, "Super Adventure");
     ///
@@ -245,6 +263,7 @@ impl GameData {
     ///
     /// ```
     /// # use rustcheevos::prelude::*;
+    /// # use rustcheevos::types::{game::GameData, rich::RichPresence};
     /// let mut game_data = GameData::new(1, "Super Adventure");
     ///
     /// let mut rich_presence = RichPresence::new();
@@ -263,6 +282,7 @@ impl GameData {
     ///
     /// ```
     /// # use rustcheevos::prelude::*;
+    /// # use rustcheevos::types::game::GameData;
     /// let game_data = GameData::new(1, "Test");
     ///
     /// for achievement in game_data.achievements() {
@@ -279,6 +299,7 @@ impl GameData {
     ///
     /// ```
     /// # use rustcheevos::prelude::*;
+    /// # use rustcheevos::types::game::GameData;
     /// let game_data = GameData::new(1, "Test");
     ///
     /// for lb in game_data.leaderboards() {
@@ -295,6 +316,7 @@ impl GameData {
     ///
     /// ```
     /// use rustcheevos::prelude::*;
+    /// use rustcheevos::types::game::GameData;
     ///
     /// let game_data = GameData::new(1, "Test");
     ///
@@ -328,6 +350,7 @@ impl GameData {
     ///
     /// ```no_run
     /// use rustcheevos::prelude::*;
+    /// use rustcheevos::types::{game::GameData, rich::RichPresence};
     ///
     /// let mut game_data = GameData::new(1, "Super Adventure");
     ///
@@ -355,7 +378,9 @@ impl GameData {
     /// # Examples
     ///
     /// ```no_run
-    /// use rustcheevos::{prelude::*, chain, bits8};
+    /// use rustcheevos::prelude::*;
+    /// use rustcheevos::types::{achievement::Achievement, game::GameData};
+    /// use rustcheevos::{chain, bits8};
     ///
     /// let mut game_data = GameData::new(1, "Super Adventure");
     ///
@@ -386,8 +411,9 @@ impl GameData {
 /// # Examples
 ///
 /// ```
-/// use rustcheevos::{prelude::*, chain, bits8};
-/// use rustcheevos::types::game::GameAsset;
+/// use rustcheevos::prelude::*;
+/// use rustcheevos::types::{achievement::Achievement, game::GameAsset};
+/// use rustcheevos::{chain, bits8};
 ///
 /// // GameAsset can be created from Achievement, Leaderboard, or RichPresence
 /// let condition = chain!(bits8!(0x1234).eq(1));

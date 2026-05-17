@@ -127,6 +127,7 @@ impl Condition {
     /// # Examples
     /// ```
     /// use rustcheevos::prelude::*;
+    /// use rustcheevos::types::requirement::Condition;
     ///
     /// let condition = Condition::eq(10, 10);
     /// assert_eq!(condition.flag(), None);
@@ -153,6 +154,7 @@ impl Condition {
     /// # Examples
     /// ```
     /// use rustcheevos::prelude::*;
+    /// use rustcheevos::types::requirement::Condition;
     ///
     /// let condition = Condition::eq(10, 10).add_hits();
     /// assert!(matches!(condition.flag(), Some(_)));

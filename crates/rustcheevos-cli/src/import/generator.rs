@@ -5,8 +5,8 @@ use std::collections::HashSet;
 use std::fmt::Write;
 
 use color_eyre::eyre::Result;
-use rustcheevos::prelude::MemorySize;
 use rustcheevos::types::memory::BitIndex;
+use rustcheevos::types::memory::MemorySize;
 
 use super::OutputFormat;
 use super::parsing::ParsedNote;
@@ -14,7 +14,7 @@ use super::parsing::ParsedNote;
 /// Generates Rust code from parsed code notes.
 ///
 /// Produces a module containing `use` statements for required macros
-/// and one function or constant per parsed note that returns a [`MemoryRef`][rustcheevos::prelude::MemoryRef].
+/// and one function or constant per parsed note that returns a [`MemoryRef`][rustcheevos::types::memory::MemoryRef].
 pub struct OutputGenerator {
     /// Whether to include doc comments in generated output.
     add_doc_comments: bool,
@@ -41,7 +41,9 @@ impl OutputGenerator {
 
     /// Generates the `use` statements for the output module.
     pub fn generate_imports(used_macros: HashSet<&'static str>) -> Result<String> {
-        let mut output = String::from("use rustcheevos::prelude::*;\n");
+        let mut output = String::from(
+            "use rustcheevos::prelude::*;\nuse rustcheevos::types::memory::MemoryRef;\n",
+        );
 
         let mut sorted_macros: Vec<_> = used_macros.into_iter().collect();
         sorted_macros.sort_unstable();

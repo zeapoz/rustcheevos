@@ -1,7 +1,7 @@
 //! Parsing logic for `RetroAchievements` code notes.
 
 use color_eyre::eyre::{Result, eyre};
-use rustcheevos::prelude::{CodeNote, MemorySize};
+use rustcheevos::types::{memory::MemorySize, note::CodeNote};
 
 /// A code note that has been parsed into structured fields.
 ///

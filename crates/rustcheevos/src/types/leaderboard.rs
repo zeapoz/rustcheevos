@@ -4,7 +4,7 @@ use std::fmt;
 use std::str::FromStr;
 
 use crate::parsers::ParseError;
-use crate::prelude::Condition;
+use crate::types::requirement::condition::Condition;
 
 use super::chain::ChainGroup;
 
@@ -17,6 +17,7 @@ use super::chain::ChainGroup;
 ///
 /// ```
 /// use rustcheevos::prelude::*;
+/// use rustcheevos::types::leaderboard::{Leaderboard, LeaderboardFormat};
 /// use rustcheevos::{bits8, measured};
 ///
 /// let leaderboard = Leaderboard::builder("Speed Run")
@@ -113,6 +114,7 @@ impl Leaderboard {
     /// # Examples
     /// ```
     /// use rustcheevos::prelude::*;
+    /// use rustcheevos::types::leaderboard::{Leaderboard, LeaderboardFormat};
     /// use rustcheevos::{bits8, measured};
     ///
     /// let leaderboard = Leaderboard::builder("Speed Run")
@@ -137,6 +139,7 @@ impl Leaderboard {
 ///
 /// ```
 /// use rustcheevos::prelude::*;
+/// use rustcheevos::types::leaderboard::{Leaderboard, LeaderboardFormat};
 /// use rustcheevos::{bits8, measured};
 ///
 /// let leaderboard = Leaderboard::builder("Speed Run")

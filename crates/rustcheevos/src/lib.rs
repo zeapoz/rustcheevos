@@ -21,7 +21,14 @@
 //!
 //! ```no_run
 //! use rustcheevos::prelude::*;
-//! use rustcheevos::{chain, add_address, delta, measured, bits8};
+//! use rustcheevos::types::{
+//!     achievement::Achievement,
+//!     chain::{Chain, PendingChain},
+//!     game::GameData,
+//!     memory::MemoryRef,
+//!     rich::{Entry, LookupTable, RichPresence},
+//! };
+//! use rustcheevos::{add_address, bits8, chain, delta, measured};
 //!
 //! const GAME_ID: u32 = 20374;
 //! const GAME_NAME: &str = "Geometry Wars: Galaxies";

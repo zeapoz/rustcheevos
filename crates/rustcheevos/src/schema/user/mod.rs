@@ -6,7 +6,7 @@ use thiserror::Error;
 
 use header::Header;
 
-use crate::prelude::{Achievement, CodeNote, Leaderboard};
+use crate::types::{achievement::Achievement, leaderboard::Leaderboard, note::CodeNote};
 
 mod header;
 

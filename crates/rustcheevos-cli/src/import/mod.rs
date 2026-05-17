@@ -9,7 +9,11 @@ use std::path::Path;
 
 use clap::ValueEnum;
 use color_eyre::eyre::{Context, Result, eyre};
-use rustcheevos::{prelude::CodeNote, schema, types::memory::MemorySize, util::parse_hex_address};
+use rustcheevos::{
+    schema,
+    types::{memory::MemorySize, note::CodeNote},
+    util::parse_hex_address,
+};
 
 use generator::OutputGenerator;
 use parsing::parse_notes;
