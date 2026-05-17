@@ -87,7 +87,7 @@ fn main() {
 
     // This returns a macro call handle that can be used directly in format! strings.
     let stage = rich_presence.register_lookup(table, bits8!(0x1234));
-    rich_presence.add_static_display("Currently in {stage}");
+    rich_presence.add_static_display(format!("Currently in {stage}"));
 
     game_data.set_rich_presence(rich_presence);
 

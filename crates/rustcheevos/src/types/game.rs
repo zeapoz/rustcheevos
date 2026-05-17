@@ -27,7 +27,7 @@ pub type CodeNoteSet = Vec<CodeNote>;
 ///     game::GameData,
 ///     leaderboard::{Leaderboard, LeaderboardFormat},
 ///     note::CodeNote,
-///     rich::RichPresence,
+///     rich::{Entry, LookupTable, RichPresence},
 /// };
 /// use rustcheevos::{bits8, chain, measured};
 ///
@@ -61,8 +61,12 @@ pub type CodeNoteSet = Vec<CodeNote>;
 ///
 /// // Define rich presence.
 /// let mut rich_presence = RichPresence::new();
+/// let table = LookupTable::new("Stage")
+///     .with_entry(Entry::new(1, "Level 1"))
+///     .with_fallback("Main Menu");
+/// let stage = rich_presence.register_lookup(table, bits8!(0x1234));
 /// let display_condition = chain!(bits8!(0x1234).ge(1));
-/// rich_presence.add_conditional_display(display_condition, "Playing: @Stage(0x1234)");
+/// rich_presence.add_conditional_display(display_condition, format!("Playing: {stage}"));
 /// rich_presence.add_static_display("Super Adventure");
 ///
 /// // Add all assets to the game.

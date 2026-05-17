@@ -38,7 +38,7 @@ pub use macros::{MacroRef, MacroValue};
 ///
 /// // Add a conditional display based on game state.
 /// let condition = chain!(bits8!(0x1234).ge(1));
-/// rich_presence.add_conditional_display(condition, "Currently in {level}");
+/// rich_presence.add_conditional_display(condition, format!("Currently in {level}"));
 ///
 /// // Add a static display fallback.
 /// rich_presence.add_static_display("Super Adventure - Main Menu");
@@ -75,7 +75,7 @@ impl RichPresence {
     /// let mut rich_presence = RichPresence::new();
     /// let score = rich_presence.builtin_macro(BuiltInMacro::Score, bits8!(0x1234));
     ///
-    /// rich_presence.add_conditional_display(Condition::always_true(), "Score: {score}");
+    /// rich_presence.add_conditional_display(Condition::always_true(), format!("Score: {score}"));
     /// ```
     pub fn builtin_macro(
         &mut self,
@@ -101,7 +101,7 @@ impl RichPresence {
     ///     .with_entry(Entry::new(1, "Level 1"));
     /// let stage = rich_presence.register_lookup(table, bits8!(0x1234));
     ///
-    /// rich_presence.add_conditional_display(Condition::always_true(), "Currently in {stage}");
+    /// rich_presence.add_conditional_display(Condition::always_true(), format!("Currently in {stage}"));
     /// ```
     pub fn register_lookup(
         &mut self,
@@ -126,7 +126,7 @@ impl RichPresence {
     /// let mut rich_presence = RichPresence::new();
     /// let score = rich_presence.register_format("Score", FormatType::Score, bits8!(0x1234));
     ///
-    /// rich_presence.add_conditional_display(Condition::always_true(), "Score: {score}");
+    /// rich_presence.add_conditional_display(Condition::always_true(), format!("Score: {score}"));
     /// ```
     pub fn register_format(
         &mut self,
