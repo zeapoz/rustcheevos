@@ -1,8 +1,8 @@
 //! Parser functions for memory types.
 
-use winnow::{Parser, Result, combinator::alt, token::one_of};
+use winnow::{Parser, Result, token::one_of};
 
-use crate::types::flag::{ArithmeticFlag, ConditionFlag, Flag};
+use crate::types::flag::{ArithmeticFlag, ConditionFlag};
 
 /// Parses a comparison flag.
 pub fn parse_condition_flag(input: &mut &str) -> Result<ConditionFlag> {
@@ -22,45 +22,57 @@ pub fn parse_arithmetic_flag(input: &mut &str) -> Result<ArithmeticFlag> {
     Ok(flag)
 }
 
-/// Parses a flag.
-pub fn parse_flag(input: &mut &str) -> Result<Flag> {
-    let flag = alt((
-        parse_condition_flag.map(Flag::from),
-        parse_arithmetic_flag.map(Flag::from),
-    ))
-    .parse_next(input)?;
-    Ok(flag)
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;
 
     #[test]
-    fn test_parse_valid_flag() {
-        let input = "A:";
-        let flag = input.parse::<Flag>().unwrap();
-        assert_eq!(flag, Flag::Arithmetic(ArithmeticFlag::AddSource));
+    fn test_parse_valid_condition_flag() {
+        let mut input = "P:";
+        let flag = parse_condition_flag(&mut input).unwrap();
+        assert_eq!(flag, ConditionFlag::PauseIf);
     }
 
     #[test]
-    fn test_parse_no_flag() {
-        let input = "";
-        let flag_or_err = input.parse::<Flag>();
-        assert!(flag_or_err.is_err());
+    fn test_parse_valid_arithmetic_flag() {
+        let mut input = "A:";
+        let flag = parse_arithmetic_flag(&mut input).unwrap();
+        assert_eq!(flag, ArithmeticFlag::AddSource);
     }
 
     #[test]
-    fn test_parse_invalid_flag() {
-        let input = "E";
-        let flag_or_err = input.parse::<Flag>();
-        assert!(flag_or_err.is_err());
+    fn test_parse_no_condition_flag() {
+        let mut input = "";
+        assert!(parse_condition_flag(&mut input).is_err());
     }
 
     #[test]
-    fn test_parse_valid_flag_no_colon() {
-        let input = "A ";
-        let flag_or_err = input.parse::<Flag>();
-        assert!(flag_or_err.is_err());
+    fn test_parse_no_arithmetic_flag() {
+        let mut input = "";
+        assert!(parse_arithmetic_flag(&mut input).is_err());
+    }
+
+    #[test]
+    fn test_parse_invalid_condition_flag() {
+        let mut input = "E:";
+        assert!(parse_condition_flag(&mut input).is_err());
+    }
+
+    #[test]
+    fn test_parse_invalid_arithmetic_flag() {
+        let mut input = "E:";
+        assert!(parse_arithmetic_flag(&mut input).is_err());
+    }
+
+    #[test]
+    fn test_parse_condition_flag_no_colon() {
+        let mut input = "P ";
+        assert!(parse_condition_flag(&mut input).is_err());
+    }
+
+    #[test]
+    fn test_parse_arithmetic_flag_no_colon() {
+        let mut input = "A ";
+        assert!(parse_arithmetic_flag(&mut input).is_err());
     }
 }

@@ -10,6 +10,7 @@ use super::{format::Format, lookup::LookupTable};
 
 pub(crate) mod builtin;
 
+/// A rich presence macro type.
 #[derive(Debug, Clone, PartialEq)]
 pub(crate) enum MacroType {
     /// A builtin macro (e.g., Number, Score, Seconds).

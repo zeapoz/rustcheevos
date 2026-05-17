@@ -1,10 +1,8 @@
 //! Type definitions for flags.
 
-use std::{fmt, str::FromStr};
+use std::fmt;
 
-use winnow::Parser;
-
-use crate::{parsers::ParseError, parsers::parse_flag};
+use crate::parsers::ParseError;
 
 pub(crate) mod traits;
 
@@ -12,46 +10,6 @@ pub use traits::{
     AddAddress, AddHits, AddSource, AndNext, Measured, MeasuredIf, MeasuredPercentage, OrNext,
     PauseIf, Remember, ResetIf, ResetNextIf, SubHits, SubSource, Trigger,
 };
-
-/// A flag that modifies behavior.
-#[derive(Debug, Clone, Copy, PartialEq)]
-pub(crate) enum Flag {
-    /// A flag used in comparisons.
-    Condition(ConditionFlag),
-    /// A flag in an arithmetic expression.
-    Arithmetic(ArithmeticFlag),
-}
-
-impl From<ConditionFlag> for Flag {
-    fn from(flag: ConditionFlag) -> Self {
-        Flag::Condition(flag)
-    }
-}
-
-impl From<ArithmeticFlag> for Flag {
-    fn from(flag: ArithmeticFlag) -> Self {
-        Flag::Arithmetic(flag)
-    }
-}
-
-impl FromStr for Flag {
-    type Err = ParseError;
-
-    fn from_str(s: &str) -> Result<Self, Self::Err> {
-        parse_flag
-            .parse(s)
-            .map_err(|s| ParseError::Flag(s.to_string()))
-    }
-}
-
-impl fmt::Display for Flag {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self {
-            Flag::Condition(flag) => write!(f, "{flag}"),
-            Flag::Arithmetic(flag) => write!(f, "{flag}"),
-        }
-    }
-}
 
 /// A flag used in comparisons.
 #[derive(Debug, Clone, Copy, PartialEq)]
