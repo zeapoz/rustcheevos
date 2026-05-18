@@ -1,6 +1,9 @@
 //! Type definition for the core game container struct.
 
-use std::{fs, io, path::Path};
+use std::{
+    fs, io,
+    path::{Path, PathBuf},
+};
 
 use crate::{
     schema::user::{USER_FILE_EXTENSION, USER_FILE_SUFFIX, UserFile},
@@ -15,6 +18,15 @@ pub type AchievementSet = Vec<Achievement>;
 pub type LeaderboardSet = Vec<Leaderboard>;
 /// A set of code notes.
 pub type CodeNoteSet = Vec<CodeNote>;
+
+/// Paths of files exported by [`GameData::export`].
+#[derive(Debug, Clone, PartialEq, Eq, Hash, Default)]
+pub struct ExportedFiles {
+    /// Path to the exported user file, if any content was exported.
+    pub user_file: Option<PathBuf>,
+    /// Path to the exported rich presence file, if any content was exported.
+    pub rich_presence: Option<PathBuf>,
+}
 
 /// The core game struct containing all the assets.
 ///
@@ -150,7 +162,7 @@ impl GameData {
     ///     .build();
     ///
     /// game_data.add(achievement);
-    /// assert_eq!(game_data.achievements().count(), 1);
+    /// assert_eq!(game_data.achievements().len(), 1);
     /// ```
     pub fn add(&mut self, item: impl Into<GameAsset>) -> &mut Self {
         match item.into() {
@@ -186,7 +198,7 @@ impl GameData {
     ///     .build();
     ///
     /// game_data.add_many([achievement_a, achievement_b]);
-    /// assert_eq!(game_data.achievements().count(), 2);
+    /// assert_eq!(game_data.achievements().len(), 2);
     /// ```
     pub fn add_many(&mut self, items: impl IntoIterator<Item = impl Into<GameAsset>>) -> &mut Self {
         for item in items {
@@ -213,7 +225,7 @@ impl GameData {
     ///     .build();
     ///
     /// game_data.set_achievements(vec![achievement]);
-    /// assert_eq!(game_data.achievements().count(), 1);
+    /// assert_eq!(game_data.achievements().len(), 1);
     /// ```
     pub fn set_achievements(&mut self, achievements: impl Into<AchievementSet>) -> &mut Self {
         self.achievements = achievements.into();
@@ -241,7 +253,7 @@ impl GameData {
     ///     .build();
     ///
     /// game_data.set_leaderboards(vec![leaderboard]);
-    /// assert_eq!(game_data.leaderboards().count(), 1);
+    /// assert_eq!(game_data.leaderboards().len(), 1);
     /// ```
     pub fn set_leaderboards(&mut self, leaderboards: impl Into<LeaderboardSet>) -> &mut Self {
         self.leaderboards = leaderboards.into();
@@ -260,7 +272,7 @@ impl GameData {
     ///
     /// let note = CodeNote::new(0x1234, "Player health");
     /// game_data.set_code_notes(vec![note]);
-    /// assert_eq!(game_data.code_notes().count(), 1);
+    /// assert_eq!(game_data.code_notes().len(), 1);
     /// ```
     pub fn set_code_notes(&mut self, code_notes: impl Into<CodeNoteSet>) -> &mut Self {
         self.code_notes = code_notes.into();
@@ -286,6 +298,55 @@ impl GameData {
         self
     }
 
+    /// Returns the achievements for this game.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # use rustcheevos::prelude::*;
+    /// # use rustcheevos::types::game::GameData;
+    /// let game_data = GameData::new(1, "Test");
+    ///
+    /// assert_eq!(game_data.achievements().len(), 0);
+    /// ```
+    #[must_use]
+    pub fn achievements(&self) -> &[Achievement] {
+        &self.achievements
+    }
+
+    /// Returns the leaderboards for this game.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # use rustcheevos::prelude::*;
+    /// # use rustcheevos::types::game::GameData;
+    /// let game_data = GameData::new(1, "Test");
+    ///
+    /// assert_eq!(game_data.leaderboards().len(), 0);
+    /// ```
+    #[must_use]
+    pub fn leaderboards(&self) -> &[Leaderboard] {
+        &self.leaderboards
+    }
+
+    /// Returns the code notes for this game.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use rustcheevos::prelude::*;
+    /// use rustcheevos::types::game::GameData;
+    ///
+    /// let game_data = GameData::new(1, "Test");
+    ///
+    /// assert_eq!(game_data.code_notes().len(), 0);
+    /// ```
+    #[must_use]
+    pub fn code_notes(&self) -> &[CodeNote] {
+        &self.code_notes
+    }
+
     /// Returns an iterator over the achievements in this game.
     ///
     /// # Examples
@@ -295,11 +356,11 @@ impl GameData {
     /// # use rustcheevos::types::game::GameData;
     /// let game_data = GameData::new(1, "Test");
     ///
-    /// for achievement in game_data.achievements() {
+    /// for achievement in game_data.iter_achievements() {
     ///     println!("{}", achievement.title());
     /// }
     /// ```
-    pub fn achievements(&self) -> impl Iterator<Item = &Achievement> {
+    pub fn iter_achievements(&self) -> impl Iterator<Item = &Achievement> {
         self.achievements.iter()
     }
 
@@ -312,11 +373,11 @@ impl GameData {
     /// # use rustcheevos::types::game::GameData;
     /// let game_data = GameData::new(1, "Test");
     ///
-    /// for lb in game_data.leaderboards() {
+    /// for lb in game_data.iter_leaderboards() {
     ///     println!("{}", lb.title());
     /// }
     /// ```
-    pub fn leaderboards(&self) -> impl Iterator<Item = &Leaderboard> {
+    pub fn iter_leaderboards(&self) -> impl Iterator<Item = &Leaderboard> {
         self.leaderboards.iter()
     }
 
@@ -330,11 +391,11 @@ impl GameData {
     ///
     /// let game_data = GameData::new(1, "Test");
     ///
-    /// for note in game_data.code_notes() {
+    /// for note in game_data.iter_code_notes() {
     ///     println!("{:x}: {}", note.address(), note.contents());
     /// }
     /// ```
-    pub fn code_notes(&self) -> impl Iterator<Item = &CodeNote> {
+    pub fn iter_code_notes(&self) -> impl Iterator<Item = &CodeNote> {
         self.code_notes.iter()
     }
 
@@ -348,9 +409,9 @@ impl GameData {
     fn user_file(&self) -> UserFile {
         UserFile::new(
             self.title.clone(),
-            self.achievements(),
-            self.leaderboards(),
-            self.code_notes(),
+            self.iter_achievements(),
+            self.iter_leaderboards(),
+            self.iter_code_notes(),
         )
     }
 
@@ -378,14 +439,18 @@ impl GameData {
     ///
     /// game_data.export(&temp_dir).unwrap();
     /// ```
-    pub fn export(&self, dir: impl AsRef<Path>) -> io::Result<()> {
+    pub fn export(&self, dir: impl AsRef<Path>) -> io::Result<ExportedFiles> {
         let dir = dir.as_ref();
         fs::create_dir_all(dir)?;
-        self.export_user_file(dir)?;
-        self.rich_presence.export(self.id, dir)
+        Ok(ExportedFiles {
+            user_file: self.export_user_file(dir)?,
+            rich_presence: self.rich_presence.export(self.id, dir)?,
+        })
     }
 
     /// Exports the user file for this game to the given directory.
+    ///
+    /// Returns `None` if there are no achievements, leaderboards, or code notes.
     ///
     /// # Errors
     ///
@@ -414,11 +479,18 @@ impl GameData {
     ///
     /// game_data.export_user_file(&temp_dir).unwrap();
     /// ```
-    pub fn export_user_file(&self, dir: impl AsRef<Path>) -> io::Result<()> {
+    pub fn export_user_file(&self, dir: impl AsRef<Path>) -> io::Result<Option<PathBuf>> {
+        if self.achievements.is_empty()
+            && self.leaderboards.is_empty()
+            && self.code_notes.is_empty()
+        {
+            return Ok(None);
+        }
         let user_file = self.user_file();
         let filename = format!("{}{USER_FILE_SUFFIX}.{USER_FILE_EXTENSION}", self.id);
         let path = dir.as_ref().join(filename);
-        fs::write(path, user_file.to_string())
+        fs::write(&path, user_file.to_string())?;
+        Ok(Some(path))
     }
 }
 

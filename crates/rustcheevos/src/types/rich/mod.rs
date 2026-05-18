@@ -1,6 +1,10 @@
 //! Type definitions for rich presence.
 
-use std::{fmt, fs, io, path::Path, rc::Rc};
+use std::{
+    fmt, fs, io,
+    path::{Path, PathBuf},
+    rc::Rc,
+};
 
 use format::Format;
 
@@ -176,7 +180,18 @@ impl RichPresence {
         self.static_display = display.into();
     }
 
+    /// Returns true if this rich presence has no content.
+    #[must_use]
+    pub fn is_empty(&self) -> bool {
+        self.lookup_tables.is_empty()
+            && self.formats.is_empty()
+            && self.conditional_displays.is_empty()
+            && self.static_display.is_empty()
+    }
+
     /// Exports this set to to the rich presence file at the given directory and with the given game id.
+    ///
+    /// Returns `None` if the rich presence has no content.
     ///
     /// # Errors
     ///
@@ -194,10 +209,18 @@ impl RichPresence {
     /// std::fs::create_dir_all(&temp_dir).unwrap();
     /// rich_presence.export("GAME001", &temp_dir).unwrap();
     /// ```
-    pub fn export(&self, game_id: impl fmt::Display, dir: impl AsRef<Path>) -> io::Result<()> {
+    pub fn export(
+        &self,
+        game_id: impl fmt::Display,
+        dir: impl AsRef<Path>,
+    ) -> io::Result<Option<PathBuf>> {
+        if self.is_empty() {
+            return Ok(None);
+        }
         let filename = format!("{game_id}{RICH_PESENCE_FILE_SUFFIX}.{RICH_PESENCE_FILE_EXTENSION}");
         let path = dir.as_ref().join(filename);
-        self.export_to_file(path)
+        self.export_to_file(&path)?;
+        Ok(Some(path))
     }
 
     /// Exports this set to a custom file path.
