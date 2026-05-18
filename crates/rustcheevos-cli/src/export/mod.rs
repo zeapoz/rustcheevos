@@ -14,10 +14,11 @@ pub fn export(game_data: &GameData, output: &Path) -> io::Result<()> {
     let achievements = game_data.achievements().len();
     let leaderboards = game_data.leaderboards().len();
     let code_notes = game_data.code_notes().len();
-    let total = achievements + leaderboards + code_notes;
 
     if let Some(ref path) = exported.user_file {
+        let total = achievements + leaderboards + code_notes;
         println!("Exported {total} game assets to {}", path.display());
+
         if achievements > 0 {
             println!("- {achievements} achievement(s)");
         }

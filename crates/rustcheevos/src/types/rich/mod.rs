@@ -189,7 +189,7 @@ impl RichPresence {
             && self.static_display.is_empty()
     }
 
-    /// Exports this set to to the rich presence file at the given directory and with the given game id.
+    /// Exports this set to the rich presence file at the given directory and with the given game id.
     ///
     /// Returns `None` if the rich presence has no content.
     ///
