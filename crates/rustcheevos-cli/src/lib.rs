@@ -72,7 +72,7 @@ impl RustcheevosCli {
     /// Returns an error if the command fails.
     pub fn run(self, game_data: &GameData) -> Result<(), CliError> {
         match self.command {
-            GameCommand::Export { output } => export(game_data, &output).map_err(CliError::from),
+            GameCommand::Export { output } => export(game_data, &output),
             GameCommand::Readme { output, hashes } => {
                 generate_readme(game_data, &output, hashes.as_deref())
             }

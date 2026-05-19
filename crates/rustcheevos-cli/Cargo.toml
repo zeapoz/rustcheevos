@@ -9,6 +9,7 @@ color-eyre = "0.6.5"
 eyre = "0.6.12"
 heck.workspace = true
 rustcheevos = { version = "0.1.0", path = "../rustcheevos" }
+rustcheevos-schema = { path = "../rustcheevos-schema" }
 serde_json.workspace = true
 thiserror.workspace = true
 

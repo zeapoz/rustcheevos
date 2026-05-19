@@ -12,6 +12,7 @@ readme = "../../README.md"
 winnow = "1.0.2"
 thiserror.workspace = true
 rustcheevos-proc = { path = "../rustcheevos-proc" }
+rustcheevos-schema = { path = "../rustcheevos-schema" }
 serde.workspace = true
 serde_json.workspace = true
 

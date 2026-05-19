@@ -8,7 +8,7 @@ use std::{
 
 use format::Format;
 
-use crate::schema::rich::{RICH_PESENCE_FILE_EXTENSION, RICH_PESENCE_FILE_SUFFIX};
+use rustcheevos_schema::rich::{RICH_PESENCE_FILE_EXTENSION, RICH_PESENCE_FILE_SUFFIX};
 
 use super::chain::ChainGroup;
 

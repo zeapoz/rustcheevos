@@ -277,3 +277,27 @@ impl FromStr for Tag {
         Ok(tag)
     }
 }
+
+/// Default author for achievement entries.
+const DEFAULT_AUTHOR: &str = "rustcheevos";
+/// Default timestamp for achievement entries.
+const DEFAULT_TIMESTAMP: &str = "0";
+
+impl From<&Achievement> for rustcheevos_schema::user::AchievementEntry {
+    fn from(value: &Achievement) -> Self {
+        Self {
+            id: value.id(),
+            requirements: value.requirements().to_string(),
+            title: value.title().to_string(),
+            description: value.description().to_string(),
+            tag: value.tag().map(ToString::to_string).unwrap_or_default(),
+            author: DEFAULT_AUTHOR.to_string(),
+            points: value.points(),
+            created: DEFAULT_TIMESTAMP.to_string(),
+            updated: DEFAULT_TIMESTAMP.to_string(),
+            upvotes: 0,
+            downvotes: 0,
+            badge: format!("{:05}", value.badge_id()),
+        }
+    }
+}

@@ -2,8 +2,8 @@
 
 use std::num::ParseIntError;
 
-use crate::schema::notes;
 use crate::util::parse_hex_address;
+use rustcheevos_schema::{notes as notes_schema, user as user_schema};
 
 /// A code note definition.
 ///
@@ -48,14 +48,23 @@ impl CodeNote {
     }
 }
 
-impl TryFrom<notes::CodeNote> for CodeNote {
+impl TryFrom<notes_schema::CodeNote> for CodeNote {
     type Error = ParseIntError;
 
-    fn try_from(value: notes::CodeNote) -> Result<Self, Self::Error> {
+    fn try_from(value: notes_schema::CodeNote) -> Result<Self, Self::Error> {
         let address = parse_hex_address(&value.address)?;
         Ok(Self {
             address,
             contents: value.note,
         })
+    }
+}
+
+impl From<&CodeNote> for user_schema::CodeNoteEntry {
+    fn from(value: &CodeNote) -> Self {
+        Self {
+            address: value.address(),
+            note: value.contents().to_string(),
+        }
     }
 }

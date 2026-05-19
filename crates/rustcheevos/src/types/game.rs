@@ -5,12 +5,12 @@ use std::{
     path::{Path, PathBuf},
 };
 
-use crate::{
-    schema::user::{USER_FILE_EXTENSION, USER_FILE_SUFFIX, UserFile},
-    types::{
-        achievement::Achievement, leaderboard::Leaderboard, note::CodeNote, rich::RichPresence,
-    },
+use rustcheevos_schema::user::{USER_FILE_EXTENSION, USER_FILE_SUFFIX, UserFile};
+
+use crate::types::{
+    achievement::Achievement, leaderboard::Leaderboard, note::CodeNote, rich::RichPresence,
 };
+use rustcheevos_schema::user::{AchievementEntry, CodeNoteEntry, LeaderboardEntry};
 
 /// A set of achievements.
 pub type AchievementSet = Vec<Achievement>;
@@ -409,9 +409,9 @@ impl GameData {
     fn user_file(&self) -> UserFile {
         UserFile::new(
             self.title.clone(),
-            self.iter_achievements(),
-            self.iter_leaderboards(),
-            self.iter_code_notes(),
+            self.iter_achievements().map(AchievementEntry::from),
+            self.iter_leaderboards().map(LeaderboardEntry::from),
+            self.iter_code_notes().map(CodeNoteEntry::from),
         )
     }
 

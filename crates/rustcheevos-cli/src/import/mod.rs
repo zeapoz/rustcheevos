@@ -10,10 +10,10 @@ use std::path::Path;
 use clap::ValueEnum;
 use color_eyre::eyre::{Context, Result, eyre};
 use rustcheevos::{
-    schema,
     types::{memory::MemorySize, note::CodeNote},
     util::parse_hex_address,
 };
+use rustcheevos_schema::notes as schema_notes;
 
 use generator::OutputGenerator;
 use parsing::parse_notes;
@@ -194,7 +194,7 @@ fn read_notes(path: &Path) -> Result<Vec<CodeNote>> {
     let contents = std::fs::read_to_string(path)
         .with_context(|| format!("Failed to read {}", path.display()))?;
 
-    let schema_notes: Vec<schema::notes::CodeNote> =
+    let schema_notes: Vec<schema_notes::CodeNote> =
         serde_json::from_str(&contents).context("Failed to parse JSON")?;
 
     schema_notes

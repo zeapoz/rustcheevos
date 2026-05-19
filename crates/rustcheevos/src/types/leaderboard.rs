@@ -3,6 +3,8 @@
 use std::fmt;
 use std::str::FromStr;
 
+use rustcheevos_schema::user as user_schema;
+
 use crate::parsers::ParseError;
 use crate::types::requirement::condition::Condition;
 
@@ -365,5 +367,21 @@ impl FromStr for LeaderboardFormat {
             s => return Err(ParseError::Leaderboard(s.to_string())),
         };
         Ok(format)
+    }
+}
+
+impl From<&Leaderboard> for user_schema::LeaderboardEntry {
+    fn from(value: &Leaderboard) -> Self {
+        Self {
+            id: value.id(),
+            start: value.start().to_string(),
+            cancel: value.cancel().to_string(),
+            submit: value.submit().to_string(),
+            value: value.value().to_string(),
+            format: value.format().to_string(),
+            title: value.title().to_string(),
+            description: value.description().to_string(),
+            lower_is_better: value.lower_is_better(),
+        }
     }
 }

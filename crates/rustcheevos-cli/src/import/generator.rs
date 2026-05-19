@@ -107,7 +107,7 @@ impl OutputGenerator {
         name_counts: &HashMap<String, usize>,
         base_name: &str,
     ) -> String {
-        let count = name_counts.get(base_name).copied().unwrap_or(0);
+        let count = name_counts.get(base_name).copied().unwrap_or_default();
         if count <= 1 {
             base_name.to_string()
         } else {

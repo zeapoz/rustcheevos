@@ -1,14 +1,16 @@
 //! Export game assets to disk.
 
-use std::{io, path::Path};
+use std::path::Path;
 
 use rustcheevos::types::game::GameData;
+
+use crate::CliError;
 
 /// Export game assets to disk.
 ///
 /// # Errors
 /// Returns an error if the export fails.
-pub fn export(game_data: &GameData, output: &Path) -> io::Result<()> {
+pub fn export(game_data: &GameData, output: &Path) -> Result<(), CliError> {
     let exported = game_data.export(output)?;
 
     let achievements = game_data.achievements().len();
