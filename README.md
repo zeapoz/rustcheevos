@@ -99,7 +99,9 @@ fn main() {
 
 ## Embeddable CLI
 
-> **Tip:** The `rustcheevos-cli` crate can also be used as a library to replace manual export handling. in addition to providing convenient CLI functionality directly to your Rustcheevos projects. See the [rustcheevos-cli README](https://github.com/zeapoz/rustcheevos/tree/main/crates/rustcheevos-cli#embeddable-cli-for-game-projects) for details.
+> [!TIP]
+> The `rustcheevos-cli` crate can also be used as a library to replace manual export handling, in addition to providing convenient CLI functionality directly to your Rustcheevos projects.
+> See the [rustcheevos-cli README](https://github.com/zeapoz/rustcheevos/tree/main/crates/rustcheevos-cli#embeddable-cli-for-rustcheevos-projects) for details.
 
 ## Community Sets
 

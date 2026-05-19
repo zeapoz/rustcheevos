@@ -10,6 +10,7 @@ eyre = "0.6.12"
 heck.workspace = true
 rustcheevos = { version = "0.1.0", path = "../rustcheevos" }
 serde_json.workspace = true
+thiserror.workspace = true
 
 [lints]
 workspace = true

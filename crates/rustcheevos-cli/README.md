@@ -32,13 +32,13 @@ The `import` subcommand supports the following options:
 - `--range <RANGE>`: Filter to a range of addresses (e.g. 0x1000..0x2000 or 0x1000..=0x2000).
 - `--format <FORMAT>`: Output format for generated code. Options are `function` (default, generates `pub const fn` functions) or `const` (generates `pub const` constants).
 
-## Embeddable CLI for Game Projects
+## Embeddable CLI for Rustcheevos Projects
 
 This crate can also be used as a library to add convenient CLI functions to Rustcheevos projects. This allows you to export your game assets with commands like `cargo run -- export`.
 
 ### Setup
 
-Add the dependency to your game project's `Cargo.toml`:
+Add the dependency to your Rustcheevos project's `Cargo.toml`:
 
 ```toml
 [dependencies]
@@ -68,18 +68,39 @@ fn main() -> std::io::Result<()> {
 | Command | Description |
 |---------|-------------|
 | `export` | Export game assets to disk |
+| `readme` | Generate a README.md for the game |
 
 #### Export
 
 ```sh
 cargo run -- export                  # exports to ./output
 cargo run -- export -o /tmp/assets   # exports to specified directory
-cargo run -- --help                  # shows all available commands
 ```
 
 The `export` subcommand supports the following options:
 
 - `-o, --output <DIR>`: Output directory for exported files (default: `output`).
+
+#### Readme
+
+```sh
+cargo run -- readme                          # generates README.md in current directory
+cargo run -- readme -o docs/README.md        # generates README at specified path
+cargo run -- readme --hashes hashes.txt      # generates README with supported hashes section
+```
+
+The `readme` subcommand supports the following options:
+
+- `-o, --output <PATH>`: Output path for the generated README (default: `README.md`).
+- `--hashes <PATH>`: Path to a file containing supported hashes (format: `hash, name` per line).
+
+The generated README includes:
+- Game title and RetroAchievements link
+- Table of contents (dynamic based on available content)
+- Supported hashes table (if `--hashes` is provided)
+- Achievements table with badge, name, description, points, and tag
+- Leaderboards table with name and format
+- Rich presence display strings
 
 # License
 

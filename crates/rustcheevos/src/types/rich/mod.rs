@@ -180,6 +180,17 @@ impl RichPresence {
         self.static_display = display.into();
     }
 
+    /// Returns an iterator over the conditional displays.
+    pub fn iter_conditional_displays(&self) -> impl Iterator<Item = &ConditionalDisplay> {
+        self.conditional_displays.iter()
+    }
+
+    /// Returns the static display string.
+    #[must_use]
+    pub fn static_display(&self) -> &str {
+        &self.static_display
+    }
+
     /// Returns true if this rich presence has no content.
     #[must_use]
     pub fn is_empty(&self) -> bool {
@@ -263,7 +274,7 @@ impl fmt::Display for RichPresence {
 
 /// A conditional rich presence display definition.
 #[derive(Debug, Clone, PartialEq)]
-struct ConditionalDisplay {
+pub struct ConditionalDisplay {
     /// The condition for displaying this display.
     condition: ChainGroup,
     /// The display to show when the condition is met.
@@ -277,6 +288,12 @@ impl ConditionalDisplay {
             condition: condition.into(),
             display: display.into(),
         }
+    }
+
+    /// Returns the display string.
+    #[must_use]
+    pub fn display(&self) -> &str {
+        &self.display
     }
 }
 
