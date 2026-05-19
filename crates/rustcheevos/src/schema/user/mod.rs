@@ -214,7 +214,8 @@ pub struct CodeNoteEntry {
 
 impl fmt::Display for CodeNoteEntry {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "N0:0x{:x}:{}", self.address, self.note)
+        let escaped = self.note.replace("\r\n", "\\n").replace('\n', "\\n");
+        write!(f, "N0:0x{:x}:\"{}\"", self.address, escaped)
     }
 }
 
