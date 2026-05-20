@@ -76,11 +76,13 @@ fn main() -> io::Result<(), CliError> {
 ```sh
 cargo run -- export                  # exports to ./output
 cargo run -- export -o /tmp/assets   # exports to specified directory
+cargo run -- export -a "zeapoz"      # exports with custom author field
 ```
 
 The `export` subcommand supports the following options:
 
 - `-o, --output <DIR>`: Output directory for exported files (default: `output`).
+- `-a, --author <AUTHOR>`: Achievement author for exported files (default: `Rustcheevos`).
 
 #### Readme
 

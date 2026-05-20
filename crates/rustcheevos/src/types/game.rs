@@ -3,7 +3,7 @@
 use crate::types::{
     achievement::Achievement, leaderboard::Leaderboard, note::CodeNote, rich::RichPresence,
 };
-use rustcheevos_schema::user::{AchievementEntry, CodeNoteEntry, LeaderboardEntry, UserFile};
+use rustcheevos_schema::user::{CodeNoteEntry, UserFile};
 
 /// A set of achievements.
 pub type AchievementSet = Vec<Achievement>;
@@ -73,7 +73,7 @@ pub type CodeNoteSet = Vec<CodeNote>;
 ///     .set_rich_presence(rich_presence);
 ///
 /// // Serialize to the user file format.
-/// let user_file = game_data.to_user_file();
+/// let user_file = game_data.to_user_file("Rustcheevos");
 /// println!("{user_file}");
 /// ```
 #[derive(Debug, Clone, PartialEq)]
@@ -408,15 +408,16 @@ impl GameData {
     ///     .build();
     /// game_data.add(achievement);
     ///
-    /// let user_file = game_data.to_user_file();
+    /// let user_file = game_data.to_user_file("Rustcheevos");
     /// assert!(user_file.to_string().contains("First Step"));
     /// ```
     #[must_use]
-    pub fn to_user_file(&self) -> UserFile {
+    pub fn to_user_file(&self, author: impl Into<String>) -> UserFile {
+        let author = author.into();
         UserFile::new(
             self.title.clone(),
-            self.iter_achievements().map(AchievementEntry::from),
-            self.iter_leaderboards().map(LeaderboardEntry::from),
+            self.iter_achievements().map(|a| a.to_user_entry(&author)),
+            self.iter_leaderboards().map(Leaderboard::to_user_entry),
             self.iter_code_notes().map(CodeNoteEntry::from),
         )
     }

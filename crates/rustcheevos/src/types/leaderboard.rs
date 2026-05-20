@@ -133,6 +133,43 @@ impl Leaderboard {
     pub fn builder(title: impl Into<String>) -> LeaderboardBuilder {
         LeaderboardBuilder::new(title)
     }
+
+    /// Converts this leaderboard to an entry in the user file.
+    ///
+    /// # Examples
+    /// ```
+    /// use rustcheevos::prelude::*;
+    /// use rustcheevos::types::leaderboard::{Leaderboard, LeaderboardFormat};
+    /// use rustcheevos::{bits8, measured};
+    ///
+    /// let leaderboard = Leaderboard::builder("Speed Run")
+    ///     .description("Complete the level as fast as possible")
+    ///     .id(600707)
+    ///     .start(bits8!(0x1234).eq(1))
+    ///     .cancel(bits8!(0x1234).eq(0))
+    ///     .submit(bits8!(0xABCD).eq(1))
+    ///     .value(measured!(bits8!(0xDEF0)))
+    ///     .format(LeaderboardFormat::Seconds)
+    ///     .lower_is_better(true)
+    ///     .build();
+    ///
+    /// let user_entry = leaderboard.to_user_entry();
+    /// assert_eq!(user_entry.id, 600707);
+    /// ```
+    #[must_use]
+    pub fn to_user_entry(&self) -> user_schema::LeaderboardEntry {
+        user_schema::LeaderboardEntry {
+            id: self.id(),
+            start: self.start().to_string(),
+            cancel: self.cancel().to_string(),
+            submit: self.submit().to_string(),
+            value: self.value().to_string(),
+            format: self.format().to_string(),
+            title: self.title().to_string(),
+            description: self.description().to_string(),
+            lower_is_better: self.lower_is_better(),
+        }
+    }
 }
 
 /// A builder for constructing [`Leaderboard`] instances.
@@ -367,22 +404,6 @@ impl FromStr for LeaderboardFormat {
             s => return Err(ParseError::Leaderboard(s.to_string())),
         };
         Ok(format)
-    }
-}
-
-impl From<&Leaderboard> for user_schema::LeaderboardEntry {
-    fn from(value: &Leaderboard) -> Self {
-        Self {
-            id: value.id(),
-            start: value.start().to_string(),
-            cancel: value.cancel().to_string(),
-            submit: value.submit().to_string(),
-            value: value.value().to_string(),
-            format: value.format().to_string(),
-            title: value.title().to_string(),
-            description: value.description().to_string(),
-            lower_is_better: value.lower_is_better(),
-        }
     }
 }
 

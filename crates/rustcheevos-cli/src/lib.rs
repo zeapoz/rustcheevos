@@ -31,9 +31,11 @@ mod readme;
 pub use error::CliError;
 
 /// Default output directory for the export command.
-pub const DEFAULT_OUTPUT_DIR: &str = "output";
+const DEFAULT_OUTPUT_DIR: &str = "output";
 /// Default output path for the readme command.
-pub const DEFAULT_README_PATH: &str = "README.md";
+const DEFAULT_README_PATH: &str = "README.md";
+/// Default author for achievement entries.
+const DEFAULT_AUTHOR: &str = "Rustcheevos";
 
 /// Embeddable command-line interface for Rustcheevos projects.
 #[derive(Debug, Parser)]
@@ -52,6 +54,9 @@ enum RustcheevosCommand {
         /// Output directory for exported files.
         #[arg(long, short, default_value = DEFAULT_OUTPUT_DIR)]
         output: PathBuf,
+        /// Achievement author for exported files.
+        #[arg(long, short, default_value = DEFAULT_AUTHOR)]
+        author: String,
     },
     /// Generate a README file for the game.
     Readme {
@@ -77,7 +82,7 @@ impl RustcheevosCli {
     /// Returns an error if the command fails.
     pub fn run(self, game_data: &GameData) -> Result<(), CliError> {
         match self.command {
-            RustcheevosCommand::Export { output } => export(game_data, &output),
+            RustcheevosCommand::Export { output, author } => export(game_data, &output, author),
             RustcheevosCommand::Readme { output, hashes } => {
                 generate_readme(game_data, &output, hashes.as_deref())
             }

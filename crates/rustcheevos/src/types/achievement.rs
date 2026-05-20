@@ -2,10 +2,15 @@
 
 use std::{fmt, str::FromStr};
 
+use rustcheevos_schema::user as user_schema;
+
 use crate::parsers::ParseError;
 
 use super::chain::ChainGroup;
 use super::requirement::condition::Condition;
+
+/// Default timestamp for achievement entries.
+const DEFAULT_TIMESTAMP: &str = "0";
 
 /// An achievement definition.
 ///
@@ -108,6 +113,44 @@ impl Achievement {
     /// ```
     pub fn builder(title: impl Into<String>) -> AchievementBuilder {
         AchievementBuilder::new(title)
+    }
+
+    /// Converts this achievement to an entry in the user file.
+    ///
+    /// # Exmaples
+    /// ```
+    /// use rustcheevos::prelude::*;
+    /// use rustcheevos::types::achievement::{Achievement, Tag};
+    /// use rustcheevos::bits8;
+    ///
+    /// let achievement = Achievement::builder("Alpha Amateur")
+    ///     .description("Earn a Bronze medal or higher on every planet of the Alpha galaxy")
+    ///     .requirements(bits8!(0x1234).eq(1))
+    ///     .badge_id(12345)
+    ///     .points(3)
+    ///     .id(600707)
+    ///     .tag(Tag::Progression)
+    ///     .build();
+    ///
+    /// let user_entry = achievement.to_user_entry("rustcheevos");
+    /// assert_eq!(user_entry.id, 600707);
+    /// ```
+    #[must_use]
+    pub fn to_user_entry(&self, author: impl Into<String>) -> user_schema::AchievementEntry {
+        user_schema::AchievementEntry {
+            id: self.id(),
+            requirements: self.requirements().to_string(),
+            title: self.title().to_string(),
+            description: self.description().to_string(),
+            tag: self.tag().map(ToString::to_string).unwrap_or_default(),
+            author: author.into(),
+            points: self.points(),
+            created: DEFAULT_TIMESTAMP.to_string(),
+            updated: DEFAULT_TIMESTAMP.to_string(),
+            upvotes: 0,
+            downvotes: 0,
+            badge: format!("{:05}", self.badge_id()),
+        }
     }
 }
 
@@ -275,30 +318,6 @@ impl FromStr for Tag {
             s => return Err(ParseError::Tag(s.to_string())),
         };
         Ok(tag)
-    }
-}
-
-/// Default author for achievement entries.
-const DEFAULT_AUTHOR: &str = "rustcheevos";
-/// Default timestamp for achievement entries.
-const DEFAULT_TIMESTAMP: &str = "0";
-
-impl From<&Achievement> for rustcheevos_schema::user::AchievementEntry {
-    fn from(value: &Achievement) -> Self {
-        Self {
-            id: value.id(),
-            requirements: value.requirements().to_string(),
-            title: value.title().to_string(),
-            description: value.description().to_string(),
-            tag: value.tag().map(ToString::to_string).unwrap_or_default(),
-            author: DEFAULT_AUTHOR.to_string(),
-            points: value.points(),
-            created: DEFAULT_TIMESTAMP.to_string(),
-            updated: DEFAULT_TIMESTAMP.to_string(),
-            upvotes: 0,
-            downvotes: 0,
-            badge: format!("{:05}", value.badge_id()),
-        }
     }
 }
 

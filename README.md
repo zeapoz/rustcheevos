@@ -95,14 +95,8 @@ For a full reference of the embeddable CLI's features, please consult the [rustc
 > [!TIP]
 > To make the process of starting a new set easier, `rustcheevos-cli` can also be installed as a standalone binary.
 > The standalone version provides a command-line interface for importing existing code notes and exporting getter functions.
-
-To install, run:
-
-```sh
-cargo install --git https://github.com/zeapoz/rustcheevos.git --bin rustcheevos-cli
-```
-
-For more information and usage, see the [rustcheevos-cli README](https://github.com/zeapoz/rustcheevos/tree/main/crates/rustcheevos-cli).
+>
+> For installation and usage, see the [rustcheevos-cli README](https://github.com/zeapoz/rustcheevos/tree/main/crates/rustcheevos-cli).
 
 ## Community Sets
 

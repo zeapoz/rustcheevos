@@ -13,7 +13,7 @@ use crate::CliError;
 ///
 /// # Errors
 /// Returns an error if the export fails.
-pub fn export(game_data: &GameData, output: &Path) -> Result<(), CliError> {
+pub fn export(game_data: &GameData, output: &Path, author: String) -> Result<(), CliError> {
     fs::create_dir_all(output)?;
 
     let achievements = game_data.achievements().len();
@@ -23,7 +23,7 @@ pub fn export(game_data: &GameData, output: &Path) -> Result<(), CliError> {
 
     let has_user_file = achievements > 0 || leaderboards > 0 || code_notes > 0;
     if has_user_file {
-        let path = export_user_file(game_data, output)?;
+        let path = export_user_file(game_data, output, author)?;
 
         let total = achievements + leaderboards + code_notes;
         println!("Exported {total} game assets to {}", path.display());
@@ -48,10 +48,14 @@ pub fn export(game_data: &GameData, output: &Path) -> Result<(), CliError> {
 }
 
 /// Exports the user file.
-fn export_user_file(game_data: &GameData, output: &Path) -> Result<PathBuf, CliError> {
+fn export_user_file(
+    game_data: &GameData,
+    output: &Path,
+    author: String,
+) -> Result<PathBuf, CliError> {
     let filename = format!("{}{USER_FILE_SUFFIX}.{USER_FILE_EXTENSION}", game_data.id());
     let path = output.join(filename);
-    let user_file = game_data.to_user_file();
+    let user_file = game_data.to_user_file(author);
     fs::write(&path, user_file.to_string())?;
     Ok(path)
 }

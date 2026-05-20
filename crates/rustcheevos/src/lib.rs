@@ -87,7 +87,7 @@
 //!     game_data.set_rich_presence(rich_presence);
 //!
 //!     // Export the user file and rich presence.
-//!     fs::write(format!("{GAME_ID}-User.txt"), game_data.to_user_file().to_string())?;
+//!     fs::write(format!("{GAME_ID}-User.txt"), game_data.to_user_file("Rustcheevos").to_string())?;
 //!     fs::write(format!("{GAME_ID}-Rich.txt"), game_data.rich_presence().to_string())?;
 //!
 //!     Ok(())
