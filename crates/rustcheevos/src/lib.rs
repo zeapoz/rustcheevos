@@ -20,6 +20,7 @@
 //! ## Example
 //!
 //! ```no_run
+//! use std::{io, fs};
 //! use rustcheevos::prelude::*;
 //! use rustcheevos::types::{
 //!     achievement::Achievement,
@@ -55,7 +56,7 @@
 //!     )
 //! }
 //!
-//! fn main() {
+//! fn main() -> io::Result<()> {
 //!     let mut game_data = GameData::new(GAME_ID, GAME_NAME);
 //!
 //!     // Define an achievement by combining conditions.
@@ -85,13 +86,16 @@
 //!
 //!     game_data.set_rich_presence(rich_presence);
 //!
-//!     // Export to a directory.
-//!     let directory = std::env::temp_dir().join("rustcheevos_example");
-//!     game_data.export(&directory).unwrap();
+//!     // Export the user file and rich presence.
+//!     fs::write(format!("{GAME_ID}-User.txt"), game_data.to_user_file().to_string())?;
+//!     fs::write(format!("{GAME_ID}-Rich.txt"), game_data.rich_presence().to_string())?;
+//!
+//!     Ok(())
 //! }
 //! ```
 
 pub use rustcheevos_proc::chain;
+pub use rustcheevos_schema::user::UserFile;
 
 mod macros;
 pub(crate) mod parsers;

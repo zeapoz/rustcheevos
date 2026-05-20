@@ -1,15 +1,10 @@
 //! Type definitions for rich presence.
 
-use std::{
-    fmt, fs, io,
-    path::{Path, PathBuf},
-    rc::Rc,
-};
+use std::fmt;
+use std::rc::Rc;
 
 use format::Format;
 use macros::MacroType;
-
-use rustcheevos_schema::rich::{RICH_PESENCE_FILE_EXTENSION, RICH_PESENCE_FILE_SUFFIX};
 
 use super::chain::ChainGroup;
 
@@ -47,6 +42,9 @@ pub use macros::{MacroDef, MacroRef, MacroValue};
 ///
 /// // Add a static display fallback.
 /// rich_presence.add_static_display("Super Adventure - Main Menu");
+///
+/// // Serialize to the rich presence file format.
+/// let output = rich_presence.to_string();
 /// ```
 #[derive(Default, Debug, Clone, PartialEq)]
 pub struct RichPresence {
@@ -240,61 +238,6 @@ impl RichPresence {
             && self.formats.is_empty()
             && self.conditional_displays.is_empty()
             && self.static_display.is_empty()
-    }
-
-    /// Exports this set to the rich presence file at the given directory and with the given game id.
-    ///
-    /// Returns `None` if the rich presence has no content.
-    ///
-    /// # Errors
-    ///
-    /// Returns an error if the directory cannot be created or if writing fails.
-    ///
-    /// # Examples
-    ///
-    /// ```no_run
-    /// use rustcheevos::types::rich::RichPresence;
-    ///
-    /// let mut rich_presence = RichPresence::new();
-    /// rich_presence.add_static_display("Super Adventure");
-    ///
-    /// let temp_dir = std::env::temp_dir().join("rustcheevos_rp_test");
-    /// std::fs::create_dir_all(&temp_dir).unwrap();
-    /// rich_presence.export("GAME001", &temp_dir).unwrap();
-    /// ```
-    pub fn export(
-        &self,
-        game_id: impl fmt::Display,
-        dir: impl AsRef<Path>,
-    ) -> io::Result<Option<PathBuf>> {
-        if self.is_empty() {
-            return Ok(None);
-        }
-        let filename = format!("{game_id}{RICH_PESENCE_FILE_SUFFIX}.{RICH_PESENCE_FILE_EXTENSION}");
-        let path = dir.as_ref().join(filename);
-        self.export_to_file(&path)?;
-        Ok(Some(path))
-    }
-
-    /// Exports this set to a custom file path.
-    ///
-    /// # Errors
-    ///
-    /// Returns an error if writing fails.
-    ///
-    /// # Examples
-    ///
-    /// ```no_run
-    /// use rustcheevos::types::rich::RichPresence;
-    ///
-    /// let mut rich_presence = RichPresence::new();
-    /// rich_presence.add_static_display("Super Adventure");
-    ///
-    /// let temp_path = std::env::temp_dir().join("rich_presence.txt");
-    /// rich_presence.export_to_file(&temp_path).unwrap();
-    /// ```
-    pub fn export_to_file(&self, path: impl AsRef<Path>) -> io::Result<()> {
-        fs::write(path, self.to_string())
     }
 }
 

@@ -12,28 +12,17 @@ To use Rustcheevos, add the following to your `Cargo.toml` file:
 ```toml
 [dependencies]
 rustcheevos = { git = "https://github.com/zeapoz/rustcheevos.git" }
+rustcheevos-cli = { git = "https://github.com/zeapoz/rustcheevos.git" }
 ```
 
 ## Usage
-
-### Rustcheevos CLI
-
-To make the process of starting a new set easier, a separate `rustcheevos-cli` tool exists that
-provides a command-line interface for scafollding new Rustcheevos sets.
-
-To install, run:
-
-```sh
-cargo install --git https://github.com/zeapoz/rustcheevos.git --bin rustcheevos-cli
-```
-
-For more information and usage, see the [rustcheevos-cli README](https://github.com/zeapoz/rustcheevos/tree/main/crates/rustcheevos-cli).
 
 ### Example Program
 
 ```rust
 use rustcheevos::prelude::*;
 use rustcheevos::{chain, add_address, delta, measured, bits8};
+use rustcheevos_cli::{RustcheevosCli, CliError};
 
 // It's recommended to define the game ID and name as constants at the top of the file.
 const GAME_ID: u32 = 20374;
@@ -61,7 +50,7 @@ fn just_beat_level(level_id: u32) -> Chain {
     )
 }
 
-fn main() {
+fn main() -> Result<(), CliError> {
     let mut game_data = GameData::new(GAME_ID, GAME_NAME);
 
     // Define an achievement by combining conditions.
@@ -91,17 +80,28 @@ fn main() {
 
     game_data.set_rich_presence(rich_presence);
 
-    // Export to a directory.
-    let directory = std::env::temp_dir().join("rustcheevos_example");
-    game_data.export(&directory).unwrap();
+    // Call the embeddable CLI to expose export functions and more.
+    RustcheevosCli::parse().run(&game_data)?;
 }
 ```
 
-## Embeddable CLI
+### Rustcheevos CLI
 
-> [!TIP]
-> The `rustcheevos-cli` crate can also be used as a library to replace manual export handling, in addition to providing convenient CLI functionality directly to your Rustcheevos projects.
-> See the [rustcheevos-cli README](https://github.com/zeapoz/rustcheevos/tree/main/crates/rustcheevos-cli#embeddable-cli-for-rustcheevos-projects) for details.
+The embeddable CLI can be used to conveniently expose common functions that are useful for building sets.
+This includes exporting logic, rich presence, and more.
+
+For a full reference of the embeddable CLI's features, please consult the [rustcheevos-cli README](https://github.com/zeapoz/rustcheevos/tree/main/crates/rustcheevos-cli#embeddable-cli-for-rustcheevos-projects).
+
+> [!TIP] To make the process of starting a new set easier, `rustcheevos-cli` can also be installed as a standalone binary.
+> The standalone version provides a command-line interface for importing existing code notes and exporting getter functions.
+
+To install, run:
+
+```sh
+cargo install --git https://github.com/zeapoz/rustcheevos.git --bin rustcheevos-cli
+```
+
+For more information and usage, see the [rustcheevos-cli README](https://github.com/zeapoz/rustcheevos/tree/main/crates/rustcheevos-cli).
 
 ## Community Sets
 

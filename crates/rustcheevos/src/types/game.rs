@@ -1,16 +1,9 @@
 //! Type definition for the core game container struct.
 
-use std::{
-    fs, io,
-    path::{Path, PathBuf},
-};
-
-use rustcheevos_schema::user::{USER_FILE_EXTENSION, USER_FILE_SUFFIX, UserFile};
-
 use crate::types::{
     achievement::Achievement, leaderboard::Leaderboard, note::CodeNote, rich::RichPresence,
 };
-use rustcheevos_schema::user::{AchievementEntry, CodeNoteEntry, LeaderboardEntry};
+use rustcheevos_schema::user::{AchievementEntry, CodeNoteEntry, LeaderboardEntry, UserFile};
 
 /// A set of achievements.
 pub type AchievementSet = Vec<Achievement>;
@@ -18,15 +11,6 @@ pub type AchievementSet = Vec<Achievement>;
 pub type LeaderboardSet = Vec<Leaderboard>;
 /// A set of code notes.
 pub type CodeNoteSet = Vec<CodeNote>;
-
-/// Paths of files exported by [`GameData::export`].
-#[derive(Debug, Clone, PartialEq, Eq, Hash, Default)]
-pub struct ExportedFiles {
-    /// Path to the exported user file, if any content was exported.
-    pub user_file: Option<PathBuf>,
-    /// Path to the exported rich presence file, if any content was exported.
-    pub rich_presence: Option<PathBuf>,
-}
 
 /// The core game struct containing all the assets.
 ///
@@ -88,9 +72,9 @@ pub struct ExportedFiles {
 ///     .add(note)
 ///     .set_rich_presence(rich_presence);
 ///
-/// // Export to a directory.
-/// let directory = std::env::temp_dir().join("rustcheevos_example");
-/// game_data.export(&directory).unwrap();
+/// // Serialize to the user file format.
+/// let user_file = game_data.to_user_file();
+/// println!("{user_file}");
 /// ```
 #[derive(Debug, Clone, PartialEq)]
 pub struct GameData {
@@ -406,63 +390,13 @@ impl GameData {
     }
 
     /// Returns the user file representation of this game.
-    fn user_file(&self) -> UserFile {
-        UserFile::new(
-            self.title.clone(),
-            self.iter_achievements().map(AchievementEntry::from),
-            self.iter_leaderboards().map(LeaderboardEntry::from),
-            self.iter_code_notes().map(CodeNoteEntry::from),
-        )
-    }
-
-    /// Exports the assets of this game to the given directory.
-    ///
-    /// This exports the user file and the rich presence file to the given directory.
-    ///
-    /// # Errors
-    ///
-    /// Returns an error if the directory cannot be created or if writing fails.
     ///
     /// # Examples
     ///
-    /// ```no_run
-    /// use rustcheevos::prelude::*;
-    /// use rustcheevos::types::{game::GameData, rich::RichPresence};
-    ///
-    /// let mut game_data = GameData::new(1, "Super Adventure");
-    ///
-    /// let mut rich_presence = RichPresence::new();
-    /// rich_presence.add_static_display("Playing Super Adventure");
-    /// game_data.set_rich_presence(rich_presence);
-    ///
-    /// let temp_dir = std::env::temp_dir().join("rustcheevos_export_test");
-    ///
-    /// game_data.export(&temp_dir).unwrap();
     /// ```
-    pub fn export(&self, dir: impl AsRef<Path>) -> io::Result<ExportedFiles> {
-        let dir = dir.as_ref();
-        fs::create_dir_all(dir)?;
-        Ok(ExportedFiles {
-            user_file: self.export_user_file(dir)?,
-            rich_presence: self.rich_presence.export(self.id, dir)?,
-        })
-    }
-
-    /// Exports the user file for this game to the given directory.
-    ///
-    /// Returns `None` if there are no achievements, leaderboards, or code notes.
-    ///
-    /// # Errors
-    ///
-    /// Returns an error if the directory cannot be created or if writing fails.
-    ///
-    /// # Examples
-    ///
-    /// ```no_run
-    /// use rustcheevos::prelude::*;
-    /// use rustcheevos::types::{achievement::Achievement, game::GameData};
-    /// use rustcheevos::{chain, bits8};
-    ///
+    /// # use rustcheevos::prelude::*;
+    /// # use rustcheevos::types::{achievement::Achievement, game::GameData};
+    /// # use rustcheevos::{chain, bits8};
     /// let mut game_data = GameData::new(1, "Super Adventure");
     ///
     /// let condition = chain!(bits8!(0x1234).eq(1));
@@ -474,23 +408,17 @@ impl GameData {
     ///     .build();
     /// game_data.add(achievement);
     ///
-    /// let temp_dir = std::env::temp_dir().join("rustcheevos_user_file_test");
-    /// std::fs::create_dir_all(&temp_dir).unwrap();
-    ///
-    /// game_data.export_user_file(&temp_dir).unwrap();
+    /// let user_file = game_data.to_user_file();
+    /// assert!(user_file.to_string().contains("First Step"));
     /// ```
-    pub fn export_user_file(&self, dir: impl AsRef<Path>) -> io::Result<Option<PathBuf>> {
-        if self.achievements.is_empty()
-            && self.leaderboards.is_empty()
-            && self.code_notes.is_empty()
-        {
-            return Ok(None);
-        }
-        let user_file = self.user_file();
-        let filename = format!("{}{USER_FILE_SUFFIX}.{USER_FILE_EXTENSION}", self.id);
-        let path = dir.as_ref().join(filename);
-        fs::write(&path, user_file.to_string())?;
-        Ok(Some(path))
+    #[must_use]
+    pub fn to_user_file(&self) -> UserFile {
+        UserFile::new(
+            self.title.clone(),
+            self.iter_achievements().map(AchievementEntry::from),
+            self.iter_leaderboards().map(LeaderboardEntry::from),
+            self.iter_code_notes().map(CodeNoteEntry::from),
+        )
     }
 }
 
