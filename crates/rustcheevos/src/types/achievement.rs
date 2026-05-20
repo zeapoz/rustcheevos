@@ -301,3 +301,32 @@ impl From<&Achievement> for rustcheevos_schema::user::AchievementEntry {
         }
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn roundtrip_tag_progression() {
+        let original = Tag::Progression;
+        let serialized = original.to_string();
+        let parsed: Tag = serialized.parse().unwrap();
+        assert_eq!(original, parsed);
+    }
+
+    #[test]
+    fn roundtrip_tag_win_condition() {
+        let original = Tag::WinCondition;
+        let serialized = original.to_string();
+        let parsed: Tag = serialized.parse().unwrap();
+        assert_eq!(original, parsed);
+    }
+
+    #[test]
+    fn roundtrip_tag_missable() {
+        let original = Tag::Missable;
+        let serialized = original.to_string();
+        let parsed: Tag = serialized.parse().unwrap();
+        assert_eq!(original, parsed);
+    }
+}

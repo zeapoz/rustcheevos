@@ -228,3 +228,96 @@ impl fmt::Display for ConditionOperation {
         write!(f, "{}{}", self.operator, self.rhs)
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn roundtrip_condition_equals() {
+        let original: Condition = "0xH1234=50".parse().unwrap();
+        let serialized = original.to_string();
+        let parsed: Condition = serialized.parse().unwrap();
+        assert_eq!(original, parsed);
+    }
+
+    #[test]
+    fn roundtrip_condition_not_equals() {
+        let original: Condition = "0xH1234!=50".parse().unwrap();
+        let serialized = original.to_string();
+        let parsed: Condition = serialized.parse().unwrap();
+        assert_eq!(original, parsed);
+    }
+
+    #[test]
+    fn roundtrip_condition_less_than() {
+        let original: Condition = "0xH1234<50".parse().unwrap();
+        let serialized = original.to_string();
+        let parsed: Condition = serialized.parse().unwrap();
+        assert_eq!(original, parsed);
+    }
+
+    #[test]
+    fn roundtrip_condition_less_than_or_equals() {
+        let original: Condition = "0xH1234<=50".parse().unwrap();
+        let serialized = original.to_string();
+        let parsed: Condition = serialized.parse().unwrap();
+        assert_eq!(original, parsed);
+    }
+
+    #[test]
+    fn roundtrip_condition_greater_than() {
+        let original: Condition = "0xH1234>50".parse().unwrap();
+        let serialized = original.to_string();
+        let parsed: Condition = serialized.parse().unwrap();
+        assert_eq!(original, parsed);
+    }
+
+    #[test]
+    fn roundtrip_condition_greater_than_or_equals() {
+        let original: Condition = "0xH1234>=50".parse().unwrap();
+        let serialized = original.to_string();
+        let parsed: Condition = serialized.parse().unwrap();
+        assert_eq!(original, parsed);
+    }
+
+    #[test]
+    fn roundtrip_condition_with_hit_count() {
+        let original: Condition = "0xH1234=50.10.".parse().unwrap();
+        let serialized = original.to_string();
+        let parsed: Condition = serialized.parse().unwrap();
+        assert_eq!(original, parsed);
+    }
+
+    #[test]
+    fn roundtrip_condition_delta() {
+        let original: Condition = "d0xH1234=50".parse().unwrap();
+        let serialized = original.to_string();
+        let parsed: Condition = serialized.parse().unwrap();
+        assert_eq!(original, parsed);
+    }
+
+    #[test]
+    fn roundtrip_condition_always_true() {
+        let original = Condition::always_true();
+        let serialized = original.to_string();
+        let parsed: Condition = serialized.parse().unwrap();
+        assert_eq!(original, parsed);
+    }
+
+    #[test]
+    fn roundtrip_condition_always_false() {
+        let original = Condition::always_false();
+        let serialized = original.to_string();
+        let parsed: Condition = serialized.parse().unwrap();
+        assert_eq!(original, parsed);
+    }
+
+    #[test]
+    fn roundtrip_condition_memory_vs_memory() {
+        let original: Condition = "0xH1234=0xH5678".parse().unwrap();
+        let serialized = original.to_string();
+        let parsed: Condition = serialized.parse().unwrap();
+        assert_eq!(original, parsed);
+    }
+}

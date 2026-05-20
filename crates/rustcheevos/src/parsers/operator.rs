@@ -6,7 +6,7 @@ use crate::types::operator::{ArithmeticOperator, ConditionOperator};
 
 /// Parses an arithmetic operator.
 pub fn parse_arithmetic_operator(input: &mut &str) -> Result<ArithmeticOperator> {
-    let operators = alt(("+", "-", "*", "/"));
+    let operators = alt(("+", "-", "*", "/", "%", "&", "^"));
     operators
         .try_map(ArithmeticOperator::try_from)
         .parse_next(input)
@@ -52,5 +52,26 @@ mod tests {
         let input = "<=";
         let operator = input.parse::<ConditionOperator>().unwrap();
         assert_eq!(operator, ConditionOperator::LessThanOrEquals);
+    }
+
+    #[test]
+    fn test_parse_modulo_operator() {
+        let input = "%";
+        let operator = input.parse::<ArithmeticOperator>().unwrap();
+        assert_eq!(operator, ArithmeticOperator::Modulo);
+    }
+
+    #[test]
+    fn test_parse_bitwise_and_operator() {
+        let input = "&";
+        let operator = input.parse::<ArithmeticOperator>().unwrap();
+        assert_eq!(operator, ArithmeticOperator::BitwiseAnd);
+    }
+
+    #[test]
+    fn test_parse_bitwise_xor_operator() {
+        let input = "^";
+        let operator = input.parse::<ArithmeticOperator>().unwrap();
+        assert_eq!(operator, ArithmeticOperator::BitwiseXor);
     }
 }

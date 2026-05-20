@@ -220,3 +220,80 @@ impl fmt::Display for ArithmeticOperation {
 }
 
 impl_arithmetic_flag_traits!(Arithmetic, with_flag);
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn roundtrip_arithmetic_subtract() {
+        let original: Arithmetic = "A:0xH1234-50".parse().unwrap();
+        let serialized = original.to_string();
+        let parsed: Arithmetic = serialized.parse().unwrap();
+        assert_eq!(original, parsed);
+    }
+
+    #[test]
+    fn roundtrip_arithmetic_multiply() {
+        let original: Arithmetic = "A:0xH1234*50".parse().unwrap();
+        let serialized = original.to_string();
+        let parsed: Arithmetic = serialized.parse().unwrap();
+        assert_eq!(original, parsed);
+    }
+
+    #[test]
+    fn roundtrip_arithmetic_divide() {
+        let original: Arithmetic = "A:0xH1234/50".parse().unwrap();
+        let serialized = original.to_string();
+        let parsed: Arithmetic = serialized.parse().unwrap();
+        assert_eq!(original, parsed);
+    }
+
+    #[test]
+    fn roundtrip_arithmetic_modulo() {
+        let original: Arithmetic = "A:0xH1234%50".parse().unwrap();
+        let serialized = original.to_string();
+        let parsed: Arithmetic = serialized.parse().unwrap();
+        assert_eq!(original, parsed);
+    }
+
+    #[test]
+    fn roundtrip_arithmetic_bitwise_and() {
+        let original: Arithmetic = "A:0xH1234&50".parse().unwrap();
+        let serialized = original.to_string();
+        let parsed: Arithmetic = serialized.parse().unwrap();
+        assert_eq!(original, parsed);
+    }
+
+    #[test]
+    fn roundtrip_arithmetic_bitwise_xor() {
+        let original: Arithmetic = "A:0xH1234^50".parse().unwrap();
+        let serialized = original.to_string();
+        let parsed: Arithmetic = serialized.parse().unwrap();
+        assert_eq!(original, parsed);
+    }
+
+    #[test]
+    fn roundtrip_arithmetic_addsource() {
+        let original: Arithmetic = "A:0xH1234+10".parse().unwrap();
+        let serialized = original.to_string();
+        let parsed: Arithmetic = serialized.parse().unwrap();
+        assert_eq!(original, parsed);
+    }
+
+    #[test]
+    fn roundtrip_arithmetic_subsource() {
+        let original: Arithmetic = "B:0xH1234+10".parse().unwrap();
+        let serialized = original.to_string();
+        let parsed: Arithmetic = serialized.parse().unwrap();
+        assert_eq!(original, parsed);
+    }
+
+    #[test]
+    fn roundtrip_arithmetic_measured() {
+        let original: Arithmetic = "M:0xH1234+10".parse().unwrap();
+        let serialized = original.to_string();
+        let parsed: Arithmetic = serialized.parse().unwrap();
+        assert_eq!(original, parsed);
+    }
+}

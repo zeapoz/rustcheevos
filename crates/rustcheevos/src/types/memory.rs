@@ -555,3 +555,207 @@ memory_ref_constructors! {
     MBF32 => mbf32,
     MBF32LE => mbf32le,
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn roundtrip_memory_size_bits8() {
+        let original = MemorySize::Bits8;
+        let serialized = original.to_string();
+        let parsed: MemorySize = serialized.parse().unwrap();
+        assert_eq!(original, parsed);
+    }
+
+    #[test]
+    fn roundtrip_memory_size_bits16() {
+        let original = MemorySize::Bits16;
+        let serialized = original.to_string();
+        let parsed: MemorySize = serialized.parse().unwrap();
+        assert_eq!(original, parsed);
+    }
+
+    #[test]
+    fn roundtrip_memory_size_bits32() {
+        let original = MemorySize::Bits32;
+        let serialized = original.to_string();
+        let parsed: MemorySize = serialized.parse().unwrap();
+        assert_eq!(original, parsed);
+    }
+
+    #[test]
+    fn roundtrip_memory_size_bits24() {
+        let original = MemorySize::Bits24;
+        let serialized = original.to_string();
+        let parsed: MemorySize = serialized.parse().unwrap();
+        assert_eq!(original, parsed);
+    }
+
+    #[test]
+    fn roundtrip_memory_size_bits16be() {
+        let original = MemorySize::Bits16BE;
+        let serialized = original.to_string();
+        let parsed: MemorySize = serialized.parse().unwrap();
+        assert_eq!(original, parsed);
+    }
+
+    #[test]
+    fn roundtrip_memory_size_bits24be() {
+        let original = MemorySize::Bits24BE;
+        let serialized = original.to_string();
+        let parsed: MemorySize = serialized.parse().unwrap();
+        assert_eq!(original, parsed);
+    }
+
+    #[test]
+    fn roundtrip_memory_size_bits32be() {
+        let original = MemorySize::Bits32BE;
+        let serialized = original.to_string();
+        let parsed: MemorySize = serialized.parse().unwrap();
+        assert_eq!(original, parsed);
+    }
+
+    #[test]
+    fn roundtrip_memory_size_bitcount() {
+        let original = MemorySize::BitCount;
+        let serialized = original.to_string();
+        let parsed: MemorySize = serialized.parse().unwrap();
+        assert_eq!(original, parsed);
+    }
+
+    #[test]
+    fn roundtrip_memory_size_lower4() {
+        let original = MemorySize::Lower4;
+        let serialized = original.to_string();
+        let parsed: MemorySize = serialized.parse().unwrap();
+        assert_eq!(original, parsed);
+    }
+
+    #[test]
+    fn roundtrip_memory_size_upper4() {
+        let original = MemorySize::Upper4;
+        let serialized = original.to_string();
+        let parsed: MemorySize = serialized.parse().unwrap();
+        assert_eq!(original, parsed);
+    }
+
+    #[test]
+    fn roundtrip_memory_size_bit_indices() {
+        for (_variant, input) in [
+            (MemorySize::BitIndex(BitIndex::Zero), "0xM"),
+            (MemorySize::BitIndex(BitIndex::One), "0xN"),
+            (MemorySize::BitIndex(BitIndex::Two), "0xO"),
+            (MemorySize::BitIndex(BitIndex::Three), "0xP"),
+            (MemorySize::BitIndex(BitIndex::Four), "0xQ"),
+            (MemorySize::BitIndex(BitIndex::Five), "0xR"),
+            (MemorySize::BitIndex(BitIndex::Six), "0xS"),
+            (MemorySize::BitIndex(BitIndex::Seven), "0xT"),
+        ] {
+            let original: MemorySize = input.parse().unwrap();
+            let serialized = original.to_string();
+            let parsed: MemorySize = serialized.parse().unwrap();
+            assert_eq!(original, parsed, "Failed for {input}");
+        }
+    }
+
+    #[test]
+    fn roundtrip_memory_size_float() {
+        let original = MemorySize::Float;
+        let serialized = original.to_string();
+        let parsed: MemorySize = serialized.parse().unwrap();
+        assert_eq!(original, parsed);
+    }
+
+    #[test]
+    fn roundtrip_memory_size_floatbe() {
+        let original = MemorySize::FloatBE;
+        let serialized = original.to_string();
+        let parsed: MemorySize = serialized.parse().unwrap();
+        assert_eq!(original, parsed);
+    }
+
+    #[test]
+    fn roundtrip_memory_size_double32() {
+        let original = MemorySize::Double32;
+        let serialized = original.to_string();
+        let parsed: MemorySize = serialized.parse().unwrap();
+        assert_eq!(original, parsed);
+    }
+
+    #[test]
+    fn roundtrip_memory_size_double32be() {
+        let original = MemorySize::Double32BE;
+        let serialized = original.to_string();
+        let parsed: MemorySize = serialized.parse().unwrap();
+        assert_eq!(original, parsed);
+    }
+
+    #[test]
+    fn roundtrip_memory_size_mbf32() {
+        let original = MemorySize::MBF32;
+        let serialized = original.to_string();
+        let parsed: MemorySize = serialized.parse().unwrap();
+        assert_eq!(original, parsed);
+    }
+
+    #[test]
+    fn roundtrip_memory_size_mbf32le() {
+        let original = MemorySize::MBF32LE;
+        let serialized = original.to_string();
+        let parsed: MemorySize = serialized.parse().unwrap();
+        assert_eq!(original, parsed);
+    }
+
+    #[test]
+    fn roundtrip_memory_ref_simple() {
+        let original: MemoryRef = "0xH1234".parse().unwrap();
+        let serialized = original.to_string();
+        let parsed: MemoryRef = serialized.parse().unwrap();
+        assert_eq!(original, parsed);
+    }
+
+    #[test]
+    fn roundtrip_memory_ref_delta() {
+        let original: MemoryRef = "d0xH1234".parse().unwrap();
+        let serialized = original.to_string();
+        let parsed: MemoryRef = serialized.parse().unwrap();
+        assert_eq!(original, parsed);
+    }
+
+    #[test]
+    fn roundtrip_memory_ref_prior() {
+        let original: MemoryRef = "p0xH1234".parse().unwrap();
+        let serialized = original.to_string();
+        let parsed: MemoryRef = serialized.parse().unwrap();
+        assert_eq!(original, parsed);
+    }
+
+    #[test]
+    fn roundtrip_memory_ref_bcd() {
+        let original: MemoryRef = "b0xH1234".parse().unwrap();
+        let serialized = original.to_string();
+        let parsed: MemoryRef = serialized.parse().unwrap();
+        assert_eq!(original, parsed);
+    }
+
+    #[test]
+    fn roundtrip_memory_ref_invert() {
+        let original: MemoryRef = "~0xH1234".parse().unwrap();
+        let serialized = original.to_string();
+        let parsed: MemoryRef = serialized.parse().unwrap();
+        assert_eq!(original, parsed);
+    }
+
+    #[test]
+    fn roundtrip_memory_ref_various_sizes() {
+        for input in [
+            "0xH1234", "0x 1234", "0xX1234", "0xW1234", "fF1234", "0xM1234",
+        ] {
+            let original: MemoryRef = input.parse().unwrap();
+            let serialized = original.to_string();
+            let parsed: MemoryRef = serialized.parse().unwrap();
+            assert_eq!(original, parsed, "Failed for {input}");
+        }
+    }
+}

@@ -367,3 +367,40 @@ impl Chain {
 
 impl_condition_flag_traits!(Chain, with_condition_flag);
 impl_arithmetic_flag_traits!(Chain, with_arithmetic_flag);
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn roundtrip_chain_single_requirement() {
+        let original: Chain = "0xH1234=50".parse().unwrap();
+        let serialized = original.to_string();
+        let parsed: Chain = serialized.parse().unwrap();
+        assert_eq!(original, parsed);
+    }
+
+    #[test]
+    fn roundtrip_chain_multiple_requirements() {
+        let original: Chain = "0xH1234=50_d0xH1234>=10".parse().unwrap();
+        let serialized = original.to_string();
+        let parsed: Chain = serialized.parse().unwrap();
+        assert_eq!(original, parsed);
+    }
+
+    #[test]
+    fn roundtrip_chain_with_arithmetic() {
+        let original: Chain = "A:0xH1234+10_0xH5678=0".parse().unwrap();
+        let serialized = original.to_string();
+        let parsed: Chain = serialized.parse().unwrap();
+        assert_eq!(original, parsed);
+    }
+
+    #[test]
+    fn roundtrip_chain_with_hit_count() {
+        let original: Chain = "0xH1234=1.100._0xH5678>=5".parse().unwrap();
+        let serialized = original.to_string();
+        let parsed: Chain = serialized.parse().unwrap();
+        assert_eq!(original, parsed);
+    }
+}

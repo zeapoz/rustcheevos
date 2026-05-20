@@ -307,3 +307,47 @@ impl fmt::Display for TypedValue {
 }
 
 impl_arithmetic_flag_traits!(TypedValue, with_arithmetic_flag, Arithmetic);
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn roundtrip_typed_value_integer() {
+        let original: TypedValue = "42".parse().unwrap();
+        let serialized = original.to_string();
+        let parsed: TypedValue = serialized.parse().unwrap();
+        assert_eq!(original, parsed);
+    }
+
+    #[test]
+    fn roundtrip_typed_value_float() {
+        let original: TypedValue = "f3.14".parse().unwrap();
+        let serialized = original.to_string();
+        let parsed: TypedValue = serialized.parse().unwrap();
+        assert_eq!(original, parsed);
+    }
+
+    #[test]
+    fn serialize_typed_value_recall() {
+        let original = TypedValue::Recall;
+        let serialized = original.to_string();
+        assert_eq!(serialized, "{recall}");
+    }
+
+    #[test]
+    fn roundtrip_typed_value_memory() {
+        let original: TypedValue = "0xH1234".parse().unwrap();
+        let serialized = original.to_string();
+        let parsed: TypedValue = serialized.parse().unwrap();
+        assert_eq!(original, parsed);
+    }
+
+    #[test]
+    fn roundtrip_typed_value_memory_delta() {
+        let original: TypedValue = "d0xX5678".parse().unwrap();
+        let serialized = original.to_string();
+        let parsed: TypedValue = serialized.parse().unwrap();
+        assert_eq!(original, parsed);
+    }
+}

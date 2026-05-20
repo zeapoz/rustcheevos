@@ -50,3 +50,31 @@ impl From<u32> for HitCount {
         Self(value)
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn serialize_hit_count_zero() {
+        let original = HitCount::default();
+        let serialized = original.to_string();
+        assert_eq!(serialized, "");
+    }
+
+    #[test]
+    fn roundtrip_hit_count_one() {
+        let original = HitCount(1);
+        let serialized = original.to_string();
+        let parsed: HitCount = serialized.parse().unwrap();
+        assert_eq!(original, parsed);
+    }
+
+    #[test]
+    fn roundtrip_hit_count_large() {
+        let original = HitCount(999);
+        let serialized = original.to_string();
+        let parsed: HitCount = serialized.parse().unwrap();
+        assert_eq!(original, parsed);
+    }
+}

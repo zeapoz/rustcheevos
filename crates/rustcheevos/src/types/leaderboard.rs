@@ -385,3 +385,136 @@ impl From<&Leaderboard> for user_schema::LeaderboardEntry {
         }
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn roundtrip_leaderboard_format_score() {
+        let original = LeaderboardFormat::Score;
+        let serialized = original.to_string();
+        let parsed: LeaderboardFormat = serialized.parse().unwrap();
+        assert_eq!(original, parsed);
+    }
+
+    #[test]
+    fn roundtrip_leaderboard_format_seconds() {
+        let original = LeaderboardFormat::Seconds;
+        let serialized = original.to_string();
+        let parsed: LeaderboardFormat = serialized.parse().unwrap();
+        assert_eq!(original, parsed);
+    }
+
+    #[test]
+    fn roundtrip_leaderboard_format_frames() {
+        let original = LeaderboardFormat::Frames;
+        let serialized = original.to_string();
+        let parsed: LeaderboardFormat = serialized.parse().unwrap();
+        assert_eq!(original, parsed);
+    }
+
+    #[test]
+    fn roundtrip_leaderboard_format_milliseconds() {
+        let original = LeaderboardFormat::Milliseconds;
+        let serialized = original.to_string();
+        let parsed: LeaderboardFormat = serialized.parse().unwrap();
+        assert_eq!(original, parsed);
+    }
+
+    #[test]
+    fn roundtrip_leaderboard_format_minutes() {
+        let original = LeaderboardFormat::Minutes;
+        let serialized = original.to_string();
+        let parsed: LeaderboardFormat = serialized.parse().unwrap();
+        assert_eq!(original, parsed);
+    }
+
+    #[test]
+    fn roundtrip_leaderboard_format_secs_as_mins() {
+        let original = LeaderboardFormat::SecsAsMins;
+        let serialized = original.to_string();
+        let parsed: LeaderboardFormat = serialized.parse().unwrap();
+        assert_eq!(original, parsed);
+    }
+
+    #[test]
+    fn roundtrip_leaderboard_format_value() {
+        let original = LeaderboardFormat::Value;
+        let serialized = original.to_string();
+        let parsed: LeaderboardFormat = serialized.parse().unwrap();
+        assert_eq!(original, parsed);
+    }
+
+    #[test]
+    fn roundtrip_leaderboard_format_unsigned() {
+        let original = LeaderboardFormat::Unsigned;
+        let serialized = original.to_string();
+        let parsed: LeaderboardFormat = serialized.parse().unwrap();
+        assert_eq!(original, parsed);
+    }
+
+    #[test]
+    fn roundtrip_leaderboard_format_tens() {
+        let original = LeaderboardFormat::Tens;
+        let serialized = original.to_string();
+        let parsed: LeaderboardFormat = serialized.parse().unwrap();
+        assert_eq!(original, parsed);
+    }
+
+    #[test]
+    fn roundtrip_leaderboard_format_hundreds() {
+        let original = LeaderboardFormat::Hundreds;
+        let serialized = original.to_string();
+        let parsed: LeaderboardFormat = serialized.parse().unwrap();
+        assert_eq!(original, parsed);
+    }
+
+    #[test]
+    fn roundtrip_leaderboard_format_thousands() {
+        let original = LeaderboardFormat::Thousands;
+        let serialized = original.to_string();
+        let parsed: LeaderboardFormat = serialized.parse().unwrap();
+        assert_eq!(original, parsed);
+    }
+
+    #[test]
+    fn roundtrip_leaderboard_format_fixed1() {
+        let original = LeaderboardFormat::Fixed1;
+        let serialized = original.to_string();
+        let parsed: LeaderboardFormat = serialized.parse().unwrap();
+        assert_eq!(original, parsed);
+    }
+
+    #[test]
+    fn roundtrip_leaderboard_format_fixed2() {
+        let original = LeaderboardFormat::Fixed2;
+        let serialized = original.to_string();
+        let parsed: LeaderboardFormat = serialized.parse().unwrap();
+        assert_eq!(original, parsed);
+    }
+
+    #[test]
+    fn roundtrip_leaderboard_format_fixed3() {
+        let original = LeaderboardFormat::Fixed3;
+        let serialized = original.to_string();
+        let parsed: LeaderboardFormat = serialized.parse().unwrap();
+        assert_eq!(original, parsed);
+    }
+
+    #[test]
+    fn roundtrip_leaderboard_format_points() {
+        let original = LeaderboardFormat::Points;
+        let serialized = original.to_string();
+        let parsed: LeaderboardFormat = serialized.parse().unwrap();
+        assert_eq!(original, parsed);
+    }
+
+    #[test]
+    fn roundtrip_leaderboard_format_custom() {
+        let original = LeaderboardFormat::Custom;
+        let serialized = original.to_string();
+        let parsed: LeaderboardFormat = serialized.parse().unwrap();
+        assert_eq!(original, parsed);
+    }
+}

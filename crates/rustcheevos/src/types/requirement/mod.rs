@@ -96,3 +96,40 @@ impl Requirement {
 
 impl_condition_flag_traits!(Requirement, with_condition_flag);
 impl_arithmetic_flag_traits!(Requirement, with_arithmetic_flag);
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn roundtrip_requirement_condition() {
+        let original: Requirement = "0xH1234=50".parse().unwrap();
+        let serialized = original.to_string();
+        let parsed: Requirement = serialized.parse().unwrap();
+        assert_eq!(original, parsed);
+    }
+
+    #[test]
+    fn roundtrip_requirement_arithmetic() {
+        let original: Requirement = "A:0xH1234+50".parse().unwrap();
+        let serialized = original.to_string();
+        let parsed: Requirement = serialized.parse().unwrap();
+        assert_eq!(original, parsed);
+    }
+
+    #[test]
+    fn roundtrip_requirement_with_hit_count() {
+        let original: Requirement = "0xH1234>=10.5.".parse().unwrap();
+        let serialized = original.to_string();
+        let parsed: Requirement = serialized.parse().unwrap();
+        assert_eq!(original, parsed);
+    }
+
+    #[test]
+    fn roundtrip_requirement_memory_comparison() {
+        let original: Requirement = "d0xX1234<0xX5678".parse().unwrap();
+        let serialized = original.to_string();
+        let parsed: Requirement = serialized.parse().unwrap();
+        assert_eq!(original, parsed);
+    }
+}
