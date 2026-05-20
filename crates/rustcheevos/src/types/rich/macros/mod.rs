@@ -32,6 +32,25 @@ impl fmt::Display for MacroType {
     }
 }
 
+/// A rich presence macro definition awaiting a value.
+#[derive(Debug, Clone, PartialEq)]
+pub struct MacroDef {
+    /// The type of macro being referenced.
+    macro_type: MacroType,
+}
+
+impl MacroDef {
+    /// Creates a new macro definition.
+    pub(crate) fn new(macro_type: MacroType) -> Self {
+        Self { macro_type }
+    }
+
+    /// Binds a value to the macro definition, returning a [`MacroRef`].
+    pub fn bind(self, value: impl Into<MacroValue>) -> MacroRef {
+        MacroRef::new(self.macro_type, value)
+    }
+}
+
 /// A rich presence macro reference.
 #[derive(Debug, Clone, PartialEq)]
 pub struct MacroRef {
@@ -53,11 +72,6 @@ impl MacroRef {
     /// Creates a new builtin macro reference.
     pub fn builtin(builtin: BuiltInMacro, value: impl Into<MacroValue>) -> MacroRef {
         Self::new(MacroType::Builtin(builtin), value)
-    }
-
-    /// Creates a new format macro reference.
-    pub(crate) fn format(format: Rc<Format>, value: impl Into<MacroValue>) -> MacroRef {
-        Self::new(MacroType::Format(format), value)
     }
 
     /// Creates a new lookup macro reference.
