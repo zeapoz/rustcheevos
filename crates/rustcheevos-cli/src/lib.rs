@@ -15,7 +15,7 @@
 //! }
 //! ```
 
-use clap::Parser;
+use clap::{Parser, Subcommand};
 use std::path::PathBuf;
 
 use rustcheevos::types::game::GameData;
@@ -30,28 +30,33 @@ mod readme;
 
 pub use error::CliError;
 
+/// Default output directory for the export command.
+pub const DEFAULT_OUTPUT_DIR: &str = "output";
+/// Default output path for the readme command.
+pub const DEFAULT_README_PATH: &str = "README.md";
+
 /// Embeddable command-line interface for Rustcheevos projects.
 #[derive(Debug, Parser)]
 #[command(version, about, long_about = None)]
 pub struct RustcheevosCli {
     /// The subcommand to execute.
     #[command(subcommand)]
-    command: GameCommand,
+    command: RustcheevosCommand,
 }
 
 /// Available subcommands.
-#[derive(Debug, clap::Subcommand)]
-pub enum GameCommand {
+#[derive(Debug, Subcommand)]
+enum RustcheevosCommand {
     /// Export game assets to disk.
     Export {
         /// Output directory for exported files.
-        #[arg(long, short, default_value = "output")]
+        #[arg(long, short, default_value = DEFAULT_OUTPUT_DIR)]
         output: PathBuf,
     },
     /// Generate a README file for the game.
     Readme {
         /// Output path for the generated README.
-        #[arg(long, short, default_value = "README.md")]
+        #[arg(long, short, default_value = DEFAULT_README_PATH)]
         output: PathBuf,
         /// Path to a file containing supported hashes (format: hash, name per line).
         #[arg(long)]
@@ -72,8 +77,8 @@ impl RustcheevosCli {
     /// Returns an error if the command fails.
     pub fn run(self, game_data: &GameData) -> Result<(), CliError> {
         match self.command {
-            GameCommand::Export { output } => export(game_data, &output),
-            GameCommand::Readme { output, hashes } => {
+            RustcheevosCommand::Export { output } => export(game_data, &output),
+            RustcheevosCommand::Readme { output, hashes } => {
                 generate_readme(game_data, &output, hashes.as_deref())
             }
         }

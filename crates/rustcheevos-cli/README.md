@@ -51,10 +51,11 @@ rustcheevos-cli = { git = "https://github.com/zeapoz/rustcheevos" }
 In your `src/main.rs`, replace your manual export logic with `RustcheevosCli`:
 
 ```rust
+use std::io;
 use rustcheevos::types::game::GameData;
-use rustcheevos_cli::{RustcheevosCli, CliParser};
+use rustcheevos_cli::{RustcheevosCli, CliError};
 
-fn main() -> std::io::Result<()> {
+fn main() -> io::Result<(), CliError> {
     let mut game_data = GameData::new(1234, "My Game");
 
     // ... add your achievements, leaderboards, rich presence ...

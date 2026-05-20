@@ -4,7 +4,7 @@ use std::fs;
 use std::path::{Path, PathBuf};
 
 use rustcheevos::types::game::GameData;
-use rustcheevos_schema::rich::{RICH_PESENCE_FILE_EXTENSION, RICH_PESENCE_FILE_SUFFIX};
+use rustcheevos_schema::rich::{RICH_PRESENCE_FILE_EXTENSION, RICH_PRESENCE_FILE_SUFFIX};
 use rustcheevos_schema::user::{USER_FILE_EXTENSION, USER_FILE_SUFFIX};
 
 use crate::CliError;
@@ -22,7 +22,6 @@ pub fn export(game_data: &GameData, output: &Path) -> Result<(), CliError> {
     let has_rich_presence = !game_data.rich_presence().is_empty();
 
     let has_user_file = achievements > 0 || leaderboards > 0 || code_notes > 0;
-
     if has_user_file {
         let path = export_user_file(game_data, output)?;
 
@@ -60,7 +59,7 @@ fn export_user_file(game_data: &GameData, output: &Path) -> Result<PathBuf, CliE
 /// Exports the rich presence file.
 fn export_rich_presence(game_data: &GameData, output: &Path) -> Result<PathBuf, CliError> {
     let filename = format!(
-        "{}{RICH_PESENCE_FILE_SUFFIX}.{RICH_PESENCE_FILE_EXTENSION}",
+        "{}{RICH_PRESENCE_FILE_SUFFIX}.{RICH_PRESENCE_FILE_EXTENSION}",
         game_data.id()
     );
     let path = output.join(filename);
