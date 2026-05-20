@@ -168,8 +168,8 @@ fn build_leaderboards_section(
         if count == 1 { "" } else { "s" }
     )?;
 
-    writeln!(md, "| Name | Format |")?;
-    writeln!(md, "|------|--------|")?;
+    writeln!(md, "| Name | Description | Format |")?;
+    writeln!(md, "|------|-------------|--------|")?;
 
     for leaderboard in leaderboards {
         let format = match leaderboard.format() {
@@ -190,7 +190,12 @@ fn build_leaderboards_section(
             LeaderboardFormat::Points => "Points",
             LeaderboardFormat::Custom => "Custom",
         };
-        writeln!(md, "| {} | {format} |", escape_cell(leaderboard.title()))?;
+        writeln!(
+            md,
+            "| {} | {} | {format} |",
+            escape_cell(leaderboard.title()),
+            escape_cell(leaderboard.description())
+        )?;
     }
 
     writeln!(md)?;
@@ -230,7 +235,7 @@ fn clean_display(display: &str) -> String {
 
     while let Some(c) = chars.next() {
         if c == '@' {
-            result.push('[');
+            result.push('{');
             // Copy the macro name
             while let Some(&next) = chars.peek() {
                 if next == '(' || next.is_whitespace() || next == '|' {
@@ -239,7 +244,7 @@ fn clean_display(display: &str) -> String {
                 chars.next();
                 result.push(next);
             }
-            result.push(']');
+            result.push('}');
             // Skip the (...) block
             if chars.peek() == Some(&'(') {
                 chars.next();
