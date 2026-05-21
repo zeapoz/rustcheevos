@@ -88,6 +88,9 @@ enum RustcheevosCommand {
         /// Show detailed output.
         #[arg(long, short, group = "verbosity")]
         verbose: bool,
+        /// Show what would be exported without writing files.
+        #[arg(long)]
+        dry_run: bool,
     },
     /// Generate a README file for the game.
     Readme {
@@ -118,11 +121,13 @@ impl RustcheevosCli {
                 author,
                 quiet,
                 verbose,
+                dry_run,
             } => export(
                 game_data,
                 &output,
                 author,
                 Verbosity::from_flags(quiet, verbose),
+                dry_run,
             ),
             RustcheevosCommand::Readme { output, hashes } => {
                 generate_readme(game_data, &output, hashes.as_deref())
