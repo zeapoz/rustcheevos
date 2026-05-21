@@ -9,25 +9,30 @@ use rustcheevos::types::memory::BitIndex;
 use rustcheevos::types::memory::MemorySize;
 
 use super::OutputFormat;
+use super::ValueStyle;
 use super::parsing::ParsedNote;
 
 /// Generates Rust code from parsed code notes.
 ///
 /// Produces a module containing `use` statements for required macros
-/// and one function or constant per parsed note that returns a [`MemoryRef`][rustcheevos::types::memory::MemoryRef].
+/// and one function or constant per parsed note that returns a [`MemoryRef`][rustcheevos::types::memory::MemoryRef]
+/// (when using `ValueStyle::Macro`) or a raw address as `usize` (when using `ValueStyle::AddrOnly`).
 pub struct OutputGenerator {
     /// Whether to include doc comments in generated output.
     add_doc_comments: bool,
     /// Output format (functions or constants).
     format: OutputFormat,
+    /// Value representation style (macro calls or raw addresses).
+    value_style: ValueStyle,
 }
 
 impl OutputGenerator {
     /// Creates a new generator with the given configuration.
-    pub fn new(add_doc_comments: bool, format: OutputFormat) -> Self {
+    pub fn new(add_doc_comments: bool, format: OutputFormat, value_style: ValueStyle) -> Self {
         Self {
             add_doc_comments,
             format,
+            value_style,
         }
     }
 
@@ -35,23 +40,31 @@ impl OutputGenerator {
     pub fn collect_used_macros(parsed_notes: &[ParsedNote]) -> HashSet<&'static str> {
         parsed_notes
             .iter()
-            .map(|parsed| memory_size_to_macro(parsed.size))
+            .filter_map(|parsed| parsed.size.map(memory_size_to_macro))
             .collect()
     }
 
     /// Generates the `use` statements for the output module.
-    pub fn generate_imports(used_macros: HashSet<&'static str>) -> Result<String> {
-        let mut output = String::from(
-            "use rustcheevos::prelude::*;\nuse rustcheevos::types::memory::MemoryRef;\n",
-        );
+    pub fn generate_imports(
+        used_macros: HashSet<&'static str>,
+        style: &ValueStyle,
+    ) -> Result<String> {
+        let mut output = String::from("use rustcheevos::prelude::*;\n");
 
-        let mut sorted_macros: Vec<_> = used_macros.into_iter().collect();
-        sorted_macros.sort_unstable();
-        if sorted_macros.len() == 1 {
-            writeln!(output, "use rustcheevos::{};", sorted_macros[0])?;
-        } else if !sorted_macros.is_empty() {
-            writeln!(output, "use rustcheevos::{{{}}};", sorted_macros.join(", "))?;
+        match style {
+            ValueStyle::Macro => {
+                output.push_str("use rustcheevos::types::memory::MemoryRef;\n");
+                let mut sorted_macros: Vec<_> = used_macros.into_iter().collect();
+                sorted_macros.sort_unstable();
+                if sorted_macros.len() == 1 {
+                    writeln!(output, "use rustcheevos::{};", sorted_macros[0])?;
+                } else if !sorted_macros.is_empty() {
+                    writeln!(output, "use rustcheevos::{{{}}};", sorted_macros.join(", "))?;
+                }
+            }
+            ValueStyle::AddrOnly => {}
         }
+
         output.push('\n');
 
         Ok(output)
@@ -65,11 +78,20 @@ impl OutputGenerator {
         let items: Vec<String> = parsed_notes
             .iter()
             .map(|parsed| {
-                let macro_name = memory_size_to_macro(parsed.size);
+                let (value_expr, ret_type) = match self.value_style {
+                    ValueStyle::Macro => {
+                        let macro_name = memory_size_to_macro(parsed.size.unwrap());
+                        (
+                            format!("{macro_name}!(0x{:x})", parsed.address),
+                            "MemoryRef",
+                        )
+                    }
+                    ValueStyle::AddrOnly => (format!("0x{:x}", parsed.address), "usize"),
+                };
                 let base_name = self.format.transform_name(&parsed.title);
                 let name = Self::deduplicate_name(&mut seen_names, &name_counts, &base_name);
                 let doc_comments = self.generate_doc_comments(&parsed.contents);
-                let item = self.format.format_item(&name, macro_name, parsed.address);
+                let item = self.format.format_item(&name, &value_expr, ret_type);
                 format!("{doc_comments}{item}")
             })
             .collect();
@@ -119,8 +141,13 @@ impl OutputGenerator {
 
     /// Generates the complete output module.
     pub fn generate(&self, parsed_notes: &[ParsedNote]) -> Result<String> {
-        let used_macros = Self::collect_used_macros(parsed_notes);
-        let imports = Self::generate_imports(used_macros)?;
+        let imports = match self.value_style {
+            ValueStyle::Macro => {
+                let used_macros = Self::collect_used_macros(parsed_notes);
+                Self::generate_imports(used_macros, &self.value_style)?
+            }
+            ValueStyle::AddrOnly => Self::generate_imports(HashSet::new(), &self.value_style)?,
+        };
         let body = self.generate_items(parsed_notes);
 
         Ok(format!("{imports}{body}"))

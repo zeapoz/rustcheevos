@@ -1,17 +1,18 @@
 //! Parsing logic for `RetroAchievements` code notes.
 
-use color_eyre::eyre::{Result, eyre};
 use rustcheevos::types::{memory::MemorySize, note::CodeNote};
+
+use super::ValueStyle;
 
 /// A code note that has been parsed into structured fields.
 ///
-/// Contains the address, memory size, a human-readable title,
+/// Contains the address, optional memory size, a human-readable title,
 /// and the original note contents.
 pub struct ParsedNote {
     /// The memory address from the original note.
     pub address: usize,
-    /// The parsed memory size variant.
-    pub size: MemorySize,
+    /// The parsed memory size variant, if a recognized size tag was found.
+    pub size: Option<MemorySize>,
     /// The title extracted from the first line of the note.
     pub title: String,
     /// The full original note contents.
@@ -20,20 +21,18 @@ pub struct ParsedNote {
 
 impl ParsedNote {
     /// Parses a [`CodeNote`] into a structured [`ParsedNote`].
-    pub fn try_from_code_note(note: &CodeNote) -> Result<Self> {
-        let first_line = note
-            .contents()
-            .lines()
-            .next()
-            .ok_or_else(|| eyre!("empty note contents"))?;
+    ///
+    /// Returns `None` if the note has empty contents or no title after bracket tags.
+    pub fn try_from_code_note(note: &CodeNote) -> Option<Self> {
+        let first_line = note.contents().lines().next()?;
 
-        let (size, rest) = Self::parse_size(first_line)?;
+        let (size, rest) = Self::parse_size(first_line);
         let title = rest.trim().to_string();
         if title.is_empty() {
-            return Err(eyre!("no title found after size tag"));
+            return None;
         }
 
-        Ok(Self {
+        Some(Self {
             address: note.address(),
             size,
             title,
@@ -42,23 +41,27 @@ impl ParsedNote {
     }
 
     /// Extracts the size tag and remaining text from a line.
-    fn parse_size(line: &str) -> Result<(MemorySize, &str)> {
+    ///
+    /// Returns `None` for size if no recognized size tag is found,
+    /// but still extracts the title by stripping all leading bracket pairs.
+    fn parse_size(line: &str) -> (Option<MemorySize>, &str) {
         let mut rest = line;
 
         while let Some((inner, remaining)) = Self::extract_bracket_pair(rest) {
             if let Ok(size) = super::parse_memory_size(inner) {
                 let (_, title) = Self::strip_leading_brackets(remaining);
-                return Ok((size, title));
+                return (Some(size), title);
             }
 
             if remaining.trim_start().starts_with('[') {
                 rest = remaining;
             } else {
-                return Err(eyre!("no valid size tag found: [{inner}]"));
+                let (_, title) = Self::strip_leading_brackets(remaining);
+                return (None, title);
             }
         }
 
-        Err(eyre!("no size tag found"))
+        (None, "")
     }
 
     /// Finds the first `[...]` bracket pair in a line.
@@ -82,17 +85,30 @@ impl ParsedNote {
 }
 
 /// Parses a slice of [`CodeNote`]s into [`ParsedNote`]s.
-pub fn parse_notes(notes: &[CodeNote]) -> (Vec<ParsedNote>, usize) {
+///
+/// When `value_style` is `Macro`, notes without a recognized size tag are skipped
+/// with a warning. When `AddrOnly`, all notes are included regardless of size tag.
+pub fn parse_notes(notes: &[CodeNote], value_style: &ValueStyle) -> (Vec<ParsedNote>, usize) {
     let mut parsed_notes = Vec::new();
     let mut skipped = 0;
 
     for note in notes {
-        match ParsedNote::try_from_code_note(note) {
-            Ok(parsed) => parsed_notes.push(parsed),
-            Err(e) => {
+        if let Some(parsed) = ParsedNote::try_from_code_note(note) {
+            if *value_style == ValueStyle::Macro && parsed.size.is_none() {
                 skipped += 1;
-                eprintln!("Skipping note at 0x{:x}: {e}", note.address());
+                eprintln!(
+                    "Skipping note at 0x{:x}: no recognized size tag (use --value addr-only to include)",
+                    note.address()
+                );
+            } else {
+                parsed_notes.push(parsed);
             }
+        } else {
+            skipped += 1;
+            eprintln!(
+                "Skipping note at 0x{:x}: empty or malformed",
+                note.address()
+            );
         }
     }
 

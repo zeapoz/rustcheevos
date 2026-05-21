@@ -37,6 +37,25 @@ impl fmt::Display for OutputFormat {
     }
 }
 
+/// Value representation style for generated code.
+#[derive(Debug, Clone, Default, PartialEq, ValueEnum)]
+pub enum ValueStyle {
+    /// Generate using memory accessor macros (e.g., `bits8!(0x1234)`).
+    #[default]
+    Macro,
+    /// Generate raw address values only (e.g., `0x1234`).
+    AddrOnly,
+}
+
+impl fmt::Display for ValueStyle {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            ValueStyle::Macro => write!(f, "macro"),
+            ValueStyle::AddrOnly => write!(f, "addr-only"),
+        }
+    }
+}
+
 impl OutputFormat {
     /// Transforms a note title into the appropriate identifier name.
     pub fn transform_name(&self, title: &str) -> String {
@@ -47,15 +66,13 @@ impl OutputFormat {
     }
 
     /// Formats a single code note item as Rust source code.
-    pub fn format_item(&self, name: &str, macro_name: &str, address: usize) -> String {
+    pub fn format_item(&self, name: &str, value: &str, ret_type: &str) -> String {
         match self {
             OutputFormat::Function => {
-                format!(
-                    "pub const fn {name}() -> MemoryRef {{\n    {macro_name}!(0x{address:x})\n}}"
-                )
+                format!("pub const fn {name}() -> {ret_type} {{\n    {value}\n}}")
             }
             OutputFormat::Const => {
-                format!("pub const {name}: MemoryRef = {macro_name}!(0x{address:x});")
+                format!("pub const {name}: {ret_type} = {value};")
             }
         }
     }
@@ -120,6 +137,7 @@ pub fn import(
     add_doc_comments: bool,
     filter: Option<NoteFilter>,
     format: OutputFormat,
+    value_style: ValueStyle,
 ) -> Result<()> {
     let notes = read_notes(input)?;
     let total_notes = notes.len();
@@ -132,14 +150,15 @@ pub fn import(
         None => notes,
     };
 
-    let (parsed_notes, skipped) = parse_notes(&notes);
+    let (parsed_notes, skipped) = parse_notes(&notes, &value_style);
 
     let item_type = match format {
         OutputFormat::Function => "function(s)",
         OutputFormat::Const => "constant(s)",
     };
 
-    let generated = OutputGenerator::new(add_doc_comments, format).generate(&parsed_notes)?;
+    let generated =
+        OutputGenerator::new(add_doc_comments, format, value_style).generate(&parsed_notes)?;
 
     std::fs::write(output, generated)
         .with_context(|| format!("Failed to write {}", output.display()))?;
@@ -169,7 +188,7 @@ pub fn import(
 /// Parses a size tag string into a [`MemorySize`] variant.
 fn parse_memory_size(tag: &str) -> Result<MemorySize> {
     match tag.to_lowercase().as_str() {
-        "bitflags" | "8-bit" => Ok(MemorySize::Bits8),
+        "8-bit" => Ok(MemorySize::Bits8),
         "16-bit" => Ok(MemorySize::Bits16),
         "24-bit" => Ok(MemorySize::Bits24),
         "32-bit" => Ok(MemorySize::Bits32),

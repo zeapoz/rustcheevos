@@ -8,7 +8,7 @@ use std::path::PathBuf;
 use clap::{Parser, Subcommand};
 use eyre::Result;
 
-use crate::import::{NoteFilter, OutputFormat, import};
+use crate::import::{NoteFilter, OutputFormat, ValueStyle, import};
 
 mod import;
 
@@ -36,6 +36,9 @@ enum Command {
         /// Output format for generated code.
         #[arg(long, value_enum, default_value_t)]
         format: OutputFormat,
+        /// Value representation style for generated code.
+        #[arg(long, value_enum, default_value_t)]
+        value: ValueStyle,
     },
 }
 
@@ -61,6 +64,7 @@ fn main() -> Result<()> {
             address,
             range,
             format,
+            value,
         } => {
             let filter = if let Some(addr) = address {
                 Some(NoteFilter::address(addr.as_str())?)
@@ -70,7 +74,14 @@ fn main() -> Result<()> {
                 None
             };
 
-            import(input, output, !no_docs, filter, format.clone())?;
+            import(
+                input,
+                output,
+                !no_docs,
+                filter,
+                format.clone(),
+                value.clone(),
+            )?;
         }
     }
 
