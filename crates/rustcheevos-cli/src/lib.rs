@@ -16,26 +16,17 @@
 //! ```
 
 use clap::{Parser, Subcommand};
-use std::path::PathBuf;
 
 use rustcheevos::types::game::GameData;
 
-use crate::export::export;
-use crate::readme::generate_readme;
+use crate::export::{ExportArgs, export};
+use crate::readme::{ReadmeArgs, generate_readme};
 
-/// Error types for CLI operations.
 mod error;
 mod export;
 mod readme;
 
 pub use error::CliError;
-
-/// Default output directory for the export command.
-const DEFAULT_OUTPUT_DIR: &str = "output";
-/// Default output path for the readme command.
-const DEFAULT_README_PATH: &str = "README.md";
-/// Default author for achievement entries.
-const DEFAULT_AUTHOR: &str = "Rustcheevos";
 
 /// Verbosity level for CLI output.
 #[derive(Debug, Clone, Copy, Default)]
@@ -75,32 +66,9 @@ pub struct RustcheevosCli {
 #[derive(Debug, Subcommand)]
 enum RustcheevosCommand {
     /// Export game assets to disk.
-    Export {
-        /// Output directory for exported files.
-        #[arg(long, short, default_value = DEFAULT_OUTPUT_DIR)]
-        output: PathBuf,
-        /// Achievement author for exported files.
-        #[arg(long, short, default_value = DEFAULT_AUTHOR)]
-        author: String,
-        /// Suppress all output except errors.
-        #[arg(long, short, group = "verbosity")]
-        quiet: bool,
-        /// Show detailed output.
-        #[arg(long, short, group = "verbosity")]
-        verbose: bool,
-        /// Show what would be exported without writing files.
-        #[arg(long)]
-        dry_run: bool,
-    },
+    Export(ExportArgs),
     /// Generate a README file for the game.
-    Readme {
-        /// Output path for the generated README.
-        #[arg(long, short, default_value = DEFAULT_README_PATH)]
-        output: PathBuf,
-        /// Path to a file containing supported hashes (format: hash, name per line).
-        #[arg(long)]
-        hashes: Option<PathBuf>,
-    },
+    Readme(ReadmeArgs),
 }
 
 impl RustcheevosCli {
@@ -116,22 +84,8 @@ impl RustcheevosCli {
     /// Returns an error if the command fails.
     pub fn run(self, game_data: &GameData) -> Result<(), CliError> {
         match self.command {
-            RustcheevosCommand::Export {
-                output,
-                author,
-                quiet,
-                verbose,
-                dry_run,
-            } => export(
-                game_data,
-                &output,
-                author,
-                Verbosity::from_flags(quiet, verbose),
-                dry_run,
-            ),
-            RustcheevosCommand::Readme { output, hashes } => {
-                generate_readme(game_data, &output, hashes.as_deref())
-            }
+            RustcheevosCommand::Export(args) => export(game_data, args),
+            RustcheevosCommand::Readme(args) => generate_readme(game_data, args),
         }
     }
 }

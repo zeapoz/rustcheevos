@@ -1,7 +1,8 @@
 //! Generate README files for Rustcheevos projects.
 
-use std::{fmt::Write, fs, path::Path};
+use std::{fmt::Write, fs, path::PathBuf};
 
+use clap::Parser;
 use rustcheevos::types::{
     achievement::{Achievement, Tag},
     game::GameData,
@@ -14,20 +15,34 @@ use hash::SupportedHash;
 
 mod hash;
 
+/// Default output path for the readme command.
+const DEFAULT_README_PATH: &str = "README.md";
+
+/// Arguments used in the readme command.
+#[derive(Parser, Debug, Default, Clone)]
+pub struct ReadmeArgs {
+    /// Output path for the generated README.
+    #[arg(long, short, default_value = DEFAULT_README_PATH)]
+    output: PathBuf,
+    /// Path to a file containing supported hashes (format: hash, name per line).
+    #[arg(long)]
+    hashes: Option<PathBuf>,
+}
+
 /// Generate a README file for the given game data.
 ///
 /// # Errors
 /// Returns an error if writing to the output path fails or if formatting fails.
 pub fn generate_readme(
     game_data: &GameData,
-    output: &Path,
-    hashes_path: Option<&Path>,
+    ReadmeArgs { output, hashes }: ReadmeArgs,
 ) -> Result<(), CliError> {
-    let hashes = hashes_path
+    let hashes = hashes
+        .as_deref()
         .map(SupportedHash::parse_from_file)
         .transpose()?;
     let content = build_readme(game_data, hashes.as_deref())?;
-    fs::write(output, content)?;
+    fs::write(&output, content)?;
     println!("Generated README at {}", output.display());
     Ok(())
 }

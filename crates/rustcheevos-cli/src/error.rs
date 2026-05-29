@@ -1,3 +1,5 @@
+//! Error types for CLI operations.
+
 use std::{fmt, io};
 
 /// Error type for CLI operations.
