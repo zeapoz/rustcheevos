@@ -8,8 +8,8 @@ clap = { version = "4.6.1", features = ["derive"] }
 color-eyre = "0.6.5"
 eyre = "0.6.12"
 heck.workspace = true
-rustcheevos = { version = "0.1.0", path = "../rustcheevos" }
-rustcheevos-schema = { path = "../rustcheevos-schema" }
+rustcheevos.workspace = true
+rustcheevos-schema.workspace = true
 serde_json.workspace = true
 thiserror.workspace = true
 
