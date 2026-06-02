@@ -13,5 +13,11 @@ rustcheevos-schema.workspace = true
 serde_json.workspace = true
 thiserror.workspace = true
 
+[features]
+default = ["export", "readme", "preview"]
+export = []
+readme = []
+preview = []
+
 [lints]
 workspace = true

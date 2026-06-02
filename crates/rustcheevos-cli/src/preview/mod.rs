@@ -16,7 +16,7 @@ mod table;
 
 /// Arguments for preview command.
 #[derive(Parser, Debug, Clone, Default)]
-pub struct PreviewArgs {
+pub struct Args {
     /// Which asset to preview. Shows all types if omitted.
     #[command(subcommand)]
     pub target: Option<PreviewTarget>,
@@ -57,7 +57,7 @@ pub enum PreviewTarget {
 }
 
 /// Preview the output of a given game asset.
-pub fn preview_output(game_data: &GameData, args: &PreviewArgs) {
+pub fn preview_output(game_data: &GameData, args: &Args) {
     match &args.target {
         None => {
             preview_achievements(game_data, None, None);

@@ -22,7 +22,7 @@ const DEFAULT_AUTHOR: &str = "Rustcheevos";
 
 /// Arguments used in the export command.
 #[derive(Parser, Debug, Default, Clone)]
-pub struct ExportArgs {
+pub struct Args {
     /// Output directory for exported files.
     #[arg(long, short, default_value = DEFAULT_OUTPUT_DIR)]
     pub output: PathBuf,
@@ -46,13 +46,13 @@ pub struct ExportArgs {
 /// Returns an error if the export fails.
 pub fn export(
     game_data: &GameData,
-    ExportArgs {
+    Args {
         output,
         author,
         dry_run,
         quiet,
         verbose,
-    }: ExportArgs,
+    }: Args,
 ) -> Result<(), CliError> {
     let verbosity = Verbosity::from_flags(quiet, verbose);
 

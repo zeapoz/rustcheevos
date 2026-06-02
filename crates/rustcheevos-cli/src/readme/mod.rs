@@ -20,7 +20,7 @@ const DEFAULT_README_PATH: &str = "README.md";
 
 /// Arguments used in the readme command.
 #[derive(Parser, Debug, Default, Clone)]
-pub struct ReadmeArgs {
+pub struct Args {
     /// Output path for the generated README.
     #[arg(long, short, default_value = DEFAULT_README_PATH)]
     output: PathBuf,
@@ -35,7 +35,7 @@ pub struct ReadmeArgs {
 /// Returns an error if writing to the output path fails or if formatting fails.
 pub fn generate_readme(
     game_data: &GameData,
-    ReadmeArgs { output, hashes }: ReadmeArgs,
+    Args { output, hashes }: Args,
 ) -> Result<(), CliError> {
     let hashes = hashes
         .as_deref()

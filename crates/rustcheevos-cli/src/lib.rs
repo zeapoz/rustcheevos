@@ -19,18 +19,19 @@ use clap::{Parser, Subcommand};
 
 use rustcheevos::types::game::GameData;
 
-use crate::export::{ExportArgs, export};
-use crate::preview::{PreviewArgs, preview_output};
-use crate::readme::{ReadmeArgs, generate_readme};
+#[cfg(feature = "export")]
+mod export;
+#[cfg(feature = "preview")]
+mod preview;
+#[cfg(feature = "readme")]
+mod readme;
 
 mod error;
-mod export;
-mod preview;
-mod readme;
 
 pub use error::CliError;
 
 /// Verbosity level for CLI output.
+#[cfg(feature = "export")]
 #[derive(Debug, Clone, Copy, Default)]
 enum Verbosity {
     /// Suppress all output except errors.
@@ -42,6 +43,7 @@ enum Verbosity {
     Verbose,
 }
 
+#[cfg(feature = "export")]
 impl Verbosity {
     /// Resolves verbosity from mutually exclusive flags.
     fn from_flags(quiet: bool, verbose: bool) -> Self {
@@ -68,11 +70,14 @@ pub struct RustcheevosCli {
 #[derive(Debug, Subcommand)]
 enum RustcheevosCommand {
     /// Export game assets to disk.
-    Export(ExportArgs),
+    #[cfg(feature = "export")]
+    Export(export::Args),
     /// Generate a README file for the game.
-    Readme(ReadmeArgs),
+    #[cfg(feature = "readme")]
+    Readme(readme::Args),
     /// Preview the output of a given asset.
-    Preview(PreviewArgs),
+    #[cfg(feature = "preview")]
+    Preview(preview::Args),
 }
 
 impl RustcheevosCli {
@@ -86,12 +91,15 @@ impl RustcheevosCli {
     ///
     /// # Errors
     /// Returns an error if the command fails.
-    pub fn run(self, game_data: &GameData) -> Result<(), CliError> {
+    pub fn run(self, _game_data: &GameData) -> Result<(), CliError> {
         match self.command {
-            RustcheevosCommand::Export(args) => export(game_data, args),
-            RustcheevosCommand::Readme(args) => generate_readme(game_data, args),
+            #[cfg(feature = "export")]
+            RustcheevosCommand::Export(args) => export::export(_game_data, args),
+            #[cfg(feature = "readme")]
+            RustcheevosCommand::Readme(args) => readme::generate_readme(_game_data, args),
+            #[cfg(feature = "preview")]
             RustcheevosCommand::Preview(args) => {
-                preview_output(game_data, &args);
+                preview::preview_output(_game_data, &args);
                 Ok(())
             }
         }
