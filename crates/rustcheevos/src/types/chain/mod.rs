@@ -124,6 +124,18 @@ impl ChainGroup {
     pub fn set_alt_groups(&mut self, alt_groups: impl IntoIterator<Item = impl Into<Chain>>) {
         self.alt_groups = alt_groups.into_iter().map(Into::into).collect();
     }
+
+    /// Returns the core chain.
+    #[must_use]
+    pub fn core(&self) -> &Chain {
+        &self.core
+    }
+
+    /// Returns the alternative chains.
+    #[must_use]
+    pub fn alt_groups(&self) -> &[Chain] {
+        &self.alt_groups
+    }
 }
 
 impl<T: Into<Chain>> From<T> for ChainGroup {
@@ -271,6 +283,32 @@ impl Chain {
     pub fn into_inner(self) -> Vec<Requirement> {
         self.0
     }
+
+    /// Sets the given comparison flag on all [`Condition`](crate::types::requirement::Condition) requirements in this chain.
+    ///
+    /// [`Arithmetic`](crate::types::requirement::Arithmetic) requirements are returned unchanged.
+    #[must_use]
+    pub fn with_condition_flag(self, flag: ConditionFlag) -> Self {
+        Self(
+            self.0
+                .into_iter()
+                .map(|req| req.with_condition_flag(flag))
+                .collect(),
+        )
+    }
+
+    /// Sets the given arithmetic flag on all [`Arithmetic`](crate::types::requirement::Arithmetic) requirements in this chain.
+    ///
+    /// [`Condition`](crate::types::requirement::Condition) requirements are returned unchanged.
+    #[must_use]
+    pub fn with_arithmetic_flag(self, flag: ArithmeticFlag) -> Self {
+        Self(
+            self.0
+                .into_iter()
+                .map(|req| req.with_arithmetic_flag(flag))
+                .collect(),
+        )
+    }
 }
 
 impl<T: Into<Requirement>> From<T> for Chain {
@@ -300,6 +338,15 @@ impl<T: Into<Chain>> FromIterator<T> for Chain {
     }
 }
 
+impl AccessModeModifier for Chain {
+    fn with_access_mode(mut self, access_mode: AccessMode) -> Self {
+        for req in &mut self.0 {
+            *req = req.with_access_mode(access_mode);
+        }
+        self
+    }
+}
+
 impl FromStr for Chain {
     type Err = ParseError;
 
@@ -324,43 +371,6 @@ impl fmt::Display for Chain {
                 .map(ToString::to_string)
                 .collect::<Vec<_>>()
                 .join("_")
-        )
-    }
-}
-
-impl AccessModeModifier for Chain {
-    fn with_access_mode(mut self, access_mode: AccessMode) -> Self {
-        for req in &mut self.0 {
-            *req = req.with_access_mode(access_mode);
-        }
-        self
-    }
-}
-
-impl Chain {
-    /// Sets the given comparison flag on all [`Condition`](crate::types::requirement::Condition) requirements in this chain.
-    ///
-    /// [`Arithmetic`](crate::types::requirement::Arithmetic) requirements are returned unchanged.
-    #[must_use]
-    pub fn with_condition_flag(self, flag: ConditionFlag) -> Self {
-        Self(
-            self.0
-                .into_iter()
-                .map(|req| req.with_condition_flag(flag))
-                .collect(),
-        )
-    }
-
-    /// Sets the given arithmetic flag on all [`Arithmetic`](crate::types::requirement::Arithmetic) requirements in this chain.
-    ///
-    /// [`Condition`](crate::types::requirement::Condition) requirements are returned unchanged.
-    #[must_use]
-    pub fn with_arithmetic_flag(self, flag: ArithmeticFlag) -> Self {
-        Self(
-            self.0
-                .into_iter()
-                .map(|req| req.with_arithmetic_flag(flag))
-                .collect(),
         )
     }
 }

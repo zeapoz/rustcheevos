@@ -141,7 +141,7 @@ mod tests {
         assert_eq!(condition.flag(), None);
         assert_eq!(
             condition.lhs(),
-            &TypedValue::Memory(MemoryRef::new(MemorySize::Bits32, 0x1234))
+            TypedValue::Memory(MemoryRef::new(MemorySize::Bits32, 0x1234))
         );
         assert_eq!(condition.to_string(), "0xX1234=0xX5678");
     }
@@ -160,7 +160,7 @@ mod tests {
         assert_eq!(arithmetic.flag(), ArithmeticFlag::AddSource);
         assert_eq!(
             arithmetic.lhs(),
-            &TypedValue::Memory(MemoryRef::new(MemorySize::Bits32, 0x1234))
+            TypedValue::Memory(MemoryRef::new(MemorySize::Bits32, 0x1234))
         );
         assert_eq!(arithmetic.rhs(), None);
     }
@@ -172,7 +172,7 @@ mod tests {
         assert_eq!(arithmetic.flag(), ArithmeticFlag::AddSource);
         assert_eq!(
             arithmetic.lhs(),
-            &TypedValue::Memory(MemoryRef::new(MemorySize::Bits32, 0x1234))
+            TypedValue::Memory(MemoryRef::new(MemorySize::Bits32, 0x1234))
         );
         assert_eq!(arithmetic.to_string(), "A:0xX1234+0xX5678");
     }
@@ -184,7 +184,7 @@ mod tests {
         assert_eq!(arithmetic.flag(), ArithmeticFlag::Measured);
         assert_eq!(
             arithmetic.lhs(),
-            &TypedValue::Memory(MemoryRef::new(MemorySize::Bits32, 0x1234))
+            TypedValue::Memory(MemoryRef::new(MemorySize::Bits32, 0x1234))
         );
         assert_eq!(arithmetic.to_string(), "M:0xX1234+0xX5678");
     }

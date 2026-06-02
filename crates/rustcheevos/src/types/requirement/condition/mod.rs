@@ -1,6 +1,6 @@
 //! Type definition for comparison conditions.
 
-pub(crate) use hits::HitCount;
+pub use hits::HitCount;
 use std::{fmt, str::FromStr};
 use winnow::Parser;
 
@@ -11,7 +11,10 @@ use crate::{
     parsers::ParseError,
     parsers::parse_condition,
     types::{
-        flag::ConditionFlag, memory::AccessMode, operator::ConditionOperator, value::TypedValue,
+        flag::ConditionFlag,
+        memory::AccessMode,
+        operator::{ConditionOperator, Operator},
+        value::TypedValue,
     },
 };
 
@@ -139,14 +142,26 @@ impl Condition {
 
     /// Returns the left hand side of the comparison.
     #[must_use]
-    pub fn lhs(&self) -> &TypedValue {
-        &self.lhs
+    pub fn lhs(&self) -> TypedValue {
+        self.lhs
     }
 
     /// Returns the right hand side of the comparison.
     #[must_use]
-    pub fn rhs(&self) -> &TypedValue {
-        &self.operation.rhs
+    pub fn rhs(&self) -> TypedValue {
+        self.operation.rhs
+    }
+
+    /// Returns the comparison operator.
+    #[must_use]
+    pub fn operator(&self) -> Operator {
+        Operator::Condition(self.operation.operator)
+    }
+
+    /// Returns the hit count of the comparison.
+    #[must_use]
+    pub fn hits(&self) -> HitCount {
+        self.hit_count
     }
 
     /// Sets the given flag on this requirement.
@@ -319,5 +334,26 @@ mod tests {
         let serialized = original.to_string();
         let parsed: Condition = serialized.parse().unwrap();
         assert_eq!(original, parsed);
+    }
+
+    #[test]
+    fn condition_operator_returns_condition_variant() {
+        let cond: Condition = "0xH1234>=50".parse().unwrap();
+        assert_eq!(
+            cond.operator(),
+            Operator::Condition(ConditionOperator::GreaterThanOrEquals)
+        );
+    }
+
+    #[test]
+    fn condition_hits_default_zero() {
+        let cond = Condition::eq(1, 1);
+        assert_eq!(*cond.hits(), 0);
+    }
+
+    #[test]
+    fn condition_hits_returns_set_value() {
+        let cond: Condition = "0xH1234=50.10.".parse().unwrap();
+        assert_eq!(*cond.hits(), 10);
     }
 }

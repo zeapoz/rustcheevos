@@ -11,6 +11,27 @@ pub use traits::{
     PauseIf, Remember, ResetIf, ResetNextIf, SubHits, SubSource, Trigger,
 };
 
+/// A container for all flags.
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub enum Flag {
+    /// A flag used in comparisons.
+    ConditionFlag(ConditionFlag),
+    /// A flag used in arithmetic operations.
+    ArithmeticFlag(ArithmeticFlag),
+}
+
+impl From<ConditionFlag> for Flag {
+    fn from(flag: ConditionFlag) -> Self {
+        Self::ConditionFlag(flag)
+    }
+}
+
+impl From<ArithmeticFlag> for Flag {
+    fn from(flag: ArithmeticFlag) -> Self {
+        Self::ArithmeticFlag(flag)
+    }
+}
+
 /// A flag used in comparisons.
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub enum ConditionFlag {

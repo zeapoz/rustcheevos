@@ -8,9 +8,15 @@ use crate::{parsers::ParseError, parsers::parse_hit_count};
 
 /// A hit count requirement.
 #[derive(Default, Debug, Clone, Copy, PartialEq)]
-pub(crate) struct HitCount(u32);
+pub struct HitCount(u32);
 
 impl HitCount {
+    /// Returns the hit count value.
+    #[must_use]
+    pub fn inner(self) -> u32 {
+        self.0
+    }
+
     /// Sets the hits on this hit count.
     pub(crate) fn set_hits(&mut self, hits: u32) {
         self.0 = hits;

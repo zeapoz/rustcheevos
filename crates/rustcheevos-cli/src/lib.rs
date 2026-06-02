@@ -20,10 +20,12 @@ use clap::{Parser, Subcommand};
 use rustcheevos::types::game::GameData;
 
 use crate::export::{ExportArgs, export};
+use crate::preview::{PreviewArgs, preview_output};
 use crate::readme::{ReadmeArgs, generate_readme};
 
 mod error;
 mod export;
+mod preview;
 mod readme;
 
 pub use error::CliError;
@@ -69,6 +71,8 @@ enum RustcheevosCommand {
     Export(ExportArgs),
     /// Generate a README file for the game.
     Readme(ReadmeArgs),
+    /// Preview the output of a given asset.
+    Preview(PreviewArgs),
 }
 
 impl RustcheevosCli {
@@ -86,6 +90,10 @@ impl RustcheevosCli {
         match self.command {
             RustcheevosCommand::Export(args) => export(game_data, args),
             RustcheevosCommand::Readme(args) => generate_readme(game_data, args),
+            RustcheevosCommand::Preview(args) => {
+                preview_output(game_data, &args);
+                Ok(())
+            }
         }
     }
 }

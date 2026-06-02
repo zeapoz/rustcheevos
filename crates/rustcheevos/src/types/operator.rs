@@ -4,14 +4,32 @@ use std::{fmt, str::FromStr};
 
 use winnow::Parser;
 
-use crate::{
-    parsers::ParseError,
-    parsers::{parse_arithmetic_operator, parse_condition_operator},
-};
+use crate::parsers::{ParseError, parse_arithmetic_operator, parse_condition_operator};
+
+/// A container for all operators.
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub enum Operator {
+    /// An operator used in comparisons.
+    Condition(ConditionOperator),
+    /// An operator used in arithmetic operations.
+    Arithmetic(ArithmeticOperator),
+}
+
+impl From<ConditionOperator> for Operator {
+    fn from(operator: ConditionOperator) -> Self {
+        Self::Condition(operator)
+    }
+}
+
+impl From<ArithmeticOperator> for Operator {
+    fn from(operator: ArithmeticOperator) -> Self {
+        Self::Arithmetic(operator)
+    }
+}
 
 /// Operators that can be used in arithmetic.
 #[derive(Clone, Copy, Debug, PartialEq)]
-pub(crate) enum ArithmeticOperator {
+pub enum ArithmeticOperator {
     /// The addition operator.
     Add,
     /// The subtraction operator.
@@ -72,7 +90,7 @@ impl fmt::Display for ArithmeticOperator {
 
 /// Operators that can be used in comparisons.
 #[derive(Clone, Copy, Debug, PartialEq)]
-pub(crate) enum ConditionOperator {
+pub enum ConditionOperator {
     /// The less than operator.
     LessThan,
     /// The less than or equals operator.

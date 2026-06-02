@@ -9,7 +9,10 @@ use crate::{
     parsers::ParseError,
     parsers::parse_arithmetic,
     types::{
-        flag::ArithmeticFlag, memory::AccessMode, operator::ArithmeticOperator, value::TypedValue,
+        flag::ArithmeticFlag,
+        memory::AccessMode,
+        operator::{ArithmeticOperator, Operator},
+        value::TypedValue,
     },
 };
 
@@ -48,14 +51,20 @@ impl Arithmetic {
 
     /// Returns the left hand side of the arithmetic requirement.
     #[must_use]
-    pub fn lhs(&self) -> &TypedValue {
-        &self.lhs
+    pub fn lhs(&self) -> TypedValue {
+        self.lhs
     }
 
     /// Returns the right hand side of the arithmetic requirement.
     #[must_use]
     pub fn rhs(&self) -> Option<TypedValue> {
         self.operation.map(|o| o.rhs)
+    }
+
+    /// Returns the arithmetic operator, if one is set.
+    #[must_use]
+    pub fn operator(&self) -> Option<Operator> {
+        self.operation.map(|o| Operator::Arithmetic(o.operator))
     }
 
     /// Sets the arithmetic flag on this requirement.
@@ -295,5 +304,20 @@ mod tests {
         let serialized = original.to_string();
         let parsed: Arithmetic = serialized.parse().unwrap();
         assert_eq!(original, parsed);
+    }
+
+    #[test]
+    fn arithmetic_operator_with_operation() {
+        let arith: Arithmetic = "A:0xH1234+50".parse().unwrap();
+        assert_eq!(
+            arith.operator(),
+            Some(Operator::Arithmetic(ArithmeticOperator::Add))
+        );
+    }
+
+    #[test]
+    fn arithmetic_operator_without_operation() {
+        let arith: Arithmetic = "A:0xH1234".parse().unwrap();
+        assert_eq!(arith.operator(), None);
     }
 }
