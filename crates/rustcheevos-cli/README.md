@@ -34,7 +34,8 @@ The `import` subcommand supports the following options:
 
 ## Embeddable CLI for Rustcheevos Projects
 
-This crate can also be used as a library to add convenient CLI functions to Rustcheevos projects. This allows you to export your game assets with commands like `cargo run -- export`.
+This crate can also be used as a library to add convenient CLI functions to Rustcheevos projects.
+This allows you to export your game assets with commands like `cargo run -- export`, or preview them with `cargo run -- preview` among other things.
 
 ### Setup
 
@@ -48,7 +49,7 @@ rustcheevos-cli = { git = "https://github.com/zeapoz/rustcheevos" }
 
 ### Usage
 
-In your `src/main.rs`, replace your manual export logic with `RustcheevosCli`:
+In your `src/main.rs`, call `RustcheevosCli` like so:
 
 ```rust
 use rustcheevos::types::game::GameData;
@@ -68,6 +69,7 @@ fn main() -> Result<(), CliError> {
 | Command | Description |
 |---------|-------------|
 | `export` | Export game assets to disk |
+| `preview` | Preview game assets in the terminal |
 | `readme` | Generate a README.md for the game |
 
 #### Export
@@ -82,6 +84,26 @@ The `export` subcommand supports the following options:
 
 - `-o, --output <DIR>`: Output directory for exported files (default: `output`).
 - `-a, --author <AUTHOR>`: Achievement author for exported files (default: `Rustcheevos`).
+
+#### Preview
+
+```sh
+cargo run -- preview                              # preview all assets
+cargo run -- preview achievement --id 600707      # preview a specific achievement
+cargo run -- preview achievement --title "Alpha"  # preview achievements matching a title
+cargo run -- preview leaderboard --id 1           # preview a specific leaderboard
+cargo run -- preview note --address 0x1234        # preview a specific code note
+cargo run -- preview rich-presence                # preview the rich presence script
+```
+
+The `preview` subcommand supports the following subcommands:
+
+- `achievement [--id <ID> | --title <TITLE>]`: Preview achievements, optionally filtered by ID or title.
+- `leaderboard [--id <ID> | --title <TITLE>]`: Preview leaderboards, optionally filtered by ID or title.
+- `note [--address <HEX> | --text <TEXT>]`: Preview code notes, optionally filtered by address or content.
+- `rich-presence`: Preview the rich presence script.
+
+If no subcommand is given, all assets are shown.
 
 #### Readme
 

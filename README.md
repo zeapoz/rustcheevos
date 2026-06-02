@@ -88,7 +88,7 @@ fn main() -> Result<(), CliError> {
 ### Rustcheevos CLI
 
 The embeddable CLI can be used to conveniently expose common functions that are useful for building sets.
-This includes exporting logic, rich presence, and more.
+This includes exporting logic, rich presence, previewing assets, and more.
 
 For a full reference of the embeddable CLI's features, please consult the [rustcheevos-cli README](https://github.com/zeapoz/rustcheevos/tree/main/crates/rustcheevos-cli#embeddable-cli-for-rustcheevos-projects).
 
