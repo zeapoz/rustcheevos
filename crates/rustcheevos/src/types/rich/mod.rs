@@ -220,6 +220,11 @@ impl RichPresence {
         self.static_display = display.into();
     }
 
+    /// Returns an iterator over the registered lookup tables.
+    pub fn lookup_tables(&self) -> impl Iterator<Item = &LookupTable> {
+        self.lookup_tables.iter().map(|rc| rc.as_ref())
+    }
+
     /// Returns an iterator over the conditional displays.
     pub fn iter_conditional_displays(&self) -> impl Iterator<Item = &ConditionalDisplay> {
         self.conditional_displays.iter()
