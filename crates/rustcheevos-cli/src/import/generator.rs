@@ -49,7 +49,7 @@ impl OutputGenerator {
         used_macros: HashSet<&'static str>,
         style: &ValueStyle,
     ) -> Result<String> {
-        let mut output = String::from("use rustcheevos::prelude::*;\n");
+        let mut output = String::new();
 
         match style {
             ValueStyle::Macro => {
