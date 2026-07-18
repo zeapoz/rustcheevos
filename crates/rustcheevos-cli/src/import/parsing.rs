@@ -2,8 +2,6 @@
 
 use rustcheevos::types::{memory::MemorySize, note::CodeNote};
 
-use super::ValueStyle;
-
 /// A code note that has been parsed into structured fields.
 ///
 /// Contains the address, optional memory size, a human-readable title,
@@ -86,23 +84,15 @@ impl ParsedNote {
 
 /// Parses a slice of [`CodeNote`]s into [`ParsedNote`]s.
 ///
-/// When `value_style` is `Macro`, notes without a recognized size tag are skipped
-/// with a warning. When `AddrOnly`, all notes are included regardless of size tag.
-pub fn parse_notes(notes: &[CodeNote], value_style: &ValueStyle) -> (Vec<ParsedNote>, usize) {
+/// Notes without a recognized size tag are still included; when using `Macro` value
+/// style, they will be generated as raw addresses without an accessor macro.
+pub fn parse_notes(notes: &[CodeNote]) -> (Vec<ParsedNote>, usize) {
     let mut parsed_notes = Vec::new();
     let mut skipped = 0;
 
     for note in notes {
         if let Some(parsed) = ParsedNote::try_from_code_note(note) {
-            if *value_style == ValueStyle::Macro && parsed.size.is_none() {
-                skipped += 1;
-                eprintln!(
-                    "Skipping note at 0x{:x}: no recognized size tag (use --value addr-only to include)",
-                    note.address()
-                );
-            } else {
-                parsed_notes.push(parsed);
-            }
+            parsed_notes.push(parsed);
         } else {
             skipped += 1;
             eprintln!(

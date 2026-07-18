@@ -150,7 +150,7 @@ pub fn import(
         None => notes,
     };
 
-    let (parsed_notes, skipped) = parse_notes(&notes, &value_style);
+    let (parsed_notes, skipped) = parse_notes(&notes);
 
     let item_type = match format {
         OutputFormat::Function => "function(s)",
@@ -163,24 +163,14 @@ pub fn import(
     std::fs::write(output, generated)
         .with_context(|| format!("Failed to write {}", output.display()))?;
 
-    if total_notes == notes.len() {
-        println!(
-            "Wrote {} {} to {} ({} skipped)",
-            parsed_notes.len(),
-            item_type,
-            output.display(),
-            skipped,
-        );
-    } else {
-        println!(
-            "Wrote {} {} to {} ({} skipped, filtered from {} notes)",
-            parsed_notes.len(),
-            item_type,
-            output.display(),
-            skipped,
-            total_notes,
-        );
-    }
+    let extra = match (skipped > 0, total_notes != notes.len()) {
+        (true, true) => format!(" ({} skipped, filtered from {} notes)", skipped, total_notes),
+        (true, false) => format!(" ({} skipped)", skipped),
+        (false, true) => format!(" (filtered from {} notes)", total_notes),
+        (false, false) => String::new(),
+    };
+
+    println!("Wrote {} {} to {}{}", parsed_notes.len(), item_type, output.display(), extra);
 
     Ok(())
 }

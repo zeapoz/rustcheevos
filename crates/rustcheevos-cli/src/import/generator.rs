@@ -53,7 +53,9 @@ impl OutputGenerator {
 
         match style {
             ValueStyle::Macro => {
-                output.push_str("use rustcheevos::types::memory::MemoryRef;\n");
+                if !used_macros.is_empty() {
+                    output.push_str("use rustcheevos::types::memory::MemoryRef;\n");
+                }
                 let mut sorted_macros: Vec<_> = used_macros.into_iter().collect();
                 sorted_macros.sort_unstable();
                 if sorted_macros.len() == 1 {
@@ -80,11 +82,15 @@ impl OutputGenerator {
             .map(|parsed| {
                 let (value_expr, ret_type) = match self.value_style {
                     ValueStyle::Macro => {
-                        let macro_name = memory_size_to_macro(parsed.size.unwrap());
-                        (
-                            format!("{macro_name}!(0x{:x})", parsed.address),
-                            "MemoryRef",
-                        )
+                        if let Some(size) = parsed.size {
+                            let macro_name = memory_size_to_macro(size);
+                            (
+                                format!("{macro_name}!(0x{:x})", parsed.address),
+                                "MemoryRef",
+                            )
+                        } else {
+                            (format!("0x{:x}", parsed.address), "usize")
+                        }
                     }
                     ValueStyle::AddrOnly => (format!("0x{:x}", parsed.address), "usize"),
                 };
