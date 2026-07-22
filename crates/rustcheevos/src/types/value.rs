@@ -4,7 +4,10 @@ use std::{fmt, str::FromStr};
 
 use winnow::Parser;
 
-use crate::{impl_arithmetic_flag_traits, parsers::ParseError, parsers::parse_typed_value};
+use crate::{
+    impl_arithmetic_flag_traits, impl_arithmetic_measured, parsers::ParseError,
+    parsers::parse_typed_value,
+};
 
 use super::{
     flag::ArithmeticFlag,
@@ -307,6 +310,7 @@ impl fmt::Display for TypedValue {
 }
 
 impl_arithmetic_flag_traits!(TypedValue, with_arithmetic_flag, Arithmetic);
+impl_arithmetic_measured!(TypedValue, with_arithmetic_flag, Arithmetic);
 
 #[cfg(test)]
 mod tests {

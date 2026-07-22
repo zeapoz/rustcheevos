@@ -5,7 +5,7 @@ use std::{fmt, str::FromStr};
 use winnow::Parser;
 
 use crate::{
-    impl_arithmetic_flag_traits,
+    impl_arithmetic_flag_traits, impl_arithmetic_measured,
     parsers::ParseError,
     parsers::parse_arithmetic,
     types::{
@@ -229,6 +229,7 @@ impl fmt::Display for ArithmeticOperation {
 }
 
 impl_arithmetic_flag_traits!(Arithmetic, with_flag);
+impl_arithmetic_measured!(Arithmetic, with_flag);
 
 #[cfg(test)]
 mod tests {

@@ -306,3 +306,30 @@ macro_rules! impl_arithmetic_flag_traits {
         }
     };
 }
+
+/// Implements the [`Measured`] trait for a type, using [`ArithmeticFlag::Measured`].
+///
+/// # Args
+/// - `$struct`: The struct to implement the trait for.
+/// - `$method`: The method to call on self with the flag (e.g., `with_flag`).
+/// - `$output`: (optional) The output type. Defaults to `Self`.
+///
+/// This is separate from [`impl_arithmetic_flag_traits`] because types that also use
+/// [`impl_condition_flag_traits`] already implement [`Measured`] via condition flags, and Rust
+/// does not allow duplicate trait implementations.
+#[doc(hidden)]
+#[macro_export]
+macro_rules! impl_arithmetic_measured {
+    ($struct:ident, $method:ident) => {
+        impl_arithmetic_measured!($struct, $method, Self);
+    };
+    ($struct:ident, $method:ident, $output:ty) => {
+        impl $crate::types::flag::Measured for $struct {
+            type Output = $output;
+
+            fn measured(self) -> Self::Output {
+                self.$method($crate::types::flag::ArithmeticFlag::Measured)
+            }
+        }
+    };
+}
