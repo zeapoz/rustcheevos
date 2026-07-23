@@ -2,6 +2,7 @@
 
 use crate::types::{
     chain::Chain,
+    flag::Measured,
     memory::{AccessModeModifier, MemoryRef},
     requirement::{Requirement, arithmetic::Arithmetic, condition::Condition},
     value::{TypedValue, TypedValueOps},
@@ -195,6 +196,15 @@ impl PendingChain<MemoryRef> {
             head: self.head.invert(),
             pending: self.pending,
         }
+    }
+}
+
+impl Measured for PendingChain<MemoryRef> {
+    type Output = Chain;
+
+    fn measured(self) -> Self::Output {
+        let head = self.head;
+        self.extend_req(head.measured())
     }
 }
 
