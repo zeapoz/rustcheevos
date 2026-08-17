@@ -54,6 +54,7 @@
 //!         delta!(current_level()).eq(level_id),
 //!         current_level().eq(level_id + 1),
 //!     )
+//!     .into()
 //! }
 //!
 //! fn main() -> io::Result<()> {

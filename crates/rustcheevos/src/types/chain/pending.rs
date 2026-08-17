@@ -1,11 +1,14 @@
 //! Type definition for pending chains.
 
-use crate::types::{
-    chain::Chain,
-    flag::Measured,
-    memory::{AccessModeModifier, MemoryRef},
-    requirement::{Requirement, arithmetic::Arithmetic, condition::Condition},
-    value::{TypedValue, TypedValueOps},
+use crate::{
+    impl_arithmetic_flag_traits, impl_condition_flag_traits,
+    types::{
+        chain::Chain,
+        flag::{ArithmeticFlag, ConditionFlag, Measured},
+        memory::{AccessMode, AccessModeModifier, MemoryRef},
+        requirement::{Requirement, arithmetic::Arithmetic, condition::Condition},
+        value::{TypedValue, TypedValueOps},
+    },
 };
 
 /// A trait for types that can be chained in a [`Chain`].
@@ -45,7 +48,7 @@ pub trait Chainable {
 ///
 /// // The head of the chain can be modified to construct a new resolved chain.
 /// pub fn is_level(&self, level: u32) -> Chain {
-///     self.level().eq(level)
+///     self.level().eq(level).into()
 /// }
 /// # }
 #[derive(Debug)]
@@ -63,7 +66,7 @@ impl<T> PendingChain<T> {
     ///
     /// ```
     /// use rustcheevos::prelude::*;
-    /// use rustcheevos::types::chain::PendingChain;
+    /// use rustcheevos::types::chain::{Chain, PendingChain};
     /// use rustcheevos::{add_address, bits32, chain};
     ///
     /// let chain = chain!(
@@ -84,7 +87,7 @@ impl<T> PendingChain<T> {
     /// # Examples
     /// ```
     /// use rustcheevos::prelude::*;
-    /// use rustcheevos::types::chain::PendingChain;
+    /// use rustcheevos::types::chain::{Chain, PendingChain};
     /// use rustcheevos::{add_address, bits32, chain};
     ///
     /// let chain = chain!(
@@ -104,7 +107,7 @@ impl<T> PendingChain<T> {
     /// # Examples
     /// ```
     /// use rustcheevos::prelude::*;
-    /// use rustcheevos::types::chain::PendingChain;
+    /// use rustcheevos::types::chain::{Chain, PendingChain};
     /// use rustcheevos::{add_address, bits32, chain};
     ///
     /// let chain = chain!(bits32!(0x5432).eq(0));
@@ -123,7 +126,7 @@ impl PendingChain<MemoryRef> {
     /// # Examples
     /// ```
     /// use rustcheevos::prelude::*;
-    /// use rustcheevos::types::chain::PendingChain;
+    /// use rustcheevos::types::chain::{Chain, PendingChain};
     /// use rustcheevos::{bits8, chain};
     ///
     /// let chain = chain!(bits8!(0x1234).eq(0));
@@ -143,7 +146,7 @@ impl PendingChain<MemoryRef> {
     /// # Examples
     /// ```
     /// use rustcheevos::prelude::*;
-    /// use rustcheevos::types::chain::PendingChain;
+    /// use rustcheevos::types::chain::{Chain, PendingChain};
     /// use rustcheevos::{bits8, chain};
     ///
     /// let chain = chain!(bits8!(0x1234).eq(0));
@@ -163,7 +166,7 @@ impl PendingChain<MemoryRef> {
     /// # Examples
     /// ```
     /// use rustcheevos::prelude::*;
-    /// use rustcheevos::types::chain::PendingChain;
+    /// use rustcheevos::types::chain::{Chain, PendingChain};
     /// use rustcheevos::{bits8, chain};
     ///
     /// let chain = chain!(bits8!(0x1234).eq(0));
@@ -183,7 +186,7 @@ impl PendingChain<MemoryRef> {
     /// # Examples
     /// ```
     /// use rustcheevos::prelude::*;
-    /// use rustcheevos::types::chain::PendingChain;
+    /// use rustcheevos::types::chain::{Chain, PendingChain};
     /// use rustcheevos::{bits8, chain};
     ///
     /// let chain = chain!(bits8!(0x1234).eq(0));
@@ -199,29 +202,39 @@ impl PendingChain<MemoryRef> {
     }
 }
 
-impl Measured for PendingChain<MemoryRef> {
-    type Output = Chain;
-
-    fn measured(self) -> Self::Output {
-        let head = self.head;
-        self.extend_req(head.measured())
+impl PendingChain<MemoryRef> {
+    /// Sets the given arithmetic flag on the head memory reference.
+    ///
+    /// This converts the head from a [`MemoryRef`] into an [`Arithmetic`],
+    /// returning a [`PendingChain<Arithmetic>`][PendingChain].
+    #[must_use]
+    pub fn with_arithmetic_flag(self, flag: ArithmeticFlag) -> PendingChain<Arithmetic> {
+        PendingChain::new(self.head.with_flag(flag), self.pending)
     }
 }
 
-impl<T: Into<TypedValue> + Copy> PendingChain<T> {
-    /// Extends the pending chain with a requirement.
-    fn extend_req(self, req: impl Into<Requirement>) -> Chain {
-        let mut chain = self.pending;
-        chain.extend(req);
-        chain
-    }
+impl Measured for PendingChain<MemoryRef> {
+    type Output = PendingChain<Arithmetic>;
 
+    fn measured(self) -> Self::Output {
+        let head = self.head;
+        PendingChain::new(head.measured(), self.pending)
+    }
+}
+
+impl_arithmetic_flag_traits!(
+    PendingMemoryRef,
+    with_arithmetic_flag,
+    PendingChain<Arithmetic>
+);
+
+impl<T: Into<TypedValue> + Copy> PendingChain<T> {
     /// Extends the pending chain with an equals comparison.
     ///
     /// # Examples
     /// ```
     /// use rustcheevos::prelude::*;
-    /// use rustcheevos::types::chain::PendingChain;
+    /// use rustcheevos::types::chain::{Chain, PendingChain};
     /// use rustcheevos::{bits8, chain};
     ///
     /// let chain = chain!(bits8!(0x1234).eq(0));
@@ -231,11 +244,11 @@ impl<T: Into<TypedValue> + Copy> PendingChain<T> {
     ///     bits8!(0x1234).eq(0),
     ///     bits8!(0x4321).eq(0)
     /// );
-    /// assert_eq!(pending_chain.eq(0), expected);
+    /// assert_eq!(Chain::from(pending_chain.eq(0)), expected);
     /// ```
-    pub fn eq(self, rhs: impl Into<TypedValue>) -> Chain {
+    pub fn eq(self, rhs: impl Into<TypedValue>) -> PendingChain<Condition> {
         let head = self.head;
-        self.extend_req(head.eq(rhs))
+        PendingChain::new(head.eq(rhs), self.pending)
     }
 
     /// Extends the pending chain with a not equals comparison.
@@ -243,7 +256,7 @@ impl<T: Into<TypedValue> + Copy> PendingChain<T> {
     /// # Examples
     /// ```
     /// use rustcheevos::prelude::*;
-    /// use rustcheevos::types::chain::PendingChain;
+    /// use rustcheevos::types::chain::{Chain, PendingChain};
     /// use rustcheevos::{bits8, chain};
     ///
     /// let chain = chain!(bits8!(0x1234).eq(0));
@@ -253,11 +266,11 @@ impl<T: Into<TypedValue> + Copy> PendingChain<T> {
     ///     bits8!(0x1234).eq(0),
     ///     bits8!(0x4321).ne(0)
     /// );
-    /// assert_eq!(pending_chain.ne(0), expected);
+    /// assert_eq!(Chain::from(pending_chain.ne(0)), expected);
     /// ```
-    pub fn ne(self, rhs: impl Into<TypedValue>) -> Chain {
+    pub fn ne(self, rhs: impl Into<TypedValue>) -> PendingChain<Condition> {
         let head = self.head;
-        self.extend_req(head.ne(rhs))
+        PendingChain::new(head.ne(rhs), self.pending)
     }
 
     /// Extends the pending chain with a less than comparison.
@@ -265,7 +278,7 @@ impl<T: Into<TypedValue> + Copy> PendingChain<T> {
     /// # Examples
     /// ```
     /// use rustcheevos::prelude::*;
-    /// use rustcheevos::types::chain::PendingChain;
+    /// use rustcheevos::types::chain::{Chain, PendingChain};
     /// use rustcheevos::{bits8, chain};
     ///
     /// let chain = chain!(bits8!(0x1234).eq(0));
@@ -275,11 +288,11 @@ impl<T: Into<TypedValue> + Copy> PendingChain<T> {
     ///     bits8!(0x1234).eq(0),
     ///     bits8!(0x4321).lt(0)
     /// );
-    /// assert_eq!(pending_chain.lt(0), expected);
+    /// assert_eq!(Chain::from(pending_chain.lt(0)), expected);
     /// ```
-    pub fn lt(self, rhs: impl Into<TypedValue>) -> Chain {
+    pub fn lt(self, rhs: impl Into<TypedValue>) -> PendingChain<Condition> {
         let head = self.head;
-        self.extend_req(head.lt(rhs))
+        PendingChain::new(head.lt(rhs), self.pending)
     }
 
     /// Extends the pending chain with a less than or equals comparison.
@@ -287,7 +300,7 @@ impl<T: Into<TypedValue> + Copy> PendingChain<T> {
     /// # Examples
     /// ```
     /// use rustcheevos::prelude::*;
-    /// use rustcheevos::types::chain::PendingChain;
+    /// use rustcheevos::types::chain::{Chain, PendingChain};
     /// use rustcheevos::{bits8, chain};
     ///
     /// let chain = chain!(bits8!(0x1234).eq(0));
@@ -297,11 +310,11 @@ impl<T: Into<TypedValue> + Copy> PendingChain<T> {
     ///     bits8!(0x1234).eq(0),
     ///     bits8!(0x4321).le(0)
     /// );
-    /// assert_eq!(pending_chain.le(0), expected);
+    /// assert_eq!(Chain::from(pending_chain.le(0)), expected);
     /// ```
-    pub fn le(self, rhs: impl Into<TypedValue>) -> Chain {
+    pub fn le(self, rhs: impl Into<TypedValue>) -> PendingChain<Condition> {
         let head = self.head;
-        self.extend_req(head.le(rhs))
+        PendingChain::new(head.le(rhs), self.pending)
     }
 
     /// Extends the pending chain with a greater than comparison.
@@ -309,7 +322,7 @@ impl<T: Into<TypedValue> + Copy> PendingChain<T> {
     /// # Examples
     /// ```
     /// use rustcheevos::prelude::*;
-    /// use rustcheevos::types::chain::PendingChain;
+    /// use rustcheevos::types::chain::{Chain, PendingChain};
     /// use rustcheevos::{bits8, chain};
     ///
     /// let chain = chain!(bits8!(0x1234).eq(0));
@@ -319,11 +332,11 @@ impl<T: Into<TypedValue> + Copy> PendingChain<T> {
     ///     bits8!(0x1234).eq(0),
     ///     bits8!(0x4321).gt(0)
     /// );
-    /// assert_eq!(pending_chain.gt(0), expected);
+    /// assert_eq!(Chain::from(pending_chain.gt(0)), expected);
     /// ```
-    pub fn gt(self, rhs: impl Into<TypedValue>) -> Chain {
+    pub fn gt(self, rhs: impl Into<TypedValue>) -> PendingChain<Condition> {
         let head = self.head;
-        self.extend_req(head.gt(rhs))
+        PendingChain::new(head.gt(rhs), self.pending)
     }
 
     /// Extends the pending chain with a greater than or equals comparison.
@@ -331,7 +344,7 @@ impl<T: Into<TypedValue> + Copy> PendingChain<T> {
     /// # Examples
     /// ```
     /// use rustcheevos::prelude::*;
-    /// use rustcheevos::types::chain::PendingChain;
+    /// use rustcheevos::types::chain::{Chain, PendingChain};
     /// use rustcheevos::{bits8, chain};
     ///
     /// let chain = chain!(bits8!(0x1234).eq(0));
@@ -341,11 +354,11 @@ impl<T: Into<TypedValue> + Copy> PendingChain<T> {
     ///     bits8!(0x1234).eq(0),
     ///     bits8!(0x4321).ge(0)
     /// );
-    /// assert_eq!(pending_chain.ge(0), expected);
+    /// assert_eq!(Chain::from(pending_chain.ge(0)), expected);
     /// ```
-    pub fn ge(self, rhs: impl Into<TypedValue>) -> Chain {
+    pub fn ge(self, rhs: impl Into<TypedValue>) -> PendingChain<Condition> {
         let head = self.head;
-        self.extend_req(head.ge(rhs))
+        PendingChain::new(head.ge(rhs), self.pending)
     }
 
     /// Extends the pending chain with an addition operation.
@@ -353,7 +366,7 @@ impl<T: Into<TypedValue> + Copy> PendingChain<T> {
     /// # Examples
     /// ```
     /// use rustcheevos::prelude::*;
-    /// use rustcheevos::types::chain::PendingChain;
+    /// use rustcheevos::types::chain::{Chain, PendingChain};
     /// use rustcheevos::{bits8, chain};
     ///
     /// let chain = chain!(bits8!(0x1234).eq(0));
@@ -363,15 +376,15 @@ impl<T: Into<TypedValue> + Copy> PendingChain<T> {
     ///     bits8!(0x1234).eq(0),
     ///     bits8!(0x4321).add(0)
     /// );
-    /// assert_eq!(pending_chain.add(0), expected);
+    /// assert_eq!(Chain::from(pending_chain.add(0)), expected);
     /// ```
     #[expect(
         clippy::should_implement_trait,
         reason = "not using arithmetic in the traditional sense"
     )]
-    pub fn add(self, rhs: impl Into<TypedValue>) -> Chain {
+    pub fn add(self, rhs: impl Into<TypedValue>) -> PendingChain<Arithmetic> {
         let head = self.head;
-        self.extend_req(head.add(rhs))
+        PendingChain::new(head.add(rhs), self.pending)
     }
 
     /// Extends the pending chain with a subtraction operation.
@@ -379,7 +392,7 @@ impl<T: Into<TypedValue> + Copy> PendingChain<T> {
     /// # Examples
     /// ```
     /// use rustcheevos::prelude::*;
-    /// use rustcheevos::types::chain::PendingChain;
+    /// use rustcheevos::types::chain::{Chain, PendingChain};
     /// use rustcheevos::{bits8, chain};
     ///
     /// let chain = chain!(bits8!(0x1234).eq(0));
@@ -389,15 +402,15 @@ impl<T: Into<TypedValue> + Copy> PendingChain<T> {
     ///     bits8!(0x1234).eq(0),
     ///     bits8!(0x4321).sub(0)
     /// );
-    /// assert_eq!(pending_chain.sub(0), expected);
+    /// assert_eq!(Chain::from(pending_chain.sub(0)), expected);
     /// ```
     #[expect(
         clippy::should_implement_trait,
         reason = "not using arithmetic in the traditional sense"
     )]
-    pub fn sub(self, rhs: impl Into<TypedValue>) -> Chain {
+    pub fn sub(self, rhs: impl Into<TypedValue>) -> PendingChain<Arithmetic> {
         let head = self.head;
-        self.extend_req(head.sub(rhs))
+        PendingChain::new(head.sub(rhs), self.pending)
     }
 
     /// Extends the pending chain with a multiplication operation.
@@ -405,7 +418,7 @@ impl<T: Into<TypedValue> + Copy> PendingChain<T> {
     /// # Examples
     /// ```
     /// use rustcheevos::prelude::*;
-    /// use rustcheevos::types::chain::PendingChain;
+    /// use rustcheevos::types::chain::{Chain, PendingChain};
     /// use rustcheevos::{bits8, chain};
     ///
     /// let chain = chain!(bits8!(0x1234).eq(0));
@@ -415,15 +428,15 @@ impl<T: Into<TypedValue> + Copy> PendingChain<T> {
     ///     bits8!(0x1234).eq(0),
     ///     bits8!(0x4321).mul(0)
     /// );
-    /// assert_eq!(pending_chain.mul(0), expected);
+    /// assert_eq!(Chain::from(pending_chain.mul(0)), expected);
     /// ```
     #[expect(
         clippy::should_implement_trait,
         reason = "not using arithmetic in the traditional sense"
     )]
-    pub fn mul(self, rhs: impl Into<TypedValue>) -> Chain {
+    pub fn mul(self, rhs: impl Into<TypedValue>) -> PendingChain<Arithmetic> {
         let head = self.head;
-        self.extend_req(head.mul(rhs))
+        PendingChain::new(head.mul(rhs), self.pending)
     }
 
     /// Extends the pending chain with a division operation.
@@ -431,7 +444,7 @@ impl<T: Into<TypedValue> + Copy> PendingChain<T> {
     /// # Examples
     /// ```
     /// use rustcheevos::prelude::*;
-    /// use rustcheevos::types::chain::PendingChain;
+    /// use rustcheevos::types::chain::{Chain, PendingChain};
     /// use rustcheevos::{bits8, chain};
     ///
     /// let chain = chain!(bits8!(0x1234).eq(0));
@@ -441,15 +454,15 @@ impl<T: Into<TypedValue> + Copy> PendingChain<T> {
     ///     bits8!(0x1234).eq(0),
     ///     bits8!(0x4321).div(0)
     /// );
-    /// assert_eq!(pending_chain.div(0), expected);
+    /// assert_eq!(Chain::from(pending_chain.div(0)), expected);
     /// ```
     #[expect(
         clippy::should_implement_trait,
         reason = "not using arithmetic in the traditional sense"
     )]
-    pub fn div(self, rhs: impl Into<TypedValue>) -> Chain {
+    pub fn div(self, rhs: impl Into<TypedValue>) -> PendingChain<Arithmetic> {
         let head = self.head;
-        self.extend_req(head.div(rhs))
+        PendingChain::new(head.div(rhs), self.pending)
     }
 
     /// Extends the pending chain with a modulo operation.
@@ -457,7 +470,7 @@ impl<T: Into<TypedValue> + Copy> PendingChain<T> {
     /// # Examples
     /// ```
     /// use rustcheevos::prelude::*;
-    /// use rustcheevos::types::chain::PendingChain;
+    /// use rustcheevos::types::chain::{Chain, PendingChain};
     /// use rustcheevos::{bits8, chain};
     ///
     /// let chain = chain!(bits8!(0x1234).eq(0));
@@ -467,11 +480,11 @@ impl<T: Into<TypedValue> + Copy> PendingChain<T> {
     ///     bits8!(0x1234).eq(0),
     ///     bits8!(0x4321).modulo(0)
     /// );
-    /// assert_eq!(pending_chain.modulo(0), expected);
+    /// assert_eq!(Chain::from(pending_chain.modulo(0)), expected);
     /// ```
-    pub fn modulo(self, rhs: impl Into<TypedValue>) -> Chain {
+    pub fn modulo(self, rhs: impl Into<TypedValue>) -> PendingChain<Arithmetic> {
         let head = self.head;
-        self.extend_req(head.modulo(rhs))
+        PendingChain::new(head.modulo(rhs), self.pending)
     }
 
     /// Extends the pending chain with a bitwise and operation.
@@ -479,7 +492,7 @@ impl<T: Into<TypedValue> + Copy> PendingChain<T> {
     /// # Examples
     /// ```
     /// use rustcheevos::prelude::*;
-    /// use rustcheevos::types::chain::PendingChain;
+    /// use rustcheevos::types::chain::{Chain, PendingChain};
     /// use rustcheevos::{bits8, chain};
     ///
     /// let chain = chain!(bits8!(0x1234).eq(0));
@@ -489,11 +502,11 @@ impl<T: Into<TypedValue> + Copy> PendingChain<T> {
     ///     bits8!(0x1234).eq(0),
     ///     bits8!(0x4321).bitwise_and(0)
     /// );
-    /// assert_eq!(pending_chain.bitwise_and(0), expected);
+    /// assert_eq!(Chain::from(pending_chain.bitwise_and(0)), expected);
     /// ```
-    pub fn bitwise_and(self, rhs: impl Into<TypedValue>) -> Chain {
+    pub fn bitwise_and(self, rhs: impl Into<TypedValue>) -> PendingChain<Arithmetic> {
         let head = self.head;
-        self.extend_req(head.bitwise_and(rhs))
+        PendingChain::new(head.bitwise_and(rhs), self.pending)
     }
 
     /// Extends the pending chain with a bitwise xor operation.
@@ -501,7 +514,7 @@ impl<T: Into<TypedValue> + Copy> PendingChain<T> {
     /// # Examples
     /// ```
     /// use rustcheevos::prelude::*;
-    /// use rustcheevos::types::chain::PendingChain;
+    /// use rustcheevos::types::chain::{Chain, PendingChain};
     /// use rustcheevos::{bits8, chain};
     ///
     /// let chain = chain!(bits8!(0x1234).eq(0));
@@ -511,11 +524,89 @@ impl<T: Into<TypedValue> + Copy> PendingChain<T> {
     ///     bits8!(0x1234).eq(0),
     ///     bits8!(0x4321).bitwise_xor(0)
     /// );
-    /// assert_eq!(pending_chain.bitwise_xor(0), expected);
+    /// assert_eq!(Chain::from(pending_chain.bitwise_xor(0)), expected);
     /// ```
-    pub fn bitwise_xor(self, rhs: impl Into<TypedValue>) -> Chain {
+    pub fn bitwise_xor(self, rhs: impl Into<TypedValue>) -> PendingChain<Arithmetic> {
         let head = self.head;
-        self.extend_req(head.bitwise_xor(rhs))
+        PendingChain::new(head.bitwise_xor(rhs), self.pending)
+    }
+}
+
+impl PendingChain<Condition> {
+    /// Sets the hit count on the head condition.
+    #[must_use]
+    pub fn with_hits(self, hits: u32) -> Self {
+        Self {
+            head: self.head.with_hits(hits),
+            pending: self.pending,
+        }
+    }
+
+    /// Sets the given condition flag on the head condition.
+    #[must_use]
+    pub fn with_condition_flag(self, flag: ConditionFlag) -> Self {
+        Self {
+            head: self.head.with_flag(flag),
+            pending: self.pending,
+        }
+    }
+}
+
+impl PendingChain<Arithmetic> {
+    /// Sets the given arithmetic flag on the head arithmetic.
+    #[must_use]
+    pub fn with_arithmetic_flag(self, flag: ArithmeticFlag) -> Self {
+        Self {
+            head: self.head.with_flag(flag),
+            pending: self.pending,
+        }
+    }
+}
+
+// Type aliases are required because `impl_condition_flag_traits!` and
+// `impl_arithmetic_flag_traits!` expect a bare `$struct:ident`, not a
+// generic type like `PendingChain<Condition>`.
+#[allow(clippy::missing_docs_in_private_items)]
+type PendingCondition = PendingChain<Condition>;
+#[allow(clippy::missing_docs_in_private_items)]
+type PendingArithmetic = PendingChain<Arithmetic>;
+#[allow(clippy::missing_docs_in_private_items)]
+type PendingMemoryRef = PendingChain<MemoryRef>;
+
+impl_condition_flag_traits!(PendingCondition, with_condition_flag);
+impl_arithmetic_flag_traits!(PendingArithmetic, with_arithmetic_flag);
+
+impl AccessModeModifier for PendingChain<Condition> {
+    fn with_access_mode(self, access_mode: AccessMode) -> Self {
+        Self {
+            head: self.head.with_access_mode(access_mode),
+            pending: self.pending,
+        }
+    }
+}
+
+impl AccessModeModifier for PendingChain<Arithmetic> {
+    fn with_access_mode(self, access_mode: AccessMode) -> Self {
+        Self {
+            head: self.head.with_access_mode(access_mode),
+            pending: self.pending,
+        }
+    }
+}
+
+impl From<PendingChain<Condition>> for Chain {
+    fn from(pc: PendingChain<Condition>) -> Self {
+        let mut chain = pc.pending;
+        chain.extend(pc.head);
+        chain
+    }
+}
+
+impl From<PendingChain<Arithmetic>> for Chain {
+    fn from(pc: PendingChain<Arithmetic>) -> Self {
+        let mut chain = pc.pending;
+        chain.extend(pc.head);
+        chain
     }
 }
 
