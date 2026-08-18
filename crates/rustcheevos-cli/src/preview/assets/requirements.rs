@@ -68,7 +68,10 @@ fn requirement_row(req: &Requirement) -> [String; 9] {
     let (lhs_type, lhs_size, lhs_val) = value_cells(req.lhs());
     let operator = req.operator().map_or_else(String::new, operator_cell);
     let (rhs_type, rhs_size, rhs_val) = req.rhs().map(value_cells).unwrap_or_default();
-    let hits = req.hits().inner().to_string();
+    let hits = req
+        .hits()
+        .map(|h| h.inner().to_string())
+        .unwrap_or_default();
     [
         flag, lhs_type, lhs_size, lhs_val, operator, rhs_type, rhs_size, rhs_val, hits,
     ]

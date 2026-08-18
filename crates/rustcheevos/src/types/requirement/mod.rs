@@ -78,11 +78,13 @@ impl Requirement {
     }
 
     /// Returns the hit count of the requirement.
+    ///
+    /// Returns `None` for [`Arithmetic`] accumulator forms.
     #[must_use]
-    pub fn hits(&self) -> HitCount {
+    pub fn hits(&self) -> Option<HitCount> {
         match self {
-            Requirement::Condition(condition) => condition.hits(),
-            Requirement::Arithmetic(_) => HitCount::default(),
+            Requirement::Condition(condition) => Some(condition.hits()),
+            Requirement::Arithmetic(_) => None,
         }
     }
 }
