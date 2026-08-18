@@ -91,15 +91,15 @@ impl RustcheevosCli {
     ///
     /// # Errors
     /// Returns an error if the command fails.
-    pub fn run(self, _game_data: &GameData) -> Result<(), CliError> {
+    pub fn run(self, game_data: &GameData) -> Result<(), CliError> {
         match self.command {
             #[cfg(feature = "export")]
-            RustcheevosCommand::Export(args) => export::export(_game_data, args),
+            RustcheevosCommand::Export(args) => export::export(game_data, args),
             #[cfg(feature = "readme")]
-            RustcheevosCommand::Readme(args) => readme::generate_readme(_game_data, args),
+            RustcheevosCommand::Readme(args) => readme::generate_readme(game_data, args),
             #[cfg(feature = "preview")]
             RustcheevosCommand::Preview(args) => {
-                preview::preview_output(_game_data, &args);
+                preview::preview_output(game_data, &args);
                 Ok(())
             }
         }

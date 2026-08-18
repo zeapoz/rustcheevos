@@ -164,12 +164,9 @@ pub fn import(
         .with_context(|| format!("Failed to write {}", output.display()))?;
 
     let extra = match (skipped > 0, total_notes != notes.len()) {
-        (true, true) => format!(
-            " ({} skipped, filtered from {} notes)",
-            skipped, total_notes
-        ),
-        (true, false) => format!(" ({} skipped)", skipped),
-        (false, true) => format!(" (filtered from {} notes)", total_notes),
+        (true, true) => format!(" ({skipped} skipped, filtered from {total_notes} notes)"),
+        (true, false) => format!(" ({skipped} skipped)"),
+        (false, true) => format!(" (filtered from {total_notes} notes)"),
         (false, false) => String::new(),
     };
 

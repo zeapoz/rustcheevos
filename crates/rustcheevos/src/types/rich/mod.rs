@@ -1,5 +1,6 @@
 //! Type definitions for rich presence.
 
+use std::convert::AsRef;
 use std::fmt;
 use std::rc::Rc;
 
@@ -222,7 +223,7 @@ impl RichPresence {
 
     /// Returns an iterator over the registered lookup tables.
     pub fn lookup_tables(&self) -> impl Iterator<Item = &LookupTable> {
-        self.lookup_tables.iter().map(|rc| rc.as_ref())
+        self.lookup_tables.iter().map(AsRef::as_ref)
     }
 
     /// Returns an iterator over the conditional displays.
