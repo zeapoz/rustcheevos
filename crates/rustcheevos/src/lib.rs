@@ -63,7 +63,7 @@
 //!     // Define an achievement by combining conditions.
 //!     let achievement = Achievement::builder("First Step")
 //!         .description("Complete the tutorial level")
-//!         .requirements(chain!(
+//!         .core(chain!(
 //!             just_beat_level(1),
 //!             in_game(),
 //!         ))

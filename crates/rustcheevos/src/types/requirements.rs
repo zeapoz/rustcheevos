@@ -127,6 +127,11 @@ impl Requirements {
         &self.core
     }
 
+    /// Replaces the core chain.
+    pub(crate) fn set_core(&mut self, core: impl Into<Chain>) {
+        self.core = core.into();
+    }
+
     /// Returns the alternative chain groups.
     #[must_use]
     pub fn alt_groups(&self) -> &[Chain] {

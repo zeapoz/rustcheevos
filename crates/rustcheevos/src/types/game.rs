@@ -26,7 +26,7 @@ use rustcheevos_schema::user::{CodeNoteEntry, UserFile};
 /// // Define an achievement with conditions.
 /// let achievement = Achievement::builder("First Step")
 ///     .description("Complete the tutorial level")
-///     .requirements(chain!(
+///     .core(chain!(
 ///         bits8!(0x1234).eq(1),
 ///         bits8!(0x5678).ge(100),
 ///     ))
@@ -132,7 +132,7 @@ impl GameData {
     ///
     /// let achievement = Achievement::builder("First Step")
     ///     .description("Complete the tutorial")
-    ///     .requirements(chain!(bits8!(0x1234).eq(1)))
+    ///     .core(chain!(bits8!(0x1234).eq(1)))
     ///     .badge_id(12345)
     ///     .points(5)
     ///     .build();
@@ -157,13 +157,13 @@ impl GameData {
     ///
     /// let a = Achievement::builder("Step A")
     ///     .description("Do A")
-    ///     .requirements(chain!(bits8!(0x1234).eq(1)))
+    ///     .core(chain!(bits8!(0x1234).eq(1)))
     ///     .badge_id(12345)
     ///     .points(5)
     ///     .build();
     /// let b = Achievement::builder("Step B")
     ///     .description("Do B")
-    ///     .requirements(chain!(bits8!(0x1234).eq(1)))
+    ///     .core(chain!(bits8!(0x1234).eq(1)))
     ///     .badge_id(12345)
     ///     .points(10)
     ///     .build();
@@ -365,7 +365,7 @@ impl GameData {
     /// let condition = chain!(bits8!(0x1234).eq(1));
     /// let achievement = Achievement::builder("First Step")
     ///     .description("Complete the tutorial")
-    ///     .requirements(condition)
+    ///     .core(condition)
     ///     .badge_id(12345)
     ///     .points(5)
     ///     .build();

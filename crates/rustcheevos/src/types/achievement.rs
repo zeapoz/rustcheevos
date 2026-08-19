@@ -6,6 +6,7 @@ use rustcheevos_schema::user as user_schema;
 
 use crate::parsers::ParseError;
 
+use super::chain::Chain;
 use super::requirements::Requirements;
 use super::requirement::condition::Condition;
 
@@ -26,7 +27,7 @@ const DEFAULT_TIMESTAMP: &str = "0";
 ///
 /// let achievement = Achievement::builder("Alpha Amateur")
 ///     .description("Earn a Bronze medal or higher on every planet of the Alpha galaxy")
-///     .requirements(bits8!(0x1234).eq(1))
+///     .core(bits8!(0x1234).eq(1))
 ///     .badge_id(12345)
 ///     .points(3)
 ///     .build();
@@ -104,7 +105,7 @@ impl Achievement {
     ///
     /// let achievement = Achievement::builder("Alpha Amateur")
     ///     .description("Earn a Bronze medal or higher on every planet of the Alpha galaxy")
-    ///     .requirements(bits8!(0x1234).eq(1))
+    ///     .core(bits8!(0x1234).eq(1))
     ///     .badge_id(12345)
     ///     .points(3)
     ///     .id(600707)
@@ -125,7 +126,7 @@ impl Achievement {
     ///
     /// let achievement = Achievement::builder("Alpha Amateur")
     ///     .description("Earn a Bronze medal or higher on every planet of the Alpha galaxy")
-    ///     .requirements(bits8!(0x1234).eq(1))
+    ///     .core(bits8!(0x1234).eq(1))
     ///     .badge_id(12345)
     ///     .points(3)
     ///     .id(600707)
@@ -165,7 +166,7 @@ impl Achievement {
 ///
 /// let achievement = Achievement::builder("Alpha Amateur")
 ///     .description("Earn a Bronze medal or higher on every planet of the Alpha galaxy")
-///     .requirements(bits8!(0x1234).eq(1))
+///     .core(bits8!(0x1234).eq(1))
 ///     .badge_id(12345)
 ///     .points(3)
 ///     .id(600707)
@@ -211,10 +212,74 @@ impl AchievementBuilder {
         self
     }
 
-    /// Sets the achievement requirements.
+    /// Sets the core requirement chain.
+    ///
+    /// Replaces the core chain in the achievement's requirements while
+    /// preserving any existing alternative groups.
+    ///
+    /// # Examples
+    /// ```
+    /// use rustcheevos::prelude::*;
+    /// use rustcheevos::types::achievement::Achievement;
+    /// use rustcheevos::{bits8, chain};
+    ///
+    /// let achievement = Achievement::builder("Alpha Amateur")
+    ///     .description("Earn a Bronze medal or higher")
+    ///     .core(chain!(bits8!(0x1234).eq(1)))
+    ///     .badge_id(12345)
+    ///     .points(3)
+    ///     .build();
+    /// ```
     #[must_use]
-    pub fn requirements(mut self, requirements: impl Into<Requirements>) -> Self {
-        self.requirements = requirements.into();
+    pub fn core(mut self, core: impl Into<Chain>) -> Self {
+        self.requirements.set_core(core);
+        self
+    }
+
+    /// Adds an alternative requirement chain group.
+    ///
+    /// # Examples
+    /// ```
+    /// use rustcheevos::prelude::*;
+    /// use rustcheevos::types::achievement::Achievement;
+    /// use rustcheevos::{bits8, chain};
+    ///
+    /// let achievement = Achievement::builder("Alpha Amateur")
+    ///     .description("Earn a Bronze medal or higher")
+    ///     .core(chain!(bits8!(0x1234).eq(1)))
+    ///     .alt_group(chain!(bits8!(0x1234).eq(2)))
+    ///     .badge_id(12345)
+    ///     .points(3)
+    ///     .build();
+    /// ```
+    #[must_use]
+    pub fn alt_group(mut self, group: impl Into<Chain>) -> Self {
+        self.requirements.add_alt_group(group);
+        self
+    }
+
+    /// Adds multiple alternative requirement chain groups.
+    ///
+    /// # Examples
+    /// ```
+    /// use rustcheevos::prelude::*;
+    /// use rustcheevos::types::achievement::Achievement;
+    /// use rustcheevos::{bits8, chain};
+    ///
+    /// let achievement = Achievement::builder("Alpha Amateur")
+    ///     .description("Earn a Bronze medal or higher")
+    ///     .core(chain!(bits8!(0x1234).eq(1)))
+    ///     .alt_groups([
+    ///         chain!(bits8!(0x1234).eq(2)),
+    ///         chain!(bits8!(0x1234).eq(3)),
+    ///     ])
+    ///     .badge_id(12345)
+    ///     .points(3)
+    ///     .build();
+    /// ```
+    #[must_use]
+    pub fn alt_groups(mut self, groups: impl IntoIterator<Item = impl Into<Chain>>) -> Self {
+        self.requirements.add_alt_groups(groups);
         self
     }
 
@@ -281,7 +346,7 @@ impl From<AchievementBuilder> for Achievement {
 ///
 /// let achievement = Achievement::builder("Solar System Sentinel")
 ///     .description("Earn a Bronze medal or higher on every planet in every galaxy excluding the Lambda galaxy")
-///     .requirements(all_medals_condition(Medal::Bronze))
+///     .core(all_medals_condition(Medal::Bronze))
 ///     .badge_id(12345)
 ///     .tag(Tag::WinCondition)
 ///     .build();
