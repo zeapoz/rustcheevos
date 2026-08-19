@@ -8,7 +8,7 @@ use rustcheevos_schema::user as user_schema;
 use crate::parsers::ParseError;
 use crate::types::requirement::condition::Condition;
 
-use super::chain::ChainGroup;
+use super::chain::Requirements;
 
 /// A leaderboard definition.
 ///
@@ -43,13 +43,13 @@ pub struct Leaderboard {
     /// The leaderboard description.
     description: String,
     /// The leaderboard start condition.
-    start: ChainGroup,
+    start: Requirements,
     /// The leaderboard cancel condition.
-    cancel: ChainGroup,
+    cancel: Requirements,
     /// The leaderboard submit condition.
-    submit: ChainGroup,
+    submit: Requirements,
     /// The leaderboard value condition.
-    value: ChainGroup,
+    value: Requirements,
     /// The value format.
     format: LeaderboardFormat,
     /// Whether lower values are better.
@@ -77,25 +77,25 @@ impl Leaderboard {
 
     /// Returns the start condition.
     #[must_use]
-    pub fn start(&self) -> &ChainGroup {
+    pub fn start(&self) -> &Requirements {
         &self.start
     }
 
     /// Returns the cancel condition.
     #[must_use]
-    pub fn cancel(&self) -> &ChainGroup {
+    pub fn cancel(&self) -> &Requirements {
         &self.cancel
     }
 
     /// Returns the submit condition.
     #[must_use]
-    pub fn submit(&self) -> &ChainGroup {
+    pub fn submit(&self) -> &Requirements {
         &self.submit
     }
 
     /// Returns the value condition.
     #[must_use]
-    pub fn value(&self) -> &ChainGroup {
+    pub fn value(&self) -> &Requirements {
         &self.value
     }
 
@@ -198,13 +198,13 @@ pub struct LeaderboardBuilder {
     /// The description of the leaderboard.
     description: String,
     /// The leaderboard start condition.
-    start: ChainGroup,
+    start: Requirements,
     /// The leaderboard cancel condition.
-    cancel: ChainGroup,
+    cancel: Requirements,
     /// The leaderboard submit condition.
-    submit: ChainGroup,
+    submit: Requirements,
     /// The leaderboard value condition.
-    value: ChainGroup,
+    value: Requirements,
     /// The leaderboard format.
     format: LeaderboardFormat,
     /// Whether lower values are better.
@@ -219,10 +219,10 @@ impl LeaderboardBuilder {
         Self {
             title: title.into(),
             description: String::new(),
-            start: ChainGroup::from(Condition::always_true()),
-            cancel: ChainGroup::from(Condition::always_false()),
-            submit: ChainGroup::from(Condition::always_true()),
-            value: ChainGroup::from(Condition::always_true()),
+            start: Requirements::from(Condition::always_true()),
+            cancel: Requirements::from(Condition::always_false()),
+            submit: Requirements::from(Condition::always_true()),
+            value: Requirements::from(Condition::always_true()),
             format: LeaderboardFormat::Value,
             lower_is_better: false,
             id: 0,
@@ -238,28 +238,28 @@ impl LeaderboardBuilder {
 
     /// Sets the leaderboard start condition.
     #[must_use]
-    pub fn start(mut self, start: impl Into<ChainGroup>) -> Self {
+    pub fn start(mut self, start: impl Into<Requirements>) -> Self {
         self.start = start.into();
         self
     }
 
     /// Sets the leaderboard cancel condition.
     #[must_use]
-    pub fn cancel(mut self, cancel: impl Into<ChainGroup>) -> Self {
+    pub fn cancel(mut self, cancel: impl Into<Requirements>) -> Self {
         self.cancel = cancel.into();
         self
     }
 
     /// Sets the leaderboard submit condition.
     #[must_use]
-    pub fn submit(mut self, submit: impl Into<ChainGroup>) -> Self {
+    pub fn submit(mut self, submit: impl Into<Requirements>) -> Self {
         self.submit = submit.into();
         self
     }
 
     /// Sets the leaderboard value condition.
     #[must_use]
-    pub fn value(mut self, value: impl Into<ChainGroup>) -> Self {
+    pub fn value(mut self, value: impl Into<Requirements>) -> Self {
         self.value = value.into();
         self
     }

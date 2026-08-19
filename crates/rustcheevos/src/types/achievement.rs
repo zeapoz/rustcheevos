@@ -6,7 +6,7 @@ use rustcheevos_schema::user as user_schema;
 
 use crate::parsers::ParseError;
 
-use super::chain::ChainGroup;
+use super::chain::Requirements;
 use super::requirement::condition::Condition;
 
 /// Default timestamp for achievement entries.
@@ -42,7 +42,7 @@ pub struct Achievement {
     /// The achievement description.
     description: String,
     /// The conditions that must be met for the achievement.
-    requirements: ChainGroup,
+    requirements: Requirements,
     /// The achievement tag.
     tag: Option<Tag>,
     /// The point value.
@@ -72,7 +72,7 @@ impl Achievement {
 
     /// Returns the achievement requirements.
     #[must_use]
-    pub fn requirements(&self) -> &ChainGroup {
+    pub fn requirements(&self) -> &Requirements {
         &self.requirements
     }
 
@@ -179,7 +179,7 @@ pub struct AchievementBuilder {
     /// The achievement description.
     description: String,
     /// The achievement requirements.
-    requirements: ChainGroup,
+    requirements: Requirements,
     /// The achievement points.
     points: u32,
     /// The achievement ID.
@@ -196,7 +196,7 @@ impl AchievementBuilder {
         Self {
             title: title.into(),
             description: String::new(),
-            requirements: ChainGroup::from(Condition::always_true()),
+            requirements: Requirements::from(Condition::always_true()),
             points: 0,
             badge_id: 0,
             id: 0,
@@ -213,7 +213,7 @@ impl AchievementBuilder {
 
     /// Sets the achievement requirements.
     #[must_use]
-    pub fn requirements(mut self, requirements: impl Into<ChainGroup>) -> Self {
+    pub fn requirements(mut self, requirements: impl Into<Requirements>) -> Self {
         self.requirements = requirements.into();
         self
     }
@@ -290,7 +290,7 @@ impl From<AchievementBuilder> for Achievement {
 pub enum Tag {
     /// Represents a progression achievement.
     Progression,
-    /// Represents ta win condition.
+    /// Represents a win condition.
     WinCondition,
     /// Represents a missable achievement.
     Missable,

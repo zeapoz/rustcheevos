@@ -16,60 +16,61 @@ pub(crate) mod pending;
 
 pub use pending::{Chainable, PendingChain};
 
-/// A holding struct for many groups of requirements.
+/// A set of requirement chains defining when a condition is satisfied.
 ///
-/// This type is used to group requirements together for use in an
-/// [Achievement][`crate::types::achievement::Achievement`].
+/// Contains a core chain that must always be satisfied, plus zero or more
+/// alternative chains. If any alternative chains are present, at least one
+/// of them must also be satisfied.
 ///
 /// # Examples
 ///
 /// ```
 /// use rustcheevos::prelude::*;
-/// use rustcheevos::types::chain::ChainGroup;
+/// use rustcheevos::types::chain::Requirements;
 /// use rustcheevos::{bits8, chain, delta};
 ///
-/// let core_condition = chain!(
+/// let core = chain!(
 ///     delta!(bits8!(0x1234)).lt(10),
 ///     bits8!(0x1234).ge(10),
 /// );
 ///
-/// let alt_condition_a = chain!(
+/// let alt_a = chain!(
 ///     delta!(bits8!(0x1234)).lt(10),
 ///     bits8!(0x1234).ge(10),
 /// );
 ///
-/// let alt_condition_b = chain!(
+/// let alt_b = chain!(
 ///     delta!(bits8!(0x1234)).lt(10),
 ///     bits8!(0x1234).ge(10),
 /// );
 ///
-/// let mut chain_group = ChainGroup::new(core_condition);
-/// chain_group.push_alt_group(alt_condition_a);
-/// chain_group.push_alt_group(alt_condition_b);
+/// let mut requirements = Requirements::new(core);
+/// requirements.push_alt_group(alt_a);
+/// requirements.push_alt_group(alt_b);
 /// ```
 #[derive(Debug, Clone, PartialEq)]
-pub struct ChainGroup {
+pub struct Requirements {
     /// The core group.
     core: Chain,
     /// The alternative groups.
     alt_groups: Vec<Chain>,
 }
 
-impl ChainGroup {
-    /// Creates a new group with the given core chain.
+impl Requirements {
+    /// Creates a new set with the given core chain.
     ///
     /// # Examples
     /// ```
     /// use rustcheevos::prelude::*;
-    /// use rustcheevos::types::chain::ChainGroup;
+    /// use rustcheevos::types::chain::Requirements;
     /// use rustcheevos::{bits8, chain, delta};
     ///
-    /// let core_condition = chain!(
+    /// let core = chain!(
     ///     delta!(bits8!(0x1234)).lt(10),
     ///     bits8!(0x1234).ge(10),
     /// );
     ///
-    /// let chain_group = ChainGroup::new(core_condition);
+    /// let requirements = Requirements::new(core);
     /// ```
     pub fn new(core: impl Into<Chain>) -> Self {
         Self {
@@ -78,48 +79,48 @@ impl ChainGroup {
         }
     }
 
-    /// Adds an alternative group of requirements.
+    /// Adds an alternative chain.
     ///
     /// # Examples
     /// ```
-    /// # use rustcheevos::types::chain::{Chain, ChainGroup};
-    /// # let core_condition = Chain::default();
+    /// # use rustcheevos::types::chain::{Chain, Requirements};
+    /// # let core = Chain::default();
     /// use rustcheevos::prelude::*;
     /// use rustcheevos::{bits8, chain, delta};
     ///
-    /// let alt_group = chain!(
+    /// let alt = chain!(
     ///     delta!(bits8!(0x1234)).lt(10),
     ///     bits8!(0x1234).ge(10),
     /// );
     ///
-    /// let mut chain_group = ChainGroup::new(core_condition);
-    /// chain_group.push_alt_group(alt_group);
+    /// let mut requirements = Requirements::new(core);
+    /// requirements.push_alt_group(alt);
     /// ```
     pub fn push_alt_group(&mut self, group: impl Into<Chain>) {
         self.alt_groups.push(group.into());
     }
 
-    /// Adds multiple alternative groups of requirements to this chain group.
+    /// Adds multiple alternative chains.
     ///
     /// # Examples
     /// ```
-    /// # use rustcheevos::types::chain::{Chain, ChainGroup};
-    /// # let core_condition = Chain::default();
+    /// # use rustcheevos::types::chain::{Chain, Requirements};
+    /// # let core = Chain::default();
     /// use rustcheevos::prelude::*;
     /// use rustcheevos::{bits8, chain, delta};
     ///
-    /// let alt_group_a = chain!(
+    /// let alt_a = chain!(
     ///     delta!(bits8!(0x1234)).lt(10),
     ///     bits8!(0x1234).ge(10),
     /// );
     ///
-    /// let alt_group_b = chain!(
+    /// let alt_b = chain!(
     ///     delta!(bits8!(0x1234)).lt(10),
     ///     bits8!(0x1234).ge(10),
     /// );
     ///
-    /// let mut chain_group = ChainGroup::new(core_condition);
-    /// chain_group.set_alt_groups(vec![alt_group_a, alt_group_b]);
+    /// let mut requirements = Requirements::new(core);
+    /// requirements.set_alt_groups(vec![alt_a, alt_b]);
     /// ```
     pub fn set_alt_groups(&mut self, alt_groups: impl IntoIterator<Item = impl Into<Chain>>) {
         self.alt_groups = alt_groups.into_iter().map(Into::into).collect();
@@ -138,13 +139,13 @@ impl ChainGroup {
     }
 }
 
-impl<T: Into<Chain>> From<T> for ChainGroup {
+impl<T: Into<Chain>> From<T> for Requirements {
     fn from(value: T) -> Self {
-        ChainGroup::new(value.into())
+        Requirements::new(value.into())
     }
 }
 
-impl fmt::Display for ChainGroup {
+impl fmt::Display for Requirements {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "{}", self.core)?;
         for g in &self.alt_groups {

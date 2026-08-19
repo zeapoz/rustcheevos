@@ -4,7 +4,7 @@ use std::fmt;
 
 use rustcheevos::types::achievement::Achievement;
 
-use crate::preview::assets::requirements::render_chain_group;
+use crate::preview::assets::requirements::render_requirements;
 use crate::preview::format_separator;
 
 /// A preview of an achievement.
@@ -27,7 +27,7 @@ impl fmt::Display for AchievementPreview<'_> {
             writeln!(f, "Tag: {tag:?}")?;
         }
         writeln!(f)?;
-        render_chain_group(f, ach.requirements())
+        render_requirements(f, ach.requirements())
     }
 }
 
@@ -35,7 +35,7 @@ impl fmt::Display for AchievementPreview<'_> {
 mod tests {
     use super::*;
     use rustcheevos::types::achievement::Tag;
-    use rustcheevos::types::chain::ChainGroup;
+    use rustcheevos::types::chain::Requirements;
     use rustcheevos::types::memory::{MemoryRef, MemorySize};
     use rustcheevos::types::requirement::Condition;
 
@@ -48,13 +48,13 @@ mod tests {
         ];
         let alt_b = [Condition::eq(MemoryRef::new(MemorySize::Bits16, 0x30), 3)];
 
-        let mut group = ChainGroup::new(core);
-        group.push_alt_group(alt_a);
-        group.push_alt_group(alt_b);
+        let mut requirements = Requirements::new(core);
+        requirements.push_alt_group(alt_a);
+        requirements.push_alt_group(alt_b);
 
         let achievement = Achievement::builder("Alpha Amateur")
             .description("Earn a Bronze medal or higher on every planet of the Alpha galaxy")
-            .requirements(group)
+            .requirements(requirements)
             .badge_id(12345)
             .points(3)
             .id(600707)

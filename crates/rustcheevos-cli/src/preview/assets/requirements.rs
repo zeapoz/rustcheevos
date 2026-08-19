@@ -3,7 +3,7 @@
 use std::fmt;
 
 use rustcheevos::types::{
-    chain::{Chain, ChainGroup},
+    chain::{Chain, Requirements},
     flag::Flag,
     operator::Operator,
     requirement::Requirement,
@@ -107,8 +107,8 @@ fn value_cells(value: TypedValue) -> (String, String, String) {
     }
 }
 
-/// Renders the core and alt groups of a [`ChainGroup`] as requirement tables.
-pub(crate) fn render_chain_group(f: &mut fmt::Formatter<'_>, group: &ChainGroup) -> fmt::Result {
+/// Renders the core and alt groups of a [`Requirements`] as requirement tables.
+pub(crate) fn render_requirements(f: &mut fmt::Formatter<'_>, group: &Requirements) -> fmt::Result {
     writeln!(
         f,
         "  Core:\n{}",

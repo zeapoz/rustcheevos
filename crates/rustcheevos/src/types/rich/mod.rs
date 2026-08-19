@@ -7,7 +7,7 @@ use std::rc::Rc;
 use format::Format;
 use macros::MacroType;
 
-use super::chain::ChainGroup;
+use super::chain::Requirements;
 
 mod format;
 mod lookup;
@@ -200,7 +200,7 @@ impl RichPresence {
     /// ```
     pub fn add_conditional_display(
         &mut self,
-        conditions: impl Into<ChainGroup>,
+        conditions: impl Into<Requirements>,
         display: impl Into<String>,
     ) {
         let display = ConditionalDisplay::new(conditions, display);
@@ -267,14 +267,14 @@ impl fmt::Display for RichPresence {
 #[derive(Debug, Clone, PartialEq)]
 pub struct ConditionalDisplay {
     /// The condition for displaying this display.
-    condition: ChainGroup,
+    condition: Requirements,
     /// The display to show when the condition is met.
     display: String,
 }
 
 impl ConditionalDisplay {
     /// Creates a new conditional display.
-    pub fn new(condition: impl Into<ChainGroup>, display: impl Into<String>) -> Self {
+    pub fn new(condition: impl Into<Requirements>, display: impl Into<String>) -> Self {
         Self {
             condition: condition.into(),
             display: display.into(),

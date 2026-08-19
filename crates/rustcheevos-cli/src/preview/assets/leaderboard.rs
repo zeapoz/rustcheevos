@@ -2,20 +2,20 @@
 
 use std::fmt;
 
-use rustcheevos::types::chain::ChainGroup;
+use rustcheevos::types::chain::Requirements;
 use rustcheevos::types::leaderboard::Leaderboard;
 
-use crate::preview::assets::requirements::render_chain_group;
+use crate::preview::assets::requirements::render_requirements;
 use crate::preview::format_separator;
 
 /// A preview of a leaderboard.
 #[derive(Debug, Clone)]
 pub struct LeaderboardPreview<'a>(pub &'a Leaderboard);
 
-/// Writes a labeled section of requirement tables for a chain group.
-fn write_section(f: &mut fmt::Formatter<'_>, label: &str, group: &ChainGroup) -> fmt::Result {
+/// Writes a labeled section of requirement tables for a requirements set.
+fn write_section(f: &mut fmt::Formatter<'_>, label: &str, group: &Requirements) -> fmt::Result {
     writeln!(f, "{label}:")?;
-    render_chain_group(f, group)
+    render_requirements(f, group)
 }
 
 impl fmt::Display for LeaderboardPreview<'_> {
