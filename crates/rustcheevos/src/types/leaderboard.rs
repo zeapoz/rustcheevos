@@ -8,7 +8,7 @@ use rustcheevos_schema::user as user_schema;
 use crate::parsers::ParseError;
 use crate::types::requirement::condition::Condition;
 
-use super::chain::Requirements;
+use super::requirements::Requirements;
 
 /// A leaderboard definition.
 ///

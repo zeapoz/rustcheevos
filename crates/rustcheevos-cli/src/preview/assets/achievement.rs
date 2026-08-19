@@ -35,7 +35,7 @@ impl fmt::Display for AchievementPreview<'_> {
 mod tests {
     use super::*;
     use rustcheevos::types::achievement::Tag;
-    use rustcheevos::types::chain::Requirements;
+    use rustcheevos::types::requirements::Requirements;
     use rustcheevos::types::memory::{MemoryRef, MemorySize};
     use rustcheevos::types::requirement::Condition;
 
@@ -49,8 +49,8 @@ mod tests {
         let alt_b = [Condition::eq(MemoryRef::new(MemorySize::Bits16, 0x30), 3)];
 
         let mut requirements = Requirements::new(core);
-        requirements.push_alt_group(alt_a);
-        requirements.push_alt_group(alt_b);
+        requirements.add_alt_group(alt_a);
+        requirements.add_alt_group(alt_b);
 
         let achievement = Achievement::builder("Alpha Amateur")
             .description("Earn a Bronze medal or higher on every planet of the Alpha galaxy")

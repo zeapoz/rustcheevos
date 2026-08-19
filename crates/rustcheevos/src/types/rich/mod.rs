@@ -7,7 +7,7 @@ use std::rc::Rc;
 use format::Format;
 use macros::MacroType;
 
-use super::chain::Requirements;
+use super::requirements::Requirements;
 
 mod format;
 mod lookup;

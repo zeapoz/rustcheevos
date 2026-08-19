@@ -3,10 +3,11 @@
 use std::fmt;
 
 use rustcheevos::types::{
-    chain::{Chain, Requirements},
+    chain::Chain,
     flag::Flag,
     operator::Operator,
     requirement::Requirement,
+    requirements::Requirements,
     value::TypedValue,
 };
 

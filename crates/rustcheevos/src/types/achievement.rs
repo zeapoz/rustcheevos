@@ -6,7 +6,7 @@ use rustcheevos_schema::user as user_schema;
 
 use crate::parsers::ParseError;
 
-use super::chain::Requirements;
+use super::requirements::Requirements;
 use super::requirement::condition::Condition;
 
 /// Default timestamp for achievement entries.
