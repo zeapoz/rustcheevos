@@ -12,8 +12,8 @@ use super::chain::Requirements;
 
 /// A leaderboard definition.
 ///
-/// This type defines the core properties of a leaderboard and is used to populate
-/// an [`AchievementSet`][`crate::types::game::AchievementSet`].
+/// This type defines the core properties of a leaderboard and is used with
+/// [`GameData::add_leaderboard`][`crate::types::game::GameData::add_leaderboard`].
 ///
 /// # Examples
 ///

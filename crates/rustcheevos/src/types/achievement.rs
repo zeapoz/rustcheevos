@@ -14,8 +14,8 @@ const DEFAULT_TIMESTAMP: &str = "0";
 
 /// An achievement definition.
 ///
-/// This type defines the core properties of an achievement and is used to populate
-/// an [`AchievementSet`][`crate::types::game::AchievementSet`].
+/// This type defines the core properties of an achievement and is used with
+/// [`GameData::add_achievement`][`crate::types::game::GameData::add_achievement`].
 ///
 /// # Examples
 ///

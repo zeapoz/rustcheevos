@@ -5,13 +5,6 @@ use crate::types::{
 };
 use rustcheevos_schema::user::{CodeNoteEntry, UserFile};
 
-/// A set of achievements.
-pub type AchievementSet = Vec<Achievement>;
-/// A set of leaderboards.
-pub type LeaderboardSet = Vec<Leaderboard>;
-/// A set of code notes.
-pub type CodeNoteSet = Vec<CodeNote>;
-
 /// The core game struct containing all the assets.
 ///
 /// # Examples
@@ -67,9 +60,9 @@ pub type CodeNoteSet = Vec<CodeNote>;
 ///
 /// // Add all assets to the game.
 /// game_data
-///     .add(achievement)
-///     .add(leaderboard)
-///     .add(note)
+///     .add_achievement(achievement)
+///     .add_leaderboard(leaderboard)
+///     .add_code_note(note)
 ///     .set_rich_presence(rich_presence);
 ///
 /// // Serialize to the user file format.
@@ -83,11 +76,11 @@ pub struct GameData {
     /// The game name.
     title: String,
     /// The achievements.
-    achievements: AchievementSet,
+    achievements: Vec<Achievement>,
     /// The leaderboards.
-    leaderboards: LeaderboardSet,
+    leaderboards: Vec<Leaderboard>,
     /// The code notes.
-    code_notes: CodeNoteSet,
+    code_notes: Vec<CodeNote>,
     /// The rich presence.
     rich_presence: RichPresence,
 }
@@ -108,9 +101,9 @@ impl GameData {
         Self {
             id,
             title: name.into(),
-            achievements: AchievementSet::new(),
-            leaderboards: LeaderboardSet::new(),
-            code_notes: CodeNoteSet::new(),
+            achievements: Vec::new(),
+            leaderboards: Vec::new(),
+            code_notes: Vec::new(),
             rich_presence: RichPresence::new(),
         }
     }
@@ -127,71 +120,7 @@ impl GameData {
         &self.title
     }
 
-    /// Adds an asset to this game.
-    ///
-    /// # Examples
-    ///
-    /// ```
-    /// # use rustcheevos::prelude::*;
-    /// # use rustcheevos::types::{achievement::Achievement, game::GameData};
-    /// # use rustcheevos::{chain, bits8};
-    /// let mut game_data = GameData::new(1, "Super Adventure");
-    ///
-    /// let condition = chain!(bits8!(0x1234).eq(1));
-    /// let achievement = Achievement::builder("First Step")
-    ///     .description("Complete the tutorial")
-    ///     .requirements(condition)
-    ///     .badge_id(12345)
-    ///     .points(5)
-    ///     .build();
-    ///
-    /// game_data.add(achievement);
-    /// assert_eq!(game_data.achievements().len(), 1);
-    /// ```
-    pub fn add(&mut self, item: impl Into<GameAsset>) -> &mut Self {
-        match item.into() {
-            GameAsset::Achievement(achievement) => self.achievements.push(achievement),
-            GameAsset::Leaderboard(leaderboard) => self.leaderboards.push(leaderboard),
-            GameAsset::CodeNote(note) => self.code_notes.push(note),
-        }
-        self
-    }
-
-    /// Adds multiple assets to this game.
-    ///
-    /// # Examples
-    ///
-    /// ```
-    /// # use rustcheevos::prelude::*;
-    /// # use rustcheevos::types::{achievement::Achievement, game::GameData};
-    /// # use rustcheevos::{chain, bits8};
-    /// let mut game_data = GameData::new(1, "Super Adventure");
-    ///
-    /// let condition = chain!(bits8!(0x1234).eq(1));
-    /// let achievement_a = Achievement::builder("Step A")
-    ///     .description("Do A")
-    ///     .requirements(condition.clone())
-    ///     .badge_id(12345)
-    ///     .points(5)
-    ///     .build();
-    /// let achievement_b = Achievement::builder("Step B")
-    ///     .description("Do B")
-    ///     .requirements(condition)
-    ///     .badge_id(12345)
-    ///     .points(10)
-    ///     .build();
-    ///
-    /// game_data.add_many([achievement_a, achievement_b]);
-    /// assert_eq!(game_data.achievements().len(), 2);
-    /// ```
-    pub fn add_many(&mut self, items: impl IntoIterator<Item = impl Into<GameAsset>>) -> &mut Self {
-        for item in items {
-            self.add(item);
-        }
-        self
-    }
-
-    /// Sets the achievements for this game.
+    /// Adds an achievement to this game.
     ///
     /// # Examples
     ///
@@ -208,15 +137,49 @@ impl GameData {
     ///     .points(5)
     ///     .build();
     ///
-    /// game_data.set_achievements(vec![achievement]);
+    /// game_data.add_achievement(achievement);
     /// assert_eq!(game_data.achievements().len(), 1);
     /// ```
-    pub fn set_achievements(&mut self, achievements: impl Into<AchievementSet>) -> &mut Self {
-        self.achievements = achievements.into();
+    pub fn add_achievement(&mut self, achievement: Achievement) -> &mut Self {
+        self.achievements.push(achievement);
         self
     }
 
-    /// Sets the leaderboards for this game.
+    /// Adds achievements to this game.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # use rustcheevos::prelude::*;
+    /// # use rustcheevos::types::{achievement::Achievement, game::GameData};
+    /// # use rustcheevos::{chain, bits8};
+    /// let mut game_data = GameData::new(1, "Super Adventure");
+    ///
+    /// let a = Achievement::builder("Step A")
+    ///     .description("Do A")
+    ///     .requirements(chain!(bits8!(0x1234).eq(1)))
+    ///     .badge_id(12345)
+    ///     .points(5)
+    ///     .build();
+    /// let b = Achievement::builder("Step B")
+    ///     .description("Do B")
+    ///     .requirements(chain!(bits8!(0x1234).eq(1)))
+    ///     .badge_id(12345)
+    ///     .points(10)
+    ///     .build();
+    ///
+    /// game_data.add_achievements([a, b]);
+    /// assert_eq!(game_data.achievements().len(), 2);
+    /// ```
+    pub fn add_achievements(
+        &mut self,
+        achievements: impl IntoIterator<Item = Achievement>,
+    ) -> &mut Self {
+        self.achievements.extend(achievements);
+        self
+    }
+
+    /// Adds a leaderboard to this game.
     ///
     /// # Examples
     ///
@@ -236,30 +199,82 @@ impl GameData {
     ///     .lower_is_better(true)
     ///     .build();
     ///
-    /// game_data.set_leaderboards(vec![leaderboard]);
+    /// game_data.add_leaderboard(leaderboard);
     /// assert_eq!(game_data.leaderboards().len(), 1);
     /// ```
-    pub fn set_leaderboards(&mut self, leaderboards: impl Into<LeaderboardSet>) -> &mut Self {
-        self.leaderboards = leaderboards.into();
+    pub fn add_leaderboard(&mut self, leaderboard: Leaderboard) -> &mut Self {
+        self.leaderboards.push(leaderboard);
         self
     }
 
-    /// Sets the code notes for this game.
+    /// Adds leaderboards to this game.
     ///
     /// # Examples
     ///
     /// ```
-    /// use rustcheevos::prelude::*;
-    /// use rustcheevos::types::{game::GameData, note::CodeNote};
+    /// # use rustcheevos::prelude::*;
+    /// # use rustcheevos::types::{game::GameData, leaderboard::{Leaderboard, LeaderboardFormat}};
+    /// # use rustcheevos::{chain, bits8, measured};
+    /// let mut game_data = GameData::new(1, "Super Adventure");
     ///
+    /// let lb = Leaderboard::builder("Speed Run")
+    ///     .description("Complete the game fast")
+    ///     .start(chain!(bits8!(0x1234).eq(1)))
+    ///     .cancel(chain!(bits8!(0x1234).eq(0)))
+    ///     .submit(chain!(bits8!(0xABCD).eq(1)))
+    ///     .value(measured!(bits8!(0xDEF0)))
+    ///     .format(LeaderboardFormat::Seconds)
+    ///     .lower_is_better(true)
+    ///     .build();
+    ///
+    /// game_data.add_leaderboards([lb]);
+    /// assert_eq!(game_data.leaderboards().len(), 1);
+    /// ```
+    pub fn add_leaderboards(
+        &mut self,
+        leaderboards: impl IntoIterator<Item = Leaderboard>,
+    ) -> &mut Self {
+        self.leaderboards.extend(leaderboards);
+        self
+    }
+
+    /// Adds a code note to this game.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # use rustcheevos::prelude::*;
+    /// # use rustcheevos::types::{game::GameData, note::CodeNote};
     /// let mut game_data = GameData::new(1, "Super Adventure");
     ///
     /// let note = CodeNote::new(0x1234, "Player health");
-    /// game_data.set_code_notes(vec![note]);
+    /// game_data.add_code_note(note);
     /// assert_eq!(game_data.code_notes().len(), 1);
     /// ```
-    pub fn set_code_notes(&mut self, code_notes: impl Into<CodeNoteSet>) -> &mut Self {
-        self.code_notes = code_notes.into();
+    pub fn add_code_note(&mut self, note: CodeNote) -> &mut Self {
+        self.code_notes.push(note);
+        self
+    }
+
+    /// Adds code notes to this game.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # use rustcheevos::prelude::*;
+    /// # use rustcheevos::types::{game::GameData, note::CodeNote};
+    /// let mut game_data = GameData::new(1, "Super Adventure");
+    ///
+    /// let a = CodeNote::new(0x1234, "Player health");
+    /// let b = CodeNote::new(0x5678, "Player lives");
+    /// game_data.add_code_notes([a, b]);
+    /// assert_eq!(game_data.code_notes().len(), 2);
+    /// ```
+    pub fn add_code_notes(
+        &mut self,
+        notes: impl IntoIterator<Item = CodeNote>,
+    ) -> &mut Self {
+        self.code_notes.extend(notes);
         self
     }
 
@@ -331,58 +346,6 @@ impl GameData {
         &self.code_notes
     }
 
-    /// Returns an iterator over the achievements in this game.
-    ///
-    /// # Examples
-    ///
-    /// ```
-    /// # use rustcheevos::prelude::*;
-    /// # use rustcheevos::types::game::GameData;
-    /// let game_data = GameData::new(1, "Test");
-    ///
-    /// for achievement in game_data.iter_achievements() {
-    ///     println!("{}", achievement.title());
-    /// }
-    /// ```
-    pub fn iter_achievements(&self) -> impl Iterator<Item = &Achievement> {
-        self.achievements.iter()
-    }
-
-    /// Returns an iterator over the leaderboards in this game.
-    ///
-    /// # Examples
-    ///
-    /// ```
-    /// # use rustcheevos::prelude::*;
-    /// # use rustcheevos::types::game::GameData;
-    /// let game_data = GameData::new(1, "Test");
-    ///
-    /// for lb in game_data.iter_leaderboards() {
-    ///     println!("{}", lb.title());
-    /// }
-    /// ```
-    pub fn iter_leaderboards(&self) -> impl Iterator<Item = &Leaderboard> {
-        self.leaderboards.iter()
-    }
-
-    /// Returns an iterator over the code notes in this game.
-    ///
-    /// # Examples
-    ///
-    /// ```
-    /// use rustcheevos::prelude::*;
-    /// use rustcheevos::types::game::GameData;
-    ///
-    /// let game_data = GameData::new(1, "Test");
-    ///
-    /// for note in game_data.iter_code_notes() {
-    ///     println!("{:x}: {}", note.address(), note.contents());
-    /// }
-    /// ```
-    pub fn iter_code_notes(&self) -> impl Iterator<Item = &CodeNote> {
-        self.code_notes.iter()
-    }
-
     /// Returns the rich presence for this game.
     #[must_use]
     pub fn rich_presence(&self) -> &RichPresence {
@@ -406,7 +369,7 @@ impl GameData {
     ///     .badge_id(12345)
     ///     .points(5)
     ///     .build();
-    /// game_data.add(achievement);
+    /// game_data.add_achievement(achievement);
     ///
     /// let user_file = game_data.to_user_file("Rustcheevos");
     /// assert!(user_file.to_string().contains("First Step"));
@@ -416,57 +379,9 @@ impl GameData {
         let author = author.into();
         UserFile::new(
             self.title.clone(),
-            self.iter_achievements().map(|a| a.to_user_entry(&author)),
-            self.iter_leaderboards().map(Leaderboard::to_user_entry),
-            self.iter_code_notes().map(CodeNoteEntry::from),
+            self.achievements.iter().map(|a| a.to_user_entry(&author)),
+            self.leaderboards.iter().map(Leaderboard::to_user_entry),
+            self.code_notes.iter().map(CodeNoteEntry::from),
         )
-    }
-}
-
-/// An asset for a game.
-///
-/// # Examples
-///
-/// ```
-/// use rustcheevos::prelude::*;
-/// use rustcheevos::types::{achievement::Achievement, game::GameAsset};
-/// use rustcheevos::{chain, bits8};
-///
-/// // GameAsset can be created from Achievement, Leaderboard, or CodeNote
-/// let condition = chain!(bits8!(0x1234).eq(1));
-/// let achievement = Achievement::builder("First Step")
-///     .description("Complete the tutorial")
-///     .requirements(condition)
-///     .badge_id(12345)
-///     .points(5)
-///     .build();
-///
-/// let game_asset: GameAsset = achievement.into();
-/// ```
-#[derive(Debug, Clone, PartialEq)]
-pub enum GameAsset {
-    /// An achievement.
-    Achievement(Achievement),
-    /// A leaderboard.
-    Leaderboard(Leaderboard),
-    /// A code note.
-    CodeNote(CodeNote),
-}
-
-impl From<Achievement> for GameAsset {
-    fn from(achievement: Achievement) -> Self {
-        GameAsset::Achievement(achievement)
-    }
-}
-
-impl From<Leaderboard> for GameAsset {
-    fn from(leaderboard: Leaderboard) -> Self {
-        GameAsset::Leaderboard(leaderboard)
-    }
-}
-
-impl From<CodeNote> for GameAsset {
-    fn from(note: CodeNote) -> Self {
-        GameAsset::CodeNote(note)
     }
 }

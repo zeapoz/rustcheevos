@@ -70,7 +70,7 @@
 //!         .badge_id(12345)
 //!         .points(5)
 //!         .build();
-//!     game_data.add(achievement);
+//!     game_data.add_achievement(achievement);
 //!
 //!     // Create a simple rich presence.
 //!     let mut rich_presence = RichPresence::new();
