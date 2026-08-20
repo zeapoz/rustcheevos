@@ -3,10 +3,11 @@
 use std::fmt;
 
 use rustcheevos::types::{
-    chain::Chain, flag::Flag, operator::Operator, requirement::Requirement,
+    chain::Chain, flag::ArithmeticFlag, flag::Flag, operator::Operator, requirement::Requirement,
     requirements::Requirements, value::TypedValue,
 };
 
+use crate::preview::PreviewOptions;
 use crate::preview::table::Table;
 
 /// Column header for the row identifier.
@@ -25,34 +26,45 @@ const HEADER_MEM_VAL: &str = "Mem/Val";
 const HEADER_HITS: &str = "Hits";
 
 /// A table-formatted group of requirements.
-#[derive(Debug, Clone)]
-pub struct RequirementsPreview<'a>(pub &'a [Chain]);
+#[derive(Debug)]
+pub struct RequirementsPreview<'a> {
+    /// The chains to render.
+    chains: &'a [Chain],
+    /// Rendering options.
+    options: PreviewOptions,
+}
 
 impl fmt::Display for RequirementsPreview<'_> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        for (i, chain) in self.0.iter().enumerate() {
+        for (i, chain) in self.chains.iter().enumerate() {
             if i > 0 {
                 writeln!(f)?;
             }
-            let table = chain.iter().enumerate().fold(
-                Table::new([
-                    HEADER_ID,
-                    HEADER_FLAG,
-                    HEADER_TYPE,
-                    HEADER_SIZE,
-                    HEADER_MEM_VAL,
-                    HEADER_CMP,
-                    HEADER_TYPE,
-                    HEADER_SIZE,
-                    HEADER_MEM_VAL,
-                    HEADER_HITS,
-                ]),
-                |table, (idx, req)| {
-                    let mut cells = requirement_row(req).to_vec();
-                    cells.insert(0, (idx + 1).to_string());
-                    table.row(cells)
-                },
-            );
+            let mut table = Table::new([
+                HEADER_ID,
+                HEADER_FLAG,
+                HEADER_TYPE,
+                HEADER_SIZE,
+                HEADER_MEM_VAL,
+                HEADER_CMP,
+                HEADER_TYPE,
+                HEADER_SIZE,
+                HEADER_MEM_VAL,
+                HEADER_HITS,
+            ]);
+            for (idx, req) in chain.iter().enumerate() {
+                if self.options.collapse_add_address
+                    && matches!(
+                        req.flag(),
+                        Some(Flag::ArithmeticFlag(ArithmeticFlag::AddAddress))
+                    )
+                {
+                    continue;
+                }
+                let mut cells = requirement_row(req).to_vec();
+                cells.insert(0, (idx + 1).to_string());
+                table = table.row(cells);
+            }
             write!(f, "{table}")?;
         }
         Ok(())
@@ -104,19 +116,29 @@ fn value_cells(value: TypedValue) -> (String, String, String) {
     }
 }
 
-/// Renders the core and alt groups of a [`Requirements`] as requirement tables.
-pub(crate) fn render_requirements(f: &mut fmt::Formatter<'_>, group: &Requirements) -> fmt::Result {
+/// Renders the core and alt groups of a [`Requirements`] as labeled requirement tables.
+pub(crate) fn render_requirements(
+    f: &mut fmt::Formatter<'_>,
+    group: &Requirements,
+    options: PreviewOptions,
+) -> fmt::Result {
     writeln!(
         f,
         "  Core:\n{}",
-        RequirementsPreview(std::slice::from_ref(group.core()))
+        RequirementsPreview {
+            chains: std::slice::from_ref(group.core()),
+            options,
+        }
     )?;
     for (i, alt) in group.alt_groups().iter().enumerate() {
         writeln!(
             f,
             "  Alt {}:\n{}",
             i + 1,
-            RequirementsPreview(std::slice::from_ref(alt))
+            RequirementsPreview {
+                chains: std::slice::from_ref(alt),
+                options,
+            }
         )?;
     }
     Ok(())
@@ -134,11 +156,27 @@ mod tests {
         Chain::from(vec![req])
     }
 
+    fn preview(chains: &[Chain]) -> RequirementsPreview<'_> {
+        RequirementsPreview {
+            chains,
+            options: PreviewOptions::default(),
+        }
+    }
+
+    fn preview_collapsed(chains: &[Chain]) -> RequirementsPreview<'_> {
+        RequirementsPreview {
+            chains,
+            options: PreviewOptions {
+                collapse_add_address: true,
+            },
+        }
+    }
+
     #[test]
     fn smoke_renders_condition_with_all_columns() {
         let req = parse_requirement("0xH1234=50");
         let chain = single_chain(req);
-        let preview = RequirementsPreview(&[chain]).to_string();
+        let preview = preview(&[chain]).to_string();
         let lines: Vec<&str> = preview.lines().collect();
         assert_eq!(lines.len(), 5);
         assert!(lines[1].contains(HEADER_ID));
@@ -157,7 +195,7 @@ mod tests {
             parse_requirement("0xH1234=3"),
         ]
         .into();
-        let rendered = RequirementsPreview(&[chain]).to_string();
+        let rendered = preview(&[chain]).to_string();
         let lines: Vec<&str> = rendered.lines().collect();
         assert!(lines[3].contains(" 1 "));
         assert!(lines[4].contains(" 2 "));
@@ -167,22 +205,20 @@ mod tests {
     #[test]
     fn renders_condition_flag_and_hits() {
         let req = parse_requirement("P:0xH1234>=50.10.");
-        let preview = RequirementsPreview(&[single_chain(req)]).to_string();
-        assert!(preview.contains("PauseIf"));
-        assert!(preview.contains(">="));
-        assert!(preview.contains("10"));
+        let rendered = preview(&[single_chain(req)]).to_string();
+        assert!(rendered.contains("PauseIf"));
+        assert!(rendered.contains(">="));
+        assert!(rendered.contains("10"));
     }
 
     #[test]
     fn renders_arithmetic_and_accumulator() {
-        let with_op =
-            RequirementsPreview(&[single_chain(parse_requirement("A:0xH1234+50"))]).to_string();
+        let with_op = preview(&[single_chain(parse_requirement("A:0xH1234+50"))]).to_string();
         assert!(with_op.contains("AddSource"));
         assert!(with_op.contains('+'));
         assert!(with_op.contains("50"));
 
-        let without_op =
-            RequirementsPreview(&[single_chain(parse_requirement("A:0xH1234"))]).to_string();
+        let without_op = preview(&[single_chain(parse_requirement("A:0xH1234"))]).to_string();
         assert!(!without_op.contains('+'));
     }
 
@@ -204,6 +240,49 @@ mod tests {
     }
 
     #[test]
+    fn collapse_add_address_filters_rows() {
+        let chain: Chain = vec![
+            parse_requirement("0xH1234=1"),
+            parse_requirement("I:0xH2222*1"),
+            parse_requirement("0xH3456>=5"),
+        ]
+        .into();
+        let collapsed = preview_collapsed(&[chain]).to_string();
+        assert!(collapsed.contains("0x1234"));
+        assert!(collapsed.contains("0x3456"));
+        assert!(!collapsed.contains("0x2222"));
+        assert!(!collapsed.contains("AddAddress"));
+    }
+
+    #[test]
+    fn collapse_add_address_preserves_ids() {
+        let chain: Chain = vec![
+            parse_requirement("0xH1234=1"),
+            parse_requirement("I:0xH2222*1"),
+            parse_requirement("0xH3456>=5"),
+        ]
+        .into();
+        let collapsed = preview_collapsed(&[chain]).to_string();
+        let lines: Vec<&str> = collapsed.lines().collect();
+        // Header separator, header row, separator, row 1, row 3
+        assert!(lines[3].contains(" 1 "));
+        assert!(lines[4].contains(" 3 "));
+    }
+
+    #[test]
+    fn collapse_add_address_without_flag_shows_all() {
+        let chain: Chain = vec![
+            parse_requirement("0xH1234=1"),
+            parse_requirement("I:0xH2222*1"),
+            parse_requirement("0xH3456>=5"),
+        ]
+        .into();
+        let uncollapsed = preview(&[chain]).to_string();
+        assert!(uncollapsed.contains("AddAddress"));
+        assert!(uncollapsed.contains("0x2222"));
+    }
+
+    #[test]
     fn dump_example() {
         let achievement: Chain = vec![
             parse_requirement("P:0xH0010=1.5."),
@@ -213,7 +292,7 @@ mod tests {
         .into();
         println!(
             "\n--- multi-condition achievement ---\n{}",
-            RequirementsPreview(&[achievement])
+            preview(&[achievement])
         );
 
         let accumulator: Chain = vec![
@@ -224,7 +303,7 @@ mod tests {
         .into();
         println!(
             "\n--- accumulator chain (Delta) ---\n{}",
-            RequirementsPreview(&[accumulator])
+            preview(&[accumulator])
         );
 
         let access_modes: Chain = vec![
@@ -234,9 +313,6 @@ mod tests {
             parse_requirement("d0xH0040=20"),
         ]
         .into();
-        println!(
-            "\n--- all access modes ---\n{}",
-            RequirementsPreview(&[access_modes])
-        );
+        println!("\n--- all access modes ---\n{}", preview(&[access_modes]));
     }
 }

@@ -14,12 +14,32 @@ use crate::preview::assets::note::CodeNotePreview;
 mod assets;
 mod table;
 
+/// Rendering options for preview output.
+#[derive(Debug, Clone, Copy, Default)]
+pub(crate) struct PreviewOptions {
+    /// Hide add address lines from requirements tables.
+    pub collapse_add_address: bool,
+}
+
 /// Arguments for preview command.
 #[derive(Parser, Debug, Clone, Default)]
 pub struct Args {
     /// Which asset to preview. Shows all types if omitted.
     #[command(subcommand)]
     pub target: Option<PreviewTarget>,
+
+    /// Hide add address lines from requirements tables.
+    #[arg(short = 'c', long = "collapse-add-address")]
+    pub collapse_add_address: bool,
+}
+
+impl Args {
+    /// Builds [`PreviewOptions`] from the parsed CLI arguments.
+    fn options(&self) -> PreviewOptions {
+        PreviewOptions {
+            collapse_add_address: self.collapse_add_address,
+        }
+    }
 }
 
 /// The type of asset to preview.
@@ -58,18 +78,19 @@ pub enum PreviewTarget {
 
 /// Preview the output of a given game asset.
 pub fn preview_output(game_data: &GameData, args: &Args) {
+    let options = args.options();
     match &args.target {
         None => {
-            preview_achievements(game_data, None, None);
-            preview_leaderboards(game_data, None, None);
+            preview_achievements(game_data, None, None, options);
+            preview_leaderboards(game_data, None, None, options);
             preview_notes(game_data, None, None);
             preview_rich_presence(game_data);
         }
         Some(PreviewTarget::Achievement { id, title }) => {
-            preview_achievements(game_data, *id, title.as_deref());
+            preview_achievements(game_data, *id, title.as_deref(), options);
         }
         Some(PreviewTarget::Leaderboard { id, title }) => {
-            preview_leaderboards(game_data, *id, title.as_deref());
+            preview_leaderboards(game_data, *id, title.as_deref(), options);
         }
         Some(PreviewTarget::Note { address, text }) => {
             preview_notes(game_data, address.as_deref(), text.as_deref());
@@ -102,11 +123,22 @@ fn report_no_match(asset: &str, filter: &str, value: &str) {
 }
 
 /// Display all matched achievements.
-fn preview_achievements(data: &GameData, id: Option<u32>, title: Option<&str>) {
+fn preview_achievements(
+    data: &GameData,
+    id: Option<u32>,
+    title: Option<&str>,
+    options: PreviewOptions,
+) {
     let items = find_achievements(data.achievements(), id, title);
     let count = items.len();
     for (i, ach) in items.iter().enumerate() {
-        print!("{}", AchievementPreview(ach));
+        print!(
+            "{}",
+            AchievementPreview {
+                achievement: ach,
+                options,
+            }
+        );
         if i + 1 < count {
             println!();
         }
@@ -114,11 +146,22 @@ fn preview_achievements(data: &GameData, id: Option<u32>, title: Option<&str>) {
 }
 
 /// Display all matched leaderboards.
-fn preview_leaderboards(data: &GameData, id: Option<u32>, title: Option<&str>) {
+fn preview_leaderboards(
+    data: &GameData,
+    id: Option<u32>,
+    title: Option<&str>,
+    options: PreviewOptions,
+) {
     let items = find_leaderboards(data.leaderboards(), id, title);
     let count = items.len();
     for (i, lb) in items.iter().enumerate() {
-        print!("{}", LeaderboardPreview(lb));
+        print!(
+            "{}",
+            LeaderboardPreview {
+                leaderboard: lb,
+                options,
+            }
+        );
         if i + 1 < count {
             println!();
         }
@@ -130,7 +173,7 @@ fn preview_notes(data: &GameData, address: Option<&str>, text: Option<&str>) {
     let items = find_notes(data.code_notes(), address, text);
     let count = items.len();
     for (i, note) in items.iter().enumerate() {
-        print!("{}", CodeNotePreview(note));
+        print!("{}", CodeNotePreview { note });
         if i + 1 < count {
             println!();
         }
@@ -215,8 +258,8 @@ fn find_notes<'a>(
     let mut items: Vec<_> = notes.iter().collect();
 
     if let Some(addr_str) = address {
-        if let Ok(addr) = parse_hex_address(addr_str) {
-            items.retain(|n| n.address() == addr);
+        if let Ok(parsed) = parse_hex_address(addr_str) {
+            items.retain(|n| n.address() == parsed);
         } else {
             report_no_match("notes", "address", addr_str);
             return Vec::new();

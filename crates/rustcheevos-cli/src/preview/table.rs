@@ -26,7 +26,7 @@ pub(crate) const T_LEFT: char = '\u{2524}';
 pub(crate) const CROSS: char = '\u{253C}';
 
 /// A simple Unicode box-drawing table.
-#[derive(Debug, Clone)]
+#[derive(Debug)]
 pub struct Table {
     /// The column headers.
     headers: Vec<String>,

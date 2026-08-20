@@ -4,16 +4,22 @@ use std::fmt;
 
 use rustcheevos::types::achievement::Achievement;
 
+use crate::preview::PreviewOptions;
 use crate::preview::assets::requirements::render_requirements;
 use crate::preview::format_separator;
 
 /// A preview of an achievement.
 #[derive(Debug, Clone)]
-pub struct AchievementPreview<'a>(pub &'a Achievement);
+pub struct AchievementPreview<'a> {
+    /// The achievement to preview.
+    pub achievement: &'a Achievement,
+    /// Rendering options.
+    pub options: PreviewOptions,
+}
 
 impl fmt::Display for AchievementPreview<'_> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        let ach = self.0;
+        let ach = self.achievement;
         writeln!(
             f,
             "{}",
@@ -27,13 +33,14 @@ impl fmt::Display for AchievementPreview<'_> {
             writeln!(f, "Tag: {tag:?}")?;
         }
         writeln!(f)?;
-        render_requirements(f, ach.requirements())
+        render_requirements(f, ach.requirements(), self.options)
     }
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::preview::PreviewOptions;
     use rustcheevos::types::achievement::Tag;
     use rustcheevos::types::memory::{MemoryRef, MemorySize};
     use rustcheevos::types::requirement::Condition;
@@ -59,7 +66,10 @@ mod tests {
             .build();
         println!(
             "\n--- achievement preview ---\n{}",
-            AchievementPreview(&achievement)
+            AchievementPreview {
+                achievement: &achievement,
+                options: PreviewOptions::default(),
+            }
         );
     }
 }

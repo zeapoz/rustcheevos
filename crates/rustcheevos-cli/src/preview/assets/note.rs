@@ -8,11 +8,14 @@ use crate::preview::format_separator;
 
 /// A preview of a code note.
 #[derive(Debug, Clone)]
-pub struct CodeNotePreview<'a>(pub &'a CodeNote);
+pub struct CodeNotePreview<'a> {
+    /// The code note to preview.
+    pub note: &'a CodeNote,
+}
 
 impl fmt::Display for CodeNotePreview<'_> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        let note = self.0;
+        let note = self.note;
         writeln!(
             f,
             "{}",
@@ -29,6 +32,9 @@ mod tests {
     #[test]
     fn dump_example() {
         let note = CodeNote::new(0x1234, "[8-bit] Player health");
-        println!("\n--- code note preview ---\n{}", CodeNotePreview(&note));
+        println!(
+            "\n--- code note preview ---\n{}",
+            CodeNotePreview { note: &note }
+        );
     }
 }
