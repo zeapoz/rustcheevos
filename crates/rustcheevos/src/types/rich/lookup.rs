@@ -25,23 +25,6 @@ pub struct LookupTable {
 }
 
 impl LookupTable {
-    /// Returns the name of the lookup table.
-    #[must_use]
-    pub fn name(&self) -> &str {
-        &self.name
-    }
-
-    /// Returns the entries in the lookup table.
-    pub fn entries(&self) -> impl Iterator<Item = &Entry> {
-        self.entries.iter()
-    }
-
-    /// Returns the fallback value.
-    #[must_use]
-    pub fn fallback(&self) -> Option<&str> {
-        self.fallback.as_deref()
-    }
-
     /// Creates a new empty lookup table with the given name.
     ///
     /// # Examples
@@ -122,6 +105,23 @@ impl LookupTable {
         self.fallback = Some(fallback.into());
         self
     }
+
+    /// Returns the name of the lookup table.
+    #[must_use]
+    pub fn name(&self) -> &str {
+        &self.name
+    }
+
+    /// Returns the entries in the lookup table.
+    pub fn entries(&self) -> impl Iterator<Item = &Entry> {
+        self.entries.iter()
+    }
+
+    /// Returns the fallback value.
+    #[must_use]
+    pub fn fallback(&self) -> Option<&str> {
+        self.fallback.as_deref()
+    }
 }
 
 impl fmt::Display for LookupTable {
@@ -147,18 +147,6 @@ pub struct Entry {
 }
 
 impl Entry {
-    /// Returns the keys for this entry.
-    #[must_use]
-    pub fn keys(&self) -> &[EntryKey] {
-        &self.keys
-    }
-
-    /// Returns the display value.
-    #[must_use]
-    pub fn value(&self) -> &str {
-        &self.value
-    }
-
     /// Creates a new entry with a given key and value.
     ///
     /// # Examples
@@ -224,6 +212,18 @@ impl Entry {
         );
         self.keys = merge_key_slices(&self.keys, &other.keys);
         self
+    }
+
+    /// Returns the keys for this entry.
+    #[must_use]
+    pub fn keys(&self) -> &[EntryKey] {
+        &self.keys
+    }
+
+    /// Returns the display value.
+    #[must_use]
+    pub fn value(&self) -> &str {
+        &self.value
     }
 }
 

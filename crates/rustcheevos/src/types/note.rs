@@ -18,18 +18,6 @@ pub struct CodeNote {
 }
 
 impl CodeNote {
-    /// Returns the memory address.
-    #[must_use]
-    pub fn address(&self) -> usize {
-        self.address
-    }
-
-    /// Returns the note contents.
-    #[must_use]
-    pub fn contents(&self) -> &str {
-        &self.contents
-    }
-
     /// Creates a new code note with the given address and contents.
     ///
     /// # Examples
@@ -45,6 +33,18 @@ impl CodeNote {
             address,
             contents: contents.into(),
         }
+    }
+
+    /// Returns the memory address.
+    #[must_use]
+    pub fn address(&self) -> usize {
+        self.address
+    }
+
+    /// Returns the note contents.
+    #[must_use]
+    pub fn contents(&self) -> &str {
+        &self.contents
     }
 }
 

@@ -57,60 +57,6 @@ pub struct Leaderboard {
 }
 
 impl Leaderboard {
-    /// Returns the leaderboard ID.
-    #[must_use]
-    pub fn id(&self) -> u32 {
-        self.id
-    }
-
-    /// Returns the leaderboard title.
-    #[must_use]
-    pub fn title(&self) -> &str {
-        &self.title
-    }
-
-    /// Returns the leaderboard description.
-    #[must_use]
-    pub fn description(&self) -> &str {
-        &self.description
-    }
-
-    /// Returns the start condition.
-    #[must_use]
-    pub fn start(&self) -> &Requirements {
-        &self.start
-    }
-
-    /// Returns the cancel condition.
-    #[must_use]
-    pub fn cancel(&self) -> &Requirements {
-        &self.cancel
-    }
-
-    /// Returns the submit condition.
-    #[must_use]
-    pub fn submit(&self) -> &Requirements {
-        &self.submit
-    }
-
-    /// Returns the value condition.
-    #[must_use]
-    pub fn value(&self) -> &Requirements {
-        &self.value
-    }
-
-    /// Returns the format.
-    #[must_use]
-    pub fn format(&self) -> LeaderboardFormat {
-        self.format
-    }
-
-    /// Returns whether lower values are better.
-    #[must_use]
-    pub fn lower_is_better(&self) -> bool {
-        self.lower_is_better
-    }
-
     /// Returns a builder for constructing a leaderboard.
     ///
     /// # Examples
@@ -169,6 +115,60 @@ impl Leaderboard {
             description: self.description().to_string(),
             lower_is_better: self.lower_is_better(),
         }
+    }
+
+    /// Returns the leaderboard ID.
+    #[must_use]
+    pub fn id(&self) -> u32 {
+        self.id
+    }
+
+    /// Returns the leaderboard title.
+    #[must_use]
+    pub fn title(&self) -> &str {
+        &self.title
+    }
+
+    /// Returns the leaderboard description.
+    #[must_use]
+    pub fn description(&self) -> &str {
+        &self.description
+    }
+
+    /// Returns the start condition.
+    #[must_use]
+    pub fn start(&self) -> &Requirements {
+        &self.start
+    }
+
+    /// Returns the cancel condition.
+    #[must_use]
+    pub fn cancel(&self) -> &Requirements {
+        &self.cancel
+    }
+
+    /// Returns the submit condition.
+    #[must_use]
+    pub fn submit(&self) -> &Requirements {
+        &self.submit
+    }
+
+    /// Returns the value condition.
+    #[must_use]
+    pub fn value(&self) -> &Requirements {
+        &self.value
+    }
+
+    /// Returns the format.
+    #[must_use]
+    pub fn format(&self) -> LeaderboardFormat {
+        self.format
+    }
+
+    /// Returns whether lower values are better.
+    #[must_use]
+    pub fn lower_is_better(&self) -> bool {
+        self.lower_is_better
     }
 }
 

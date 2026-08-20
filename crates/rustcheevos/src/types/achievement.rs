@@ -7,8 +7,8 @@ use rustcheevos_schema::user as user_schema;
 use crate::parsers::ParseError;
 
 use super::chain::Chain;
-use super::requirements::Requirements;
 use super::requirement::condition::Condition;
+use super::requirements::Requirements;
 
 /// Default timestamp for achievement entries.
 const DEFAULT_TIMESTAMP: &str = "0";
@@ -53,48 +53,6 @@ pub struct Achievement {
 }
 
 impl Achievement {
-    /// Returns the achievement ID.
-    #[must_use]
-    pub fn id(&self) -> u32 {
-        self.id
-    }
-
-    /// Returns the achievement title.
-    #[must_use]
-    pub fn title(&self) -> &str {
-        &self.title
-    }
-
-    /// Returns the achievement description.
-    #[must_use]
-    pub fn description(&self) -> &str {
-        &self.description
-    }
-
-    /// Returns the achievement requirements.
-    #[must_use]
-    pub fn requirements(&self) -> &Requirements {
-        &self.requirements
-    }
-
-    /// Returns the achievement tag.
-    #[must_use]
-    pub fn tag(&self) -> Option<&Tag> {
-        self.tag.as_ref()
-    }
-
-    /// Returns the point value.
-    #[must_use]
-    pub fn points(&self) -> u32 {
-        self.points
-    }
-
-    /// Returns the badge ID.
-    #[must_use]
-    pub fn badge_id(&self) -> u32 {
-        self.badge_id
-    }
-
     /// Returns a builder for constructing an achievement.
     ///
     /// # Examples
@@ -152,6 +110,48 @@ impl Achievement {
             downvotes: 0,
             badge: format!("{:05}", self.badge_id()),
         }
+    }
+
+    /// Returns the achievement ID.
+    #[must_use]
+    pub fn id(&self) -> u32 {
+        self.id
+    }
+
+    /// Returns the achievement title.
+    #[must_use]
+    pub fn title(&self) -> &str {
+        &self.title
+    }
+
+    /// Returns the achievement description.
+    #[must_use]
+    pub fn description(&self) -> &str {
+        &self.description
+    }
+
+    /// Returns the achievement requirements.
+    #[must_use]
+    pub fn requirements(&self) -> &Requirements {
+        &self.requirements
+    }
+
+    /// Returns the achievement tag.
+    #[must_use]
+    pub fn tag(&self) -> Option<&Tag> {
+        self.tag.as_ref()
+    }
+
+    /// Returns the point value.
+    #[must_use]
+    pub fn points(&self) -> u32 {
+        self.points
+    }
+
+    /// Returns the badge ID.
+    #[must_use]
+    pub fn badge_id(&self) -> u32 {
+        self.badge_id
     }
 }
 

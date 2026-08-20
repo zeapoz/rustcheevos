@@ -3,12 +3,8 @@
 use std::fmt;
 
 use rustcheevos::types::{
-    chain::Chain,
-    flag::Flag,
-    operator::Operator,
-    requirement::Requirement,
-    requirements::Requirements,
-    value::TypedValue,
+    chain::Chain, flag::Flag, operator::Operator, requirement::Requirement,
+    requirements::Requirements, value::TypedValue,
 };
 
 use crate::preview::table::Table;

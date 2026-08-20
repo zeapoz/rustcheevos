@@ -2,8 +2,8 @@
 
 use std::fmt;
 
-use rustcheevos::types::requirements::Requirements;
 use rustcheevos::types::leaderboard::Leaderboard;
+use rustcheevos::types::requirements::Requirements;
 
 use crate::preview::assets::requirements::render_requirements;
 use crate::preview::format_separator;
