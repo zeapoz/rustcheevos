@@ -29,7 +29,6 @@
 //!     memory::MemoryRef,
 //!     rich::{Entry, LookupTable, RichPresence},
 //! };
-//! use rustcheevos::{add_address, bits8, chain, delta, measured};
 //!
 //! const GAME_ID: u32 = 20374;
 //! const GAME_NAME: &str = "Geometry Wars: Galaxies";
