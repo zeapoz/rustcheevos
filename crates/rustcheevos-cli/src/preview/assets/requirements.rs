@@ -3,8 +3,8 @@
 use std::fmt;
 
 use rustcheevos::types::{
-    chain::Chain, flag::ArithmeticFlag, flag::Flag, operator::Operator, requirement::Requirement,
-    requirements::Requirements, value::TypedValue,
+    chain::ResolvedChain, flag::ArithmeticFlag, flag::Flag, operator::Operator,
+    requirement::Requirement, requirements::Requirements, value::TypedValue,
 };
 
 use crate::preview::PreviewOptions;
@@ -29,7 +29,7 @@ const HEADER_HITS: &str = "Hits";
 #[derive(Debug)]
 pub struct RequirementsPreview<'a> {
     /// The chains to render.
-    chains: &'a [Chain],
+    chains: &'a [ResolvedChain],
     /// Rendering options.
     options: PreviewOptions,
 }
@@ -152,18 +152,18 @@ mod tests {
         s.parse().unwrap()
     }
 
-    fn single_chain(req: Requirement) -> Chain {
-        Chain::from(vec![req])
+    fn single_chain(req: Requirement) -> ResolvedChain {
+        ResolvedChain::from(vec![req])
     }
 
-    fn preview(chains: &[Chain]) -> RequirementsPreview<'_> {
+    fn preview(chains: &[ResolvedChain]) -> RequirementsPreview<'_> {
         RequirementsPreview {
             chains,
             options: PreviewOptions::default(),
         }
     }
 
-    fn preview_collapsed(chains: &[Chain]) -> RequirementsPreview<'_> {
+    fn preview_collapsed(chains: &[ResolvedChain]) -> RequirementsPreview<'_> {
         RequirementsPreview {
             chains,
             options: PreviewOptions {
@@ -189,7 +189,7 @@ mod tests {
 
     #[test]
     fn enumerates_rows_starting_at_1() {
-        let chain: Chain = vec![
+        let chain: ResolvedChain = vec![
             parse_requirement("0xH1234=1"),
             parse_requirement("0xH1234=2"),
             parse_requirement("0xH1234=3"),
@@ -241,7 +241,7 @@ mod tests {
 
     #[test]
     fn collapse_add_address_filters_rows() {
-        let chain: Chain = vec![
+        let chain: ResolvedChain = vec![
             parse_requirement("0xH1234=1"),
             parse_requirement("I:0xH2222*1"),
             parse_requirement("0xH3456>=5"),
@@ -256,7 +256,7 @@ mod tests {
 
     #[test]
     fn collapse_add_address_preserves_ids() {
-        let chain: Chain = vec![
+        let chain: ResolvedChain = vec![
             parse_requirement("0xH1234=1"),
             parse_requirement("I:0xH2222*1"),
             parse_requirement("0xH3456>=5"),
@@ -271,7 +271,7 @@ mod tests {
 
     #[test]
     fn collapse_add_address_without_flag_shows_all() {
-        let chain: Chain = vec![
+        let chain: ResolvedChain = vec![
             parse_requirement("0xH1234=1"),
             parse_requirement("I:0xH2222*1"),
             parse_requirement("0xH3456>=5"),
@@ -284,7 +284,7 @@ mod tests {
 
     #[test]
     fn dump_example() {
-        let achievement: Chain = vec![
+        let achievement: ResolvedChain = vec![
             parse_requirement("P:0xH0010=1.5."),
             parse_requirement("0xH0020>=50"),
             parse_requirement("A:0xH0030*2"),
@@ -295,7 +295,7 @@ mod tests {
             preview(&[achievement])
         );
 
-        let accumulator: Chain = vec![
+        let accumulator: ResolvedChain = vec![
             parse_requirement("A:d0xH0010+1"),
             parse_requirement("A:d0xH0020+1"),
             parse_requirement("0xH0030>=100"),
@@ -306,7 +306,7 @@ mod tests {
             preview(&[accumulator])
         );
 
-        let access_modes: Chain = vec![
+        let access_modes: ResolvedChain = vec![
             parse_requirement("b0xH0010=5"),
             parse_requirement("p0xH0020=10"),
             parse_requirement("~0xH0030=15"),

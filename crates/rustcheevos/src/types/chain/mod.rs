@@ -14,7 +14,7 @@ use crate::{
 
 pub(crate) mod pending;
 
-pub use pending::{Chainable, PendingChain};
+pub use pending::{Chain, Chainable};
 
 /// A chain of requirements that must all be true.
 ///
@@ -28,33 +28,51 @@ pub use pending::{Chainable, PendingChain};
 ///
 /// ```
 /// use rustcheevos::prelude::*;
-/// use rustcheevos::types::chain::Chain;
+/// use rustcheevos::types::{chain::{Chain, ResolvedChain}, requirement::Condition};
 /// use rustcheevos::{bits8, chain, delta};
 ///
-/// let chain_a = chain!(
+/// // A reusable helper keeps its head pending, so it can still be modified
+/// // at the call site before being resolved into a [`ResolvedChain`].
+/// fn digging() -> Chain<Condition> {
+///     chain!(
+///         and_next!(bits8!(0x10).eq(1)),
+///         bits8!(0x11).eq(1),
+///     )
+/// }
+///
+/// let resolved: ResolvedChain = digging().with_hits(5).into();
+/// ```
+///
+/// ```
+/// use rustcheevos::prelude::*;
+/// use rustcheevos::types::chain::ResolvedChain;
+/// use rustcheevos::{bits8, chain, delta};
+///
+/// let chain_a: ResolvedChain = chain!(
 ///     delta!(bits8!(0x1234)).lt(10),
 ///     bits8!(0x1234).ge(10),
-/// );
+/// )
+/// .into();
 ///
-/// let mut chain_b = Chain::new();
+/// let mut chain_b = ResolvedChain::new();
 /// chain_b.push(delta!(bits8!(0x1234)).lt(10));
 /// chain_b.push(bits8!(0x1234).ge(10));
 ///
 /// assert_eq!(chain_a, chain_b);
 /// ```
 #[derive(Default, Debug, Clone, PartialEq)]
-pub struct Chain(Vec<Requirement>);
+pub struct ResolvedChain(Vec<Requirement>);
 
-impl Chain {
+impl ResolvedChain {
     /// Creates a new chain.
     ///
     /// # Examples
     /// ```
     /// use rustcheevos::prelude::*;
-    /// use rustcheevos::types::chain::Chain;
+    /// use rustcheevos::types::chain::ResolvedChain;
     /// use rustcheevos::{bits8, chain, delta};
     ///
-    /// let mut chain = Chain::new();
+    /// let mut chain = ResolvedChain::new();
     ///
     /// let requirement = delta!(bits8!(0x1234)).lt(10);
     /// chain.push(requirement);
@@ -69,12 +87,12 @@ impl Chain {
     /// # Examples
     /// ```
     /// use rustcheevos::prelude::*;
-    /// use rustcheevos::types::chain::Chain;
+    /// use rustcheevos::types::chain::ResolvedChain;
     /// use rustcheevos::{bits8, chain, delta};
     ///
     /// let requirement = delta!(bits8!(0x1234)).lt(10);
     ///
-    /// let mut chain = Chain::new();
+    /// let mut chain = ResolvedChain::new();
     /// chain.push(requirement);
     /// ```
     pub fn push(&mut self, requirement: impl Into<Requirement>) {
@@ -86,24 +104,26 @@ impl Chain {
     /// # Examples
     /// ```
     /// use rustcheevos::prelude::*;
-    /// use rustcheevos::types::chain::Chain;
+    /// use rustcheevos::types::chain::ResolvedChain;
     /// use rustcheevos::{bits8, chain, delta};
     ///
-    /// let mut chain_a = chain!(
+    /// let mut chain_a: ResolvedChain = chain!(
     ///     delta!(bits8!(0x1234)).lt(10),
     ///     bits8!(0x1234).ge(10),
-    /// );
+    /// )
+    /// .into();
     ///
     ///
-    /// let chain_b = chain!(
+    /// let chain_b: ResolvedChain = chain!(
     ///     delta!(bits8!(0x1234)).lt(10),
     ///     bits8!(0x1234).ge(10),
-    /// );
+    /// )
+    /// .into();
     ///
     /// chain_a.extend(chain_b);
     /// ```
     ///
-    pub fn extend(&mut self, item: impl Into<Chain>) {
+    pub fn extend(&mut self, item: impl Into<ResolvedChain>) {
         self.0.extend_from_slice(&item.into().into_inner());
     }
 
@@ -112,13 +132,14 @@ impl Chain {
     /// # Examples
     /// ```
     /// use rustcheevos::prelude::*;
-    /// use rustcheevos::types::chain::Chain;
+    /// use rustcheevos::types::chain::ResolvedChain;
     /// use rustcheevos::{bits8, chain, delta};
     ///
-    /// let chain = chain!(
+    /// let chain: ResolvedChain = chain!(
     ///     delta!(bits8!(0x1234)).lt(10),
     ///     bits8!(0x1234).ge(10),
-    /// );
+    /// )
+    /// .into();
     ///
     /// chain.iter().for_each(|requirement| {
     ///     println!("{requirement}");
@@ -133,12 +154,12 @@ impl Chain {
     /// # Examples
     /// ```
     /// use rustcheevos::prelude::*;
-    /// use rustcheevos::types::chain::Chain;
+    /// use rustcheevos::types::chain::ResolvedChain;
     /// use rustcheevos::{bits8, chain, delta};
     ///
     /// let requirement = delta!(bits8!(0x1234)).lt(10);
     ///
-    /// let chain = chain!(requirement.clone());
+    /// let chain: ResolvedChain = chain!(requirement.clone()).into();
     /// assert_eq!(chain.into_inner(), vec![requirement.into()]);
     /// ```
     #[must_use]
@@ -173,34 +194,39 @@ impl Chain {
     }
 }
 
-impl<T: Into<Requirement>> From<T> for Chain {
+impl<T: Into<Requirement>> From<T> for ResolvedChain {
     fn from(value: T) -> Self {
-        Chain(vec![value.into()])
+        ResolvedChain(vec![value.into()])
     }
 }
 
-impl<const N: usize, T: Into<Requirement>> From<[T; N]> for Chain {
+impl<const N: usize, T: Into<Requirement>> From<[T; N]> for ResolvedChain {
     fn from(arr: [T; N]) -> Self {
         let arr = arr.into_iter().map(T::into).collect::<Vec<_>>();
-        Chain(arr)
+        ResolvedChain(arr)
     }
 }
 
-impl<T: Into<Requirement>> From<Vec<T>> for Chain {
+impl<T: Into<Requirement>> From<Vec<T>> for ResolvedChain {
     fn from(value: Vec<T>) -> Self {
         let value = value.into_iter().map(T::into).collect::<Vec<_>>();
-        Chain(value)
+        ResolvedChain(value)
     }
 }
 
-impl<T: Into<Chain>> FromIterator<T> for Chain {
+impl<T: Into<ResolvedChain>> FromIterator<T> for ResolvedChain {
     fn from_iter<I: IntoIterator<Item = T>>(iter: I) -> Self {
         let chains: Vec<_> = iter.into_iter().map(T::into).collect();
-        Chain(chains.into_iter().flat_map(Chain::into_inner).collect())
+        ResolvedChain(
+            chains
+                .into_iter()
+                .flat_map(ResolvedChain::into_inner)
+                .collect(),
+        )
     }
 }
 
-impl AccessModeModifier for Chain {
+impl AccessModeModifier for ResolvedChain {
     fn with_access_mode(mut self, access_mode: AccessMode) -> Self {
         for req in &mut self.0 {
             *req = req.with_access_mode(access_mode);
@@ -209,7 +235,7 @@ impl AccessModeModifier for Chain {
     }
 }
 
-impl FromStr for Chain {
+impl FromStr for ResolvedChain {
     type Err = ParseError;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
@@ -223,7 +249,7 @@ impl FromStr for Chain {
     }
 }
 
-impl fmt::Display for Chain {
+impl fmt::Display for ResolvedChain {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(
             f,
@@ -237,8 +263,8 @@ impl fmt::Display for Chain {
     }
 }
 
-impl_condition_flag_traits!(Chain, with_condition_flag);
-impl_arithmetic_flag_traits!(Chain, with_arithmetic_flag);
+impl_condition_flag_traits!(ResolvedChain, with_condition_flag);
+impl_arithmetic_flag_traits!(ResolvedChain, with_arithmetic_flag);
 
 #[cfg(test)]
 mod tests {
@@ -246,33 +272,33 @@ mod tests {
 
     #[test]
     fn roundtrip_chain_single_requirement() {
-        let original: Chain = "0xH1234=50".parse().unwrap();
+        let original: ResolvedChain = "0xH1234=50".parse().unwrap();
         let serialized = original.to_string();
-        let parsed: Chain = serialized.parse().unwrap();
+        let parsed: ResolvedChain = serialized.parse().unwrap();
         assert_eq!(original, parsed);
     }
 
     #[test]
     fn roundtrip_chain_multiple_requirements() {
-        let original: Chain = "0xH1234=50_d0xH1234>=10".parse().unwrap();
+        let original: ResolvedChain = "0xH1234=50_d0xH1234>=10".parse().unwrap();
         let serialized = original.to_string();
-        let parsed: Chain = serialized.parse().unwrap();
+        let parsed: ResolvedChain = serialized.parse().unwrap();
         assert_eq!(original, parsed);
     }
 
     #[test]
     fn roundtrip_chain_with_arithmetic() {
-        let original: Chain = "A:0xH1234+10_0xH5678=0".parse().unwrap();
+        let original: ResolvedChain = "A:0xH1234+10_0xH5678=0".parse().unwrap();
         let serialized = original.to_string();
-        let parsed: Chain = serialized.parse().unwrap();
+        let parsed: ResolvedChain = serialized.parse().unwrap();
         assert_eq!(original, parsed);
     }
 
     #[test]
     fn roundtrip_chain_with_hit_count() {
-        let original: Chain = "0xH1234=1.100._0xH5678>=5".parse().unwrap();
+        let original: ResolvedChain = "0xH1234=1.100._0xH5678>=5".parse().unwrap();
         let serialized = original.to_string();
-        let parsed: Chain = serialized.parse().unwrap();
+        let parsed: ResolvedChain = serialized.parse().unwrap();
         assert_eq!(original, parsed);
     }
 }

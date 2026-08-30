@@ -14,8 +14,8 @@
 //! - [`RichPresence`][`crate::types::rich::RichPresence`] - Dynamic display strings with lookup tables and conditions
 //! - [`MemoryRef`][`crate::types::memory::MemoryRef`] - Memory location references (address, size, access mode)
 //! - [`Requirement`][`crate::types::requirement::Requirement`] - Condition clauses (comparisons and arithmetic operations)
-//! - [`Chain`][`crate::types::chain::Chain`] - Ordered requirement sequences with chaining operators
-//! - [`PendingChain`][`crate::types::chain::PendingChain`] - Builder type for constructing chains fluently
+//! - [`Chain`][`crate::types::chain::Chain`] - Builder type for constructing chains fluently
+//! - [`ResolvedChain`][`crate::types::chain::ResolvedChain`] - Ordered requirement sequences with chaining operators
 //!
 //! ## Example
 //!
@@ -24,9 +24,10 @@
 //! use rustcheevos::prelude::*;
 //! use rustcheevos::types::{
 //!     achievement::Achievement,
-//!     chain::{Chain, PendingChain},
+//!     chain::Chain,
 //!     game::GameData,
 //!     memory::MemoryRef,
+//!     requirement::Condition,
 //!     rich::{Entry, LookupTable, RichPresence},
 //! };
 //!
@@ -34,13 +35,13 @@
 //! const GAME_NAME: &str = "Geometry Wars: Galaxies";
 //!
 //! // Logic chains can be defined as functions.
-//! fn in_game() -> Chain {
+//! fn in_game() -> Chain<Condition> {
 //!     chain!(bits8!(0x1234).eq(1))
 //! }
 //!
 //! // Complex logic chains can be made simpler by returning pending chains that allow
 //! // for modiyfing the last condition in the chain.
-//! fn current_level() -> PendingChain<MemoryRef> {
+//! fn current_level() -> Chain<MemoryRef> {
 //!     chain!(
 //!         add_address!(bits8!(0x16).mul(2)),
 //!         bits8!(0x2345),
@@ -48,12 +49,11 @@
 //! }
 //!
 //! // Use flags like delta! fluidly like you would in the achievement editor.
-//! fn just_beat_level(level_id: u32) -> Chain {
+//! fn just_beat_level(level_id: u32) -> Chain<Condition> {
 //!     chain!(
 //!         delta!(current_level()).eq(level_id),
 //!         current_level().eq(level_id + 1),
 //!     )
-//!     .into()
 //! }
 //!
 //! fn main() -> io::Result<()> {

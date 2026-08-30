@@ -30,7 +30,7 @@ pub fn chain(input: TokenStream) -> TokenStream {
 
     quote! {
         {
-            let mut group = rustcheevos::types::chain::Chain::new();
+            let mut group = rustcheevos::types::chain::ResolvedChain::new();
             #(group.extend(#chain);)*
             #head.chain(group)
         }

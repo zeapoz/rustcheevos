@@ -29,13 +29,13 @@ const GAME_ID: u32 = 20374;
 const GAME_NAME: &str = "Geometry Wars: Galaxies";
 
 // Logic chains can be defined as small composable and reusable functions.
-fn in_game() -> Chain {
+fn in_game() -> Chain<Condition> {
     chain!(bits8!(0x1234).eq(1))
 }
 
 // Complex logic chains can be made simpler by returning pending chains that allow
 // for modiyfing the last condition in the chain.
-fn current_level() -> PendingChain<MemoryRef> {
+fn current_level() -> Chain<MemoryRef> {
     chain!(
         add_address!(bits8!(0x16).mul(2)),
         bits8!(0x2345),
@@ -43,7 +43,7 @@ fn current_level() -> PendingChain<MemoryRef> {
 }
 
 // Use flags like delta! fluidly like you would in the achievement editor.
-fn just_beat_level(level_id: u32) -> Chain {
+fn just_beat_level(level_id: u32) -> Chain<Condition> {
     chain!(
         delta!(current_level()).eq(level_id),
         current_level().eq(level_id + 1),

@@ -6,7 +6,7 @@ use rustcheevos_schema::user as user_schema;
 
 use crate::parsers::ParseError;
 
-use super::chain::Chain;
+use super::chain::ResolvedChain;
 use super::requirement::condition::Condition;
 use super::requirements::Requirements;
 
@@ -231,7 +231,7 @@ impl AchievementBuilder {
     ///     .build();
     /// ```
     #[must_use]
-    pub fn core(mut self, core: impl Into<Chain>) -> Self {
+    pub fn core(mut self, core: impl Into<ResolvedChain>) -> Self {
         self.requirements.set_core(core);
         self
     }
@@ -253,7 +253,7 @@ impl AchievementBuilder {
     ///     .build();
     /// ```
     #[must_use]
-    pub fn alt_group(mut self, group: impl Into<Chain>) -> Self {
+    pub fn alt_group(mut self, group: impl Into<ResolvedChain>) -> Self {
         self.requirements.add_alt_group(group);
         self
     }
@@ -278,7 +278,10 @@ impl AchievementBuilder {
     ///     .build();
     /// ```
     #[must_use]
-    pub fn alt_groups(mut self, groups: impl IntoIterator<Item = impl Into<Chain>>) -> Self {
+    pub fn alt_groups(
+        mut self,
+        groups: impl IntoIterator<Item = impl Into<ResolvedChain>>,
+    ) -> Self {
         self.requirements.add_alt_groups(groups);
         self
     }
@@ -340,9 +343,9 @@ impl From<AchievementBuilder> for Achievement {
 /// # Examples
 /// ```
 /// # enum Medal { Bronze }
-/// # fn all_medals_condition(medal: Medal) -> Chain { Chain::default() }
+/// # fn all_medals_condition(medal: Medal) -> ResolvedChain { ResolvedChain::default() }
 /// use rustcheevos::types::achievement::{Achievement, Tag};
-/// use rustcheevos::types::chain::Chain;
+/// use rustcheevos::types::chain::ResolvedChain;
 ///
 /// let achievement = Achievement::builder("Solar System Sentinel")
 ///     .description("Earn a Bronze medal or higher on every planet in every galaxy excluding the Lambda galaxy")

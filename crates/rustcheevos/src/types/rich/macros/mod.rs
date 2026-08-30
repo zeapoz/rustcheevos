@@ -4,7 +4,7 @@ use std::{fmt, rc::Rc};
 
 use builtin::BuiltInMacro;
 
-use crate::types::{chain::Chain, memory::MemoryRef};
+use crate::types::{chain::ResolvedChain, memory::MemoryRef};
 
 use super::{format::Format, lookup::LookupTable};
 
@@ -92,7 +92,7 @@ pub enum MacroValue {
     /// A memory reference value.
     Memory(MemoryRef),
     /// An arithmetic chain value.
-    Arithmetic(Chain),
+    Arithmetic(ResolvedChain),
 }
 
 impl From<MemoryRef> for MacroValue {
@@ -101,7 +101,7 @@ impl From<MemoryRef> for MacroValue {
     }
 }
 
-impl<T: Into<Chain>> From<T> for MacroValue {
+impl<T: Into<ResolvedChain>> From<T> for MacroValue {
     fn from(value: T) -> Self {
         Self::Arithmetic(value.into())
     }

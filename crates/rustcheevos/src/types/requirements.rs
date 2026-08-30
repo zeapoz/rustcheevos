@@ -2,7 +2,7 @@
 
 use std::fmt;
 
-use crate::types::chain::Chain;
+use crate::types::chain::ResolvedChain;
 
 /// A set of requirement chains defining when a condition is satisfied.
 ///
@@ -39,9 +39,9 @@ use crate::types::chain::Chain;
 #[derive(Debug, Clone, PartialEq)]
 pub struct Requirements {
     /// The core group.
-    core: Chain,
+    core: ResolvedChain,
     /// The alternative groups.
-    alt_groups: Vec<Chain>,
+    alt_groups: Vec<ResolvedChain>,
 }
 
 impl Requirements {
@@ -60,7 +60,7 @@ impl Requirements {
     ///
     /// let requirements = Requirements::new(core);
     /// ```
-    pub fn new(core: impl Into<Chain>) -> Self {
+    pub fn new(core: impl Into<ResolvedChain>) -> Self {
         Self {
             core: core.into(),
             alt_groups: Vec::new(),
@@ -71,9 +71,9 @@ impl Requirements {
     ///
     /// # Examples
     /// ```
-    /// # use rustcheevos::types::chain::Chain;
+    /// # use rustcheevos::types::chain::ResolvedChain;
     /// # use rustcheevos::types::requirements::Requirements;
-    /// # let core = Chain::default();
+    /// # let core = ResolvedChain::default();
     /// use rustcheevos::prelude::*;
     /// use rustcheevos::{bits8, chain, delta};
     ///
@@ -85,7 +85,7 @@ impl Requirements {
     /// let mut requirements = Requirements::new(core);
     /// requirements.add_alt_group(alt);
     /// ```
-    pub fn add_alt_group(&mut self, group: impl Into<Chain>) -> &mut Self {
+    pub fn add_alt_group(&mut self, group: impl Into<ResolvedChain>) -> &mut Self {
         self.alt_groups.push(group.into());
         self
     }
@@ -94,9 +94,9 @@ impl Requirements {
     ///
     /// # Examples
     /// ```
-    /// # use rustcheevos::types::chain::Chain;
+    /// # use rustcheevos::types::chain::ResolvedChain;
     /// # use rustcheevos::types::requirements::Requirements;
-    /// # let core = Chain::default();
+    /// # let core = ResolvedChain::default();
     /// use rustcheevos::prelude::*;
     /// use rustcheevos::{bits8, chain, delta};
     ///
@@ -115,7 +115,7 @@ impl Requirements {
     /// ```
     pub fn add_alt_groups(
         &mut self,
-        groups: impl IntoIterator<Item = impl Into<Chain>>,
+        groups: impl IntoIterator<Item = impl Into<ResolvedChain>>,
     ) -> &mut Self {
         self.alt_groups.extend(groups.into_iter().map(Into::into));
         self
@@ -123,23 +123,23 @@ impl Requirements {
 
     /// Returns the core chain.
     #[must_use]
-    pub fn core(&self) -> &Chain {
+    pub fn core(&self) -> &ResolvedChain {
         &self.core
     }
 
     /// Replaces the core chain.
-    pub(crate) fn set_core(&mut self, core: impl Into<Chain>) {
+    pub(crate) fn set_core(&mut self, core: impl Into<ResolvedChain>) {
         self.core = core.into();
     }
 
     /// Returns the alternative chain groups.
     #[must_use]
-    pub fn alt_groups(&self) -> &[Chain] {
+    pub fn alt_groups(&self) -> &[ResolvedChain] {
         &self.alt_groups
     }
 }
 
-impl<T: Into<Chain>> From<T> for Requirements {
+impl<T: Into<ResolvedChain>> From<T> for Requirements {
     fn from(value: T) -> Self {
         Requirements::new(value.into())
     }
