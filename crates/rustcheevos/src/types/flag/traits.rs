@@ -1,8 +1,6 @@
 //! Traits for types that can be modified with flags.
 
-use crate::types::requirement::Arithmetic;
-
-use super::ArithmeticFlag;
+use crate::types::{flag::ArithmeticFlag, requirement::Arithmetic};
 
 /// A trait for types that can be modified with pause if.
 pub trait PauseIf {
@@ -155,6 +153,22 @@ pub trait Remember {
 
     /// Sets the [`Remember`][`super::ArithmeticFlag::Remember`] flag on this type.
     fn remember(self) -> Self::Output;
+}
+
+impl Measured for u32 {
+    type Output = Arithmetic;
+
+    fn measured(self) -> Self::Output {
+        Arithmetic::new(ArithmeticFlag::Measured, self, None)
+    }
+}
+
+impl Measured for f32 {
+    type Output = Arithmetic;
+
+    fn measured(self) -> Self::Output {
+        Arithmetic::new(ArithmeticFlag::Measured, self, None)
+    }
 }
 
 /// Implements all comparison flag traits for a struct.
