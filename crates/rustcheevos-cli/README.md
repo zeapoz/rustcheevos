@@ -31,6 +31,7 @@ The `import` subcommand supports the following options:
 - `--address <ADDRESS>`: Filter to a single note by address (hex, e.g. 0x1234).
 - `--range <RANGE>`: Filter to a range of addresses (e.g. 0x1000..0x2000 or 0x1000..=0x2000).
 - `--format <FORMAT>`: Output format for generated code. Options are `function` (default, generates `pub const fn` functions) or `const` (generates `pub const` constants).
+- `--value <VALUE>`: Value representation style for generated code. Options are `macro` (default, generates memory accessor macros) or `addr-only` (generates raw address `usize` values).
 
 ## Embeddable CLI for Rustcheevos Projects
 
@@ -78,22 +79,28 @@ fn main() -> Result<(), CliError> {
 cargo run -- export                  # exports to ./output
 cargo run -- export -o /tmp/assets   # exports to specified directory
 cargo run -- export -a "zeapoz"      # exports with custom author field
+cargo run -- export -v               # lists every asset being exported
+cargo run -- export --dry-run        # reports what would be exported, writes nothing
 ```
 
 The `export` subcommand supports the following options:
 
 - `-o, --output <DIR>`: Output directory for exported files (default: `output`).
 - `-a, --author <AUTHOR>`: Achievement author for exported files (default: `Rustcheevos`).
+- `-q, --quiet`: Suppress all output except errors.
+- `-v, --verbose`: List every achievement, leaderboard, and code note included in the export.
+- `--dry-run`: Report the files that would be written without creating the output directory or writing any files.
 
 #### Preview
 
 ```sh
-cargo run -- preview                              # preview all assets
-cargo run -- preview achievement --id 600707      # preview a specific achievement
-cargo run -- preview achievement --title "Alpha"  # preview achievements matching a title
-cargo run -- preview leaderboard --id 1           # preview a specific leaderboard
-cargo run -- preview note --address 0x1234        # preview a specific code note
-cargo run -- preview rich-presence                # preview the rich presence script
+cargo run -- preview                               # preview all assets
+cargo run -- preview achievement --id 600707       # preview a specific achievement
+cargo run -- preview achievement --title "Alpha"   # preview achievements matching a title
+cargo run -- preview leaderboard --id 1            # preview a specific leaderboard
+cargo run -- preview note --address 0x1234         # preview a specific code note
+cargo run -- preview rich-presence                 # preview the rich presence script
+cargo run -- preview -c                            # collapse AddAddress rows in requirement tables
 ```
 
 The `preview` subcommand supports the following subcommands:
@@ -102,6 +109,10 @@ The `preview` subcommand supports the following subcommands:
 - `leaderboard [--id <ID> | --title <TITLE>]`: Preview leaderboards, optionally filtered by ID or title.
 - `note [--address <HEX> | --text <TEXT>]`: Preview code notes, optionally filtered by address or content.
 - `rich-presence`: Preview the rich presence script.
+
+The `preview` subcommand also supports a top-level option:
+
+- `-c, --collapse-add-address`: Hide `AddAddress` rows from the requirement tables of achievements and leaderboards, leaving only the conditions they apply to.
 
 If no subcommand is given, all assets are shown.
 

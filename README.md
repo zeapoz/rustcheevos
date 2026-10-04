@@ -21,7 +21,15 @@ rustcheevos-cli = { git = "https://github.com/zeapoz/rustcheevos.git" }
 
 ```rust
 use rustcheevos::prelude::*;
-use rustcheevos::{chain, add_address, delta, measured, bits8};
+use rustcheevos::{chain, add_address, delta, bits8};
+use rustcheevos::types::{
+    achievement::Achievement,
+    chain::Chain,
+    game::GameData,
+    memory::MemoryRef,
+    requirement::Condition,
+    rich::{Entry, LookupTable, RichPresence},
+};
 use rustcheevos_cli::{RustcheevosCli, CliError};
 
 // It's recommended to define the game ID and name as constants at the top of the file.
@@ -56,14 +64,14 @@ fn main() -> Result<(), CliError> {
     // Define an achievement by combining conditions.
     let achievement = Achievement::builder("First Step")
         .description("Complete the tutorial level")
-        .requirements(chain!(
+        .core(chain!(
             just_beat_level(1),
             in_game(),
         ))
         .badge_id(12345)
         .points(5)
         .build();
-    game_data.add(achievement);
+    game_data.add_achievement(achievement);
 
     // Create a simple rich presence.
     let mut rich_presence = RichPresence::new();
@@ -81,7 +89,7 @@ fn main() -> Result<(), CliError> {
     game_data.set_rich_presence(rich_presence);
 
     // Call the embeddable CLI to expose export functions and more.
-    RustcheevosCli::parse().run(&game_data)?;
+    RustcheevosCli::parse().run(&game_data)
 }
 ```
 
