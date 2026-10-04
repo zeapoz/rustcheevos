@@ -1,7 +1,7 @@
 //! Type definition for pending chains.
 
 use crate::{
-    impl_arithmetic_flag_traits, impl_condition_flag_traits,
+    impl_arithmetic_flag_traits, impl_arithmetic_measured, impl_condition_flag_traits,
     types::{
         chain::ResolvedChain,
         flag::{ArithmeticFlag, ConditionFlag, Measured},
@@ -620,6 +620,7 @@ type MemoryChain = Chain<MemoryRef>;
 
 impl_condition_flag_traits!(ConditionChain, with_condition_flag);
 impl_arithmetic_flag_traits!(ArithmeticChain, with_arithmetic_flag);
+impl_arithmetic_measured!(ArithmeticChain, with_arithmetic_flag);
 
 impl AccessModeModifier for Chain<Condition> {
     fn with_access_mode(self, access_mode: AccessMode) -> Self {
