@@ -232,7 +232,7 @@ impl AchievementBuilder {
     /// ```
     #[must_use]
     pub fn core(mut self, core: impl Into<ResolvedChain>) -> Self {
-        self.requirements.set_core(core);
+        self.requirements = self.requirements.with_core(core);
         self
     }
 
@@ -254,7 +254,7 @@ impl AchievementBuilder {
     /// ```
     #[must_use]
     pub fn alt_group(mut self, group: impl Into<ResolvedChain>) -> Self {
-        self.requirements.add_alt_group(group);
+        self.requirements = self.requirements.with_alt(group);
         self
     }
 
@@ -282,7 +282,7 @@ impl AchievementBuilder {
         mut self,
         groups: impl IntoIterator<Item = impl Into<ResolvedChain>>,
     ) -> Self {
-        self.requirements.add_alt_groups(groups);
+        self.requirements = self.requirements.with_alts(groups);
         self
     }
 
