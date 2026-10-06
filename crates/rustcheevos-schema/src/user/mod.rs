@@ -99,6 +99,14 @@ pub struct AchievementEntry {
     pub badge: String,
 }
 
+/// Escapes backslashes and double quotes for a quoted user file field.
+///
+/// Backslashes are escaped first so that a backslash preceding a quote cannot
+/// merge with the quote's escape sequence and terminate the field early.
+fn escape_quoted(s: &str) -> String {
+    s.replace('\\', "\\\\").replace('"', "\\\"")
+}
+
 impl fmt::Display for AchievementEntry {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(
@@ -106,8 +114,8 @@ impl fmt::Display for AchievementEntry {
             r#"{}:"{}":"{}":"{}": : :{}:{}:{}:{}:{}:{}:{}:{}"#,
             self.id,
             self.requirements,
-            self.title,
-            self.description,
+            escape_quoted(&self.title),
+            escape_quoted(&self.description),
             self.tag,
             self.author,
             self.points,
@@ -154,8 +162,8 @@ impl fmt::Display for LeaderboardEntry {
             self.submit,
             self.value,
             self.format,
-            self.title,
-            self.description,
+            escape_quoted(&self.title),
+            escape_quoted(&self.description),
             i32::from(self.lower_is_better)
         )
     }
@@ -174,5 +182,99 @@ impl fmt::Display for CodeNoteEntry {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let escaped = self.note.replace("\r\n", "\\n").replace('\n', "\\n");
         write!(f, "N0:0x{:x}:\"{}\"", self.address, escaped)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::{AchievementEntry, LeaderboardEntry};
+
+    /// Creates an achievement entry with the given title and description.
+    fn achievement(title: &str, description: &str) -> AchievementEntry {
+        AchievementEntry {
+            id: 12345,
+            requirements: "0xH1000=1".to_string(),
+            title: title.to_string(),
+            description: description.to_string(),
+            tag: String::new(),
+            author: "author".to_string(),
+            points: 5,
+            created: "2024-01-01 00:00:00".to_string(),
+            updated: "2024-01-01 00:00:00".to_string(),
+            upvotes: 0,
+            downvotes: 0,
+            badge: "01234".to_string(),
+        }
+    }
+
+    /// Creates a leaderboard entry with the given title and description.
+    fn leaderboard(title: &str, description: &str) -> LeaderboardEntry {
+        LeaderboardEntry {
+            id: 600_707,
+            start: "0xH1000=1".to_string(),
+            cancel: "0xH1000=0".to_string(),
+            submit: "0xH1000=2".to_string(),
+            value: "0xH2000".to_string(),
+            format: "TIME".to_string(),
+            title: title.to_string(),
+            description: description.to_string(),
+            lower_is_better: true,
+        }
+    }
+
+    #[test]
+    fn escape_quoted_escapes_quotes() {
+        assert_eq!(super::escape_quoted(r#"He said "hi""#), r#"He said \"hi\""#);
+    }
+
+    #[test]
+    fn escape_quoted_escapes_backslashes_first() {
+        assert_eq!(super::escape_quoted(r"C:\save"), "C:\\\\save");
+        assert_eq!(super::escape_quoted(r#"quote: ""#), r#"quote: \""#);
+        assert_eq!(super::escape_quoted(r#"C:\dir""#), "C:\\\\dir\\\"");
+    }
+
+    #[test]
+    fn escape_quoted_leaves_plain_text_unchanged() {
+        assert_eq!(super::escape_quoted("Plain title"), "Plain title");
+        assert_eq!(super::escape_quoted(""), "");
+        assert_eq!(super::escape_quoted("Colon: fine"), "Colon: fine");
+    }
+
+    #[test]
+    fn achievement_entry_escapes_title_and_description() {
+        let entry = achievement(r#"Beat "Hard" mode"#, r"C:\save file");
+        let line = entry.to_string();
+        assert_eq!(
+            line,
+            r#"12345:"0xH1000=1":"Beat \"Hard\" mode":"C:\\save file": : ::author:5:2024-01-01 00:00:00:2024-01-01 00:00:00:0:0:01234"#
+        );
+    }
+
+    #[test]
+    fn achievement_entry_without_escapes_is_unchanged() {
+        let entry = achievement("First Step", "Reach the flag");
+        assert_eq!(
+            entry.to_string(),
+            r#"12345:"0xH1000=1":"First Step":"Reach the flag": : ::author:5:2024-01-01 00:00:00:2024-01-01 00:00:00:0:0:01234"#
+        );
+    }
+
+    #[test]
+    fn leaderboard_entry_escapes_title_and_description() {
+        let entry = leaderboard(r#"Speed Run "Any%""#, "Finish in one go");
+        assert_eq!(
+            entry.to_string(),
+            r#"L600707:"0xH1000=1":"0xH1000=0":"0xH1000=2":"0xH2000":TIME:"Speed Run \"Any%\"":"Finish in one go":1"#
+        );
+    }
+
+    #[test]
+    fn leaderboard_entry_without_escapes_is_unchanged() {
+        let entry = leaderboard("Speed Run", "Complete the level");
+        assert_eq!(
+            entry.to_string(),
+            r#"L600707:"0xH1000=1":"0xH1000=0":"0xH1000=2":"0xH2000":TIME:"Speed Run":"Complete the level":1"#
+        );
     }
 }
